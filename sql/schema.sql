@@ -18,10 +18,10 @@ CREATE TABLE `poppit_users` (
     `last_name` VARCHAR(80) NOT NULL DEFAULT '',
     `email_address` VARCHAR(255) NOT NULL DEFAULT '',
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
-    `address` VARCHAR(255) NOT NULL DEFAULT '',
-    `city` VARCHAR(80) NOT NULL DEFAULT '',
-    `state` VARCHAR(80) NOT NULL DEFAULT '',
-    `zip` VARCHAR(5) NOT NULL DEFAULT '',
+    -- `address` VARCHAR(255) NOT NULL DEFAULT '',
+    -- `city` VARCHAR(80) NOT NULL DEFAULT '',
+    -- `state` VARCHAR(80) NOT NULL DEFAULT '',
+    -- `zip` VARCHAR(5) NOT NULL DEFAULT '',
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
@@ -112,3 +112,4 @@ CREATE TABLE `poppit_user_role` (
 
 -- some hard-coded data
 
+INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_hash`) VALUES ('Brandon','Chambers','bran.cham@gmail.com','321321321');

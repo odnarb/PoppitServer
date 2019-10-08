@@ -9,6 +9,8 @@ const dotenv = require('dotenv');
 //load env vars from .env file
 dotenv.config();
 
+const COOKIE_MAX_AGE = 72 * 60 * 60 * 1000;
+
 let express = require('express'),
     app = express(),
     _ = require('lodash'),
@@ -53,6 +55,7 @@ connection.connect(function(err) {
 });
 
 let execSQL = function(sqlStr, cb){
+    console.log("SQL STRING: ", sqlStr);
     connection.query(sqlStr, function (error, result, fields) {
         if (error) {
             cb(null,error);
@@ -64,21 +67,22 @@ let execSQL = function(sqlStr, cb){
 
 let Users = {
     find: function(opts,cb){
-        let sqlStr = 'select * from poppit_users where id=' + opts.where;
-        connection.query(sqlStr, function (error, result, fields) {
+        let sqlStr = "select `first_name`,`last_name`,`email_address`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " AND password_hash=" + mysql.escape(opts.password) + " limit 1;";
+
+        execSQL(sqlStr, function(error, result){
             if (error) {
                 cb(null,error);
             } else {
+                console.log(getTime() + " - Users.find() result?: ", result);
                 cb(result);
             }
-        })
+        });
     },
-    create: function(obj, cb){
-        let cols = "first_name,last_name,email_address,password_hash,address,city,state,zip,updated_at,created_at";
-        let rowdata = "";
-        let sqlStr = "insert into poppit_users (" + cols + ") VALUES (" +rowdata+ ")" + obj;
+    create: function(vals, cb){
+        let cols = ["first_name","last_name","email_address","password_hash"];
+        let sqlStr = "insert into poppit_users (" + mysql.escape(cols) + ") VALUES (" +mysql.escape(vals)+ ");";
 
-        execSQL(sqlStr, function(){
+        execSQL(sqlStr, function(error, result){
             if (error) {
                 cb(null,error);
             } else {
@@ -88,7 +92,7 @@ let Users = {
     },
     delete:  function(id, cb){
         let sqlStr = 'delete from poppit_users where id=' + id;
-        execSQL(sqlStr, function(){
+        execSQL(sqlStr, function(error, result){
             if (error) {
                 cb(null,error);
             } else {
@@ -167,25 +171,33 @@ router.post('/user/login', function(req, res) {
     console.log( getTime() + '---POST /user/login: ', req.body);
 
     if( !req.body ){
-        return res.send(400);
+        return res.status(400).json({reason: "no_params_sent"});
+    } else if (!req.body.email){
+        return res.status(400).json({ reason: "no_email" });
+    } else if (!req.body.password){
+        return res.status(400).json({ reason: "no_password" });
     }
 
-    if( req.body.email && req.body.email == "bran.cham@gmail.com" ){
-        if( req.body.password && req.body.password == "321321321" ){
-            req.session.regenerate(function(err) {
-                console.log( getTime() + ' - : User logged IN' );
-                req.session.isLoggedIn = true;
-                if( req.body.remember && req.body.remember == "on" ){
-                    req.session.cookie.maxAge = COOKIE_MAX_AGE;
-                }
-                return res.send({ result: 'user logged IN'});
-            });
-        } else {
-            return res.send(400);
+    let opts = { email: req.body.email, password: req.body.password };
+    Users.find(opts, function(err,user) {
+        if(err){
+            console.log( getTime() + " - DB error: ", err);
+            return res.status(500).json({fail: "no_user"});
         }
-    } else {
-        return res.send(400);
-    }
+        if( user.length == 0 ){
+            return res.status(400).json({fail: "no_user"});
+        }
+
+        req.session.regenerate(function(err) {
+            console.log( getTime() + ' - : User logged IN' );
+            req.session.isLoggedIn = true;
+            req.session.user = user;
+            if( req.body.remember && req.body.remember == "on" ){
+                req.session.cookie.maxAge = COOKIE_MAX_AGE;
+            }
+            return res.send({ result: user});
+        });
+    })
 });
 
 router.get('/user/logout', function(req, res) {
