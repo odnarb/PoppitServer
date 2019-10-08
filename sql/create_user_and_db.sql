@@ -1,0 +1,8 @@
+DROP USER poppit;
+DROP DATABASE IF EXISTS poppit;
+CREATE DATABASE poppit;
+CREATE USER 'poppit'@'%' IDENTIFIED BY '88s87dp0pp!t23H';
+GRANT ALL PRIVILEGES ON poppit.* TO 'poppit'@'%';
+
+FLUSH PRIVILEGES;
+USE poppit;

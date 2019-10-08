@@ -4,19 +4,21 @@
 * Created: 5/22/2018 by Brandon Chambers
 */
 
-const COOKIE_MAX_AGE = 72 * 60 * 60 * 1000;
+const dotenv = require('dotenv');
+
+//load env vars from .env file
+dotenv.config();
 
 let express = require('express'),
-    _ = require('lodash'),
-    // Waterline = require('waterline'),
-    // mySqlAdapter = require('sails-mysql'),
     app = express(),
+    _ = require('lodash'),
+    mysql = require('mysql');
     moment = require('moment'),
     router = express.Router(),
-    bodyParser = require('body-parser'),
-    // events = require('events'),
-    // eventEmitter = new events.EventEmitter(),
     session = require('express-session'),
+    bodyParser = require('body-parser'),
+    events = require('events'),
+    eventEmitter = new events.EventEmitter(),
     uuidv4 = require('uuid/v4');
 
 function stringifyOrEmpty(i){
@@ -26,53 +28,75 @@ function stringifyOrEmpty(i){
     return newStr;
 }
 
-// sqlConnection.on('connect', function(err) {
-//     if (err) {
-//         console.log("---SQL Connection error: ", err);
-//         process.exit(1);
-//     }
-//     eventEmitter.emit('tdsReady');
-// });
 
 //////////////////////////////////////////////////////////////////
-// WATERLINE CONFIG
-//////////////////////////////////////////////////////////////////
-// Instantiate a new instance of the ORM
-// var orm = new Waterline();
-
-// var waterlineConfig = {
-//     adapters: {
-//         'sails-mysql': mySqlAdapter
-//     },
-
-//     // Build Connections Config
-//     // Setup connections using the named adapter configs
-//     connections: {
-//         mysql: {
-//             adapter: 'sails-mysql',
-//             db: 'sails'
-//         }
-//     },
-
-//     defaults: {
-//         migrate: 'safe',
-//         schema: true
-//     }
-// };
-
-//////////////////////////////////////////////////////////////////
-// WATERLINE MODELS
+// MYSQL CONFIG
 //////////////////////////////////////////////////////////////////
 
-// var UserModel = require('./api/models/User');
-// var AccountModel = require('./api/models/Account');
+let connection = mysql.createConnection({
+    host     :  process.env.DB_HOST,
+    user     :  process.env.DB_USER,
+    password :  process.env.DB_PASS,
+    database :  process.env.DB_NAME
+});
 
-// var User = Waterline.Collection.extend(UserModel);
-// var Account = Waterline.Collection.extend(AccountModel);
+connection.connect(function(err) {
+    if (err) {
+        console.error('error connecting to DB: ' + err.stack);
+        return;
+    }
+    console.log( getTime() + '---DB connected as id ' + connection.threadId) ;
 
-// // Load the Models into the ORM
-// orm.loadCollection(User);
-// orm.loadCollection(Account);
+    //continue to start the server
+    eventEmitter.emit('mysqlReady');
+
+});
+
+let execSQL = function(sqlStr, cb){
+    connection.query(sqlStr, function (error, result, fields) {
+        if (error) {
+            cb(null,error);
+        } else {
+            cb(result);
+        }
+    });
+}
+
+let Users = {
+    find: function(opts,cb){
+        let sqlStr = 'select * from poppit_users where id=' + opts.where;
+        connection.query(sqlStr, function (error, result, fields) {
+            if (error) {
+                cb(null,error);
+            } else {
+                cb(result);
+            }
+        })
+    },
+    create: function(obj, cb){
+        let cols = "first_name,last_name,email_address,password_hash,address,city,state,zip,updated_at,created_at";
+        let rowdata = "";
+        let sqlStr = "insert into poppit_users (" + cols + ") VALUES (" +rowdata+ ")" + obj;
+
+        execSQL(sqlStr, function(){
+            if (error) {
+                cb(null,error);
+            } else {
+                cb(result);
+            }
+        });
+    },
+    delete:  function(id, cb){
+        let sqlStr = 'delete from poppit_users where id=' + id;
+        execSQL(sqlStr, function(){
+            if (error) {
+                cb(null,error);
+            } else {
+                cb(result);
+            }
+        });
+    }
+};
 
 //////////////////////////////////////////////////////////////////
 // EXPRESS SETUP
@@ -207,33 +231,18 @@ app.use(session({
 //apply our router function to ALL methods defined in router
 app.use(policyFilter, router);
 
-
 //////////////////////////////////////////////////////////////////
-// START WATERLINE & EXPRESS
+// START EXPRESS SERVER
 //////////////////////////////////////////////////////////////////
 
-// //First wait for tds/sql connection
-// eventEmitter.on('tdsReady', function(){
-//     // Now start Waterline passing adapters in
-//     orm.initialize(waterlineConfig, function(err, models) {
-//         if (err) throw err;
+//First wait for mysql connection
+eventEmitter.on('mysqlReady', function(){
+    // Now start Waterline passing adapters in
 
-//         app.models = models.collections;
-//         app.connections = models.connections;
+    // Start Server
+    var port = process.argv[2] || 7777;
 
-//         // Start Server
-//         process_num = process.argv[2] || 1;
-//         var port = process.argv[3] || 7777;
+    app.listen(port);
 
-//         app.listen(port);
-
-//         console.log(getTime() + '- Jib Logger Mover is LIVE on port '+port);
-//     });
-// });
-
-
-// Start Server
-var port = process.argv[2] || 7777;
-
-app.listen(port);
-console.log(getTime() + '- Poppit Server is LIVE on port '+port);
+    console.log(getTime() + '- Poppit Server is LIVE on port '+port);
+});
