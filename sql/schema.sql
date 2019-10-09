@@ -18,6 +18,7 @@ CREATE TABLE `poppit_users` (
     `last_name` VARCHAR(80) NOT NULL DEFAULT '',
     `email_address` VARCHAR(255) NOT NULL DEFAULT '',
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
+    `active` INT NOT NULL DEFAULT 0,
     -- `address` VARCHAR(255) NOT NULL DEFAULT '',
     -- `city` VARCHAR(80) NOT NULL DEFAULT '',
     -- `state` VARCHAR(80) NOT NULL DEFAULT '',

@@ -10,6 +10,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const COOKIE_MAX_AGE = 72 * 60 * 60 * 1000;
+const SALT_ROUNDS = 10;
 
 let express = require('express'),
     app = express(),
@@ -21,6 +22,7 @@ let express = require('express'),
     bodyParser = require('body-parser'),
     events = require('events'),
     eventEmitter = new events.EventEmitter(),
+    bcrypt = require('bcrypt'),
     uuidv4 = require('uuid/v4');
 
 function stringifyOrEmpty(i){
@@ -58,35 +60,37 @@ let execSQL = function(sqlStr, cb){
     console.log("SQL STRING: ", sqlStr);
     connection.query(sqlStr, function (error, result, fields) {
         if (error) {
-            cb(null,error);
+            cb(error);
         } else {
-            cb(result);
+            cb(null,result);
         }
     });
 }
 
 let Users = {
     find: function(opts,cb){
-        let sqlStr = "select `first_name`,`last_name`,`email_address`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " AND password_hash=" + mysql.escape(opts.password) + " limit 1;";
+        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " limit 1;";
 
         execSQL(sqlStr, function(error, result){
             if (error) {
-                cb(null,error);
+                cb(error);
             } else {
-                console.log(getTime() + " - Users.find() result?: ", result);
-                cb(result);
+                console.log(getTime() + " - Users.find() result?: ", result[0]);
+                cb(null,result[0]);
             }
         });
     },
     create: function(vals, cb){
+
         let cols = ["first_name","last_name","email_address","password_hash"];
-        let sqlStr = "insert into poppit_users (" + mysql.escape(cols) + ") VALUES (" +mysql.escape(vals)+ ");";
+        let sqlStr = "insert into poppit_users SET " +mysql.escape(vals)+ ";";
 
         execSQL(sqlStr, function(error, result){
             if (error) {
-                cb(null,error);
+                cb(error);
             } else {
-                cb(result);
+                console.log(getTime() + " - Users.create() result?: ", result);
+                cb(null,result);
             }
         });
     },
@@ -94,9 +98,9 @@ let Users = {
         let sqlStr = 'delete from poppit_users where id=' + id;
         execSQL(sqlStr, function(error, result){
             if (error) {
-                cb(null,error);
+                cb(error);
             } else {
-                cb(result);
+                cb(null, result);
             }
         });
     }
@@ -178,25 +182,28 @@ router.post('/user/login', function(req, res) {
         return res.status(400).json({ reason: "no_password" });
     }
 
-    let opts = { email: req.body.email, password: req.body.password };
-    Users.find(opts, function(err,user) {
+    Users.find({ email: req.body.email }, function(err,user) {
         if(err){
-            console.log( getTime() + " - DB error: ", err);
+            console.log( getTime() + " - DB User.find() error: ", err);
             return res.status(500).json({fail: "no_user"});
         }
         if( user.length == 0 ){
             return res.status(400).json({fail: "no_user"});
         }
 
-        req.session.regenerate(function(err) {
-            console.log( getTime() + ' - : User logged IN' );
-            req.session.isLoggedIn = true;
-            req.session.user = user;
-            if( req.body.remember && req.body.remember == "on" ){
-                req.session.cookie.maxAge = COOKIE_MAX_AGE;
-            }
-            return res.send({ result: user});
-        });
+        if( bcrypt.compareSync(req.body.password, user.password_hash) ){
+            req.session.regenerate(function(err) {
+                console.log( getTime() + ' - : User logged IN' );
+                req.session.isLoggedIn = true;
+                req.session.user = user;
+                if( req.body.remember && req.body.remember == "on" ){
+                    req.session.cookie.maxAge = COOKIE_MAX_AGE;
+                }
+                return res.send({ result: user });
+            });
+        } else {
+            return res.status(400).json({fail: "no_user"});
+        }
     })
 });
 
@@ -206,11 +213,46 @@ router.get('/user/logout', function(req, res) {
     });
 });
 
+//TODO
 router.post('/user/signup', function(req, res) {
-    console.log( getTime() + ' - : User signed up', req.body );
-    return res.send({ result: 'user signed up', user_info: req.body });
+    console.log( getTime() + '---POST /user/signup: ', req.body);
+
+    if( !req.body ){
+        return res.status(400).json({reason: "no_params_sent"});
+    } else if ( !req.body.first_name ){
+        return res.status(400).json({ reason: "no_first_name" });
+    } else if ( !req.body.last_name ){
+        return res.status(400).json({ reason: "no_last_name" });
+    } else if ( !req.body.email ){
+        return res.status(400).json({ reason: "no_email" });
+    } else if ( !req.body.password ){
+        return res.status(400).json({ reason: "no_password" });
+    } else if ( !req.body.rpassword ){
+        return res.status(400).json({ reason: "no_rpassword" });
+    } else if ( req.body.password !== req.body.rpassword  ){
+        return res.status(400).json({ reason: "password_mismatch" });
+    }
+
+    let user = {
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        email_address: req.body.email,
+        password_hash: bcrypt.hashSync(req.body.password, SALT_ROUNDS)
+    };
+
+    Users.create(user, function(err,user){
+        if(err){
+            console.log( getTime() + " - DB User.create() error: ", err);
+            return res.status(500).json({fail: "no_user"});
+        }
+        if( user.length == 0 ){
+            return res.status(400).json({fail: "no_user"});
+        }
+        return res.send({ result: 'success', user_info: req.body });
+    });
 });
 
+//TODO
 router.get('/user/forgotpassword', function(req, res) {
     console.log( getTime() + ' - : User forgotpassword: ', req.body );
     return res.send({ result: 'user forgotpassword'});
@@ -233,11 +275,11 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 //setup session
 //app.set('trust proxy', 1) // trust first proxy
 app.use(session({
-  genid: function(req) { return uuidv4(); },
-  secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }
+    genid: function(req) { return uuidv4(); },
+    secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
 }));
 
 //apply our router function to ALL methods defined in router
