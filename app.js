@@ -32,6 +32,10 @@ function stringifyOrEmpty(i){
     return newStr;
 }
 
+//TODO
+function sendEmail(email, cb){
+    console.log( getTime() + " - TODO: Implement sendEmail()");
+}
 
 //////////////////////////////////////////////////////////////////
 // MYSQL CONFIG
@@ -184,7 +188,7 @@ router.post('/user/login', function(req, res) {
     Users.find({ email: req.body.email }, function(err,user) {
         if(err){
             console.log( getTime() + " - DB User.find() error: ", err);
-            return res.status(500).json({fail: "no_user"});
+            return res.status(500).json({fail: "server_error"});
         }
 
         //user not found at all
@@ -219,7 +223,6 @@ router.get('/user/logout', function(req, res) {
     });
 });
 
-//TODO
 router.post('/user/signup', function(req, res) {
     console.log( getTime() + '---POST /user/signup: ', req.body);
 
@@ -249,7 +252,7 @@ router.post('/user/signup', function(req, res) {
     Users.find({ email: req.body.email }, function(err,found_user) {
         if(err){
             console.log( getTime() + " - DB User.find() error: ", err);
-            return res.status(500).json({reason: "no_user"});
+            return res.status(500).json({reason: "server_error"});
         }
 
         //user not found at all
@@ -260,21 +263,41 @@ router.post('/user/signup', function(req, res) {
         Users.create(user, function(err,result){
             if(err){
                 console.log( getTime() + " - DB User.create() error: ", err);
-                return res.status(500).json({reason: "no_user"});
+                return res.status(500).json({reason: "server_error"});
             }
             if( result.affectedRows == 0 ){
                 return res.status(400).json({reason: "no_user"});
             } else {
-                return res.send({ result: 'success' });
+                sendEmail( found_user.email_address, function(){
+                    return res.send({ result: 'success' });
+                });
             }
-        });
-    });
+        }); //Users.create()
+    }); //Users.find()
 });
 
-//TODO
 router.get('/user/forgotpassword', function(req, res) {
-    console.log( getTime() + ' - : User forgotpassword: ', req.body );
-    return res.send({ result: 'user forgotpassword'});
+    console.log( getTime() + '---POST /user/signup: ', req.body);
+
+    if( !req.body ){
+        return res.status(400).json({ reason: "no_params_sent" });
+    } else if ( !req.body.email ){
+        return res.status(400).json({ reason: "no_email" });
+    }
+
+    Users.find({ email: req.body.email }, function(err,found_user) {
+        if(err){
+            console.log( getTime() + " - DB User.find() error: ", err);
+            return res.status(500).json({reason: "server_error"});
+        }
+
+        if( found_user ){
+            //send email
+            sendEmail( found_user.email_address, function(){
+                return res.send({ result: 'success' });
+            });
+        }
+    }); //Users.find()
 });
 
 ////////////////////////////////////////////

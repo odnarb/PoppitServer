@@ -177,7 +177,7 @@ var KTLoginGeneral = function() {
                         showErrorMsg(form, 'danger', 'Please confirm your password.');
                     } else if( error.reason == "password_mismatch" ) {
                         showErrorMsg(form, 'danger', 'Please make sure your passwords match.');
-                    } else if( error.reason == "no_user") {
+                    } else if( error.reason == "server_error") {
                         showErrorMsg(form, 'danger', 'We were unable to process your request. Please try again later.');
                     }
                 }
