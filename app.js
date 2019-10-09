@@ -134,7 +134,6 @@ function policyFilter(req, res, next) {
         console.log( getTime() + ' - : User logged in..routing to dashboard' );
         return res.redirect('/');
     }
-
     return next();
 }
 
@@ -156,7 +155,7 @@ router.post('/', function(req, res, next) {
 router.get('/', function(req, res) {
     return res.render('pages/dashboard',{
         data: {
-            pageTitle: 'Poppit | Dashboard'
+            pageTitle: process.env.APP_NAME + ' | Dashboard'
         }
     });
 });
@@ -166,7 +165,7 @@ router.get('/user/login', function(req, res) {
 
     return res.render('pages/login',{
         data: {
-            pageTitle: 'Poppit | Login'
+            pageTitle: process.env.APP_NAME + ' | Login'
         }
     });
 });
@@ -189,7 +188,7 @@ router.post('/user/login', function(req, res) {
         }
 
         //user not found at all
-        if( user.length == 0 ){
+        if( user == undefined ){
             return res.status(400).json({fail: "no_user"});
         }
 
@@ -225,7 +224,7 @@ router.post('/user/signup', function(req, res) {
     console.log( getTime() + '---POST /user/signup: ', req.body);
 
     if( !req.body ){
-        return res.status(400).json({reason: "no_params_sent"});
+        return res.status(400).json({ reason: "no_params_sent" });
     } else if ( !req.body.first_name ){
         return res.status(400).json({ reason: "no_first_name" });
     } else if ( !req.body.last_name ){
@@ -247,15 +246,28 @@ router.post('/user/signup', function(req, res) {
         password_hash: bcrypt.hashSync(req.body.password, SALT_ROUNDS)
     };
 
-    Users.create(user, function(err,user){
+    Users.find({ email: req.body.email }, function(err,found_user) {
         if(err){
-            console.log( getTime() + " - DB User.create() error: ", err);
-            return res.status(500).json({fail: "no_user"});
+            console.log( getTime() + " - DB User.find() error: ", err);
+            return res.status(500).json({reason: "no_user"});
         }
-        if( user.length == 0 ){
-            return res.status(400).json({fail: "no_user"});
+
+        //user not found at all
+        if( found_user != undefined ){
+            return res.status(400).json({ reason: "email_already_taken" });
         }
-        return res.send({ result: 'success', user_info: req.body });
+
+        Users.create(user, function(err,result){
+            if(err){
+                console.log( getTime() + " - DB User.create() error: ", err);
+                return res.status(500).json({reason: "no_user"});
+            }
+            if( result.affectedRows == 0 ){
+                return res.status(400).json({reason: "no_user"});
+            } else {
+                return res.send({ result: 'success' });
+            }
+        });
     });
 });
 
