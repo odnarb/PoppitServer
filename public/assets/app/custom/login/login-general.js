@@ -72,8 +72,6 @@ var KTLoginGeneral = function() {
         $('#kt_login_signin_submit').click(function(e) {
             e.preventDefault();
 
-            console.log('SIGNIN');
-
             var btn = $(this);
             var form = $(this).closest('form');
 
@@ -113,8 +111,6 @@ var KTLoginGeneral = function() {
     var handleSignUpFormSubmit = function() {
         $('#kt_login_signup_submit').click(function(e) {
             e.preventDefault();
-
-            console.log('SIGNUP');
 
             var btn = $(this);
             var form = $(this).closest('form');
@@ -160,6 +156,30 @@ var KTLoginGeneral = function() {
                     signInForm.validate().resetForm();
 
                     showErrorMsg(signInForm, 'success', 'Thank you. To complete your registration please check your email.');
+                },
+                error: function(res,error){
+                    btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+                    console.log("error from server: ", error);
+
+                    if( error.reason == "email_already_taken" ) {
+                        showErrorMsg(form, 'danger', 'That email address is already in use.');
+                    } else if( error.reason == "no_params_sent"){
+                        showErrorMsg(form, 'danger', 'Please refresh the page and try signing up again.');
+                    } else if( error.reason == "no_first_name" ) {
+                        showErrorMsg(form, 'danger', 'Please provide your full name.');
+                    } else if( error.reason == "no_last_name" ) {
+                        showErrorMsg(form, 'danger', 'Please provide your full name.');
+                    } else if( error.reason == "no_email" ) {
+                        showErrorMsg(form, 'danger', 'Please provide your email address.');
+                    } else if( error.reason == "no_password" ) {
+                        showErrorMsg(form, 'danger', 'Please provide your password.');
+                    } else if( error.reason == "no_rpassword" ) {
+                        showErrorMsg(form, 'danger', 'Please confirm your password.');
+                    } else if( error.reason == "password_mismatch" ) {
+                        showErrorMsg(form, 'danger', 'Please make sure your passwords match.');
+                    } else if( error.reason == "no_user") {
+                        showErrorMsg(form, 'danger', 'We were unable to process your request. Please try again later.');
+                    }
                 }
             });
         });
