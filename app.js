@@ -69,7 +69,7 @@ let execSQL = function(sqlStr, cb){
 
 let Users = {
     find: function(opts,cb){
-        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " limit 1;";
+        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`active`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " limit 1;";
 
         execSQL(sqlStr, function(error, result){
             if (error) {
@@ -187,7 +187,14 @@ router.post('/user/login', function(req, res) {
             console.log( getTime() + " - DB User.find() error: ", err);
             return res.status(500).json({fail: "no_user"});
         }
+
+        //user not found at all
         if( user.length == 0 ){
+            return res.status(400).json({fail: "no_user"});
+        }
+
+        //user has not been activated
+        if( user.active == 0 ){
             return res.status(400).json({fail: "no_user"});
         }
 

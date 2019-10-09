@@ -113,4 +113,5 @@ CREATE TABLE `poppit_user_role` (
 
 -- some hard-coded data
 
-INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_hash`) VALUES ('Brandon','Chambers','bran.cham@gmail.com','321321321');
+INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_hash`,`active`) VALUES ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',1);
+INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_hash`,`active`) VALUES ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
