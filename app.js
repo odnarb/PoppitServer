@@ -166,8 +166,6 @@ router.get('/', function(req, res) {
 });
 
 router.get('/user/login', function(req, res) {
-    console.log( getTime() + '---GET /user/login');
-
     return res.render('pages/login',{
         data: {
             pageTitle: process.env.APP_NAME + ' | Login'
@@ -176,8 +174,6 @@ router.get('/user/login', function(req, res) {
 });
 
 router.post('/user/login', function(req, res) {
-    console.log( getTime() + '---POST /user/login: ', req.body);
-
     if( !req.body ){
         return res.status(400).json({reason: "no_params_sent"});
     } else if (!req.body.email){
@@ -227,8 +223,6 @@ router.get('/user/logout', function(req, res) {
 });
 
 router.post('/user/signup', function(req, res) {
-    console.log( getTime() + '---POST /user/signup: ', req.body);
-
     if( !req.body ){
         return res.status(400).json({ reason: "no_params_sent" });
     } else if ( !req.body.first_name ){
@@ -280,8 +274,6 @@ router.post('/user/signup', function(req, res) {
 });
 
 router.post('/user/forgotpassword', function(req, res) {
-    console.log( getTime() + '---POST /user/signup: ', req.body);
-
     if( !req.body ){
         return res.status(400).json({ reason: "no_params_sent" });
     } else if ( !req.body.email ){
