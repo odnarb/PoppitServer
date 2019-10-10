@@ -102,7 +102,11 @@ var KTLoginGeneral = function() {
                 },
                 error: function(res,error){
                     btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
-                    showErrorMsg(form, 'danger', 'Incorrect username or password. Please try again.');
+                    if( res.responseJSON.reason == "not_active" ) {
+                        showErrorMsg(form, 'danger', 'Your account has not been activated yet. Please click the activation link in the email we sent. <a href="#">Resend activation email.</a>');
+                    } else {
+                        showErrorMsg(form, 'danger', 'Incorrect username or password. Please try again.');
+                    }
                 }
             });
         });
@@ -159,25 +163,26 @@ var KTLoginGeneral = function() {
                 },
                 error: function(res,error){
                     btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
-                    console.log("error from server: ", error);
 
-                    if( error.reason == "email_already_taken" ) {
+                    console.log("--SIGNUP ERROR: ", error);
+
+                    if( res.responseJSON.reason == "email_already_taken" ) {
                         showErrorMsg(form, 'danger', 'That email address is already in use.');
-                    } else if( error.reason == "no_params_sent"){
+                    } else if( res.responseJSON.reason == "no_params_sent"){
                         showErrorMsg(form, 'danger', 'Please refresh the page and try signing up again.');
-                    } else if( error.reason == "no_first_name" ) {
+                    } else if( res.responseJSON.reason == "no_first_name" ) {
                         showErrorMsg(form, 'danger', 'Please provide your full name.');
-                    } else if( error.reason == "no_last_name" ) {
+                    } else if( res.responseJSON.reason == "no_last_name" ) {
                         showErrorMsg(form, 'danger', 'Please provide your full name.');
-                    } else if( error.reason == "no_email" ) {
+                    } else if( res.responseJSON.reason == "no_email" ) {
                         showErrorMsg(form, 'danger', 'Please provide your email address.');
-                    } else if( error.reason == "no_password" ) {
+                    } else if( res.responseJSON.reason == "no_password" ) {
                         showErrorMsg(form, 'danger', 'Please provide your password.');
-                    } else if( error.reason == "no_rpassword" ) {
+                    } else if( res.responseJSON.reason == "no_rpassword" ) {
                         showErrorMsg(form, 'danger', 'Please confirm your password.');
-                    } else if( error.reason == "password_mismatch" ) {
+                    } else if( res.responseJSON.reason == "password_mismatch" ) {
                         showErrorMsg(form, 'danger', 'Please make sure your passwords match.');
-                    } else if( error.reason == "server_error") {
+                    } else if( res.responseJSON.reason == "server_error") {
                         showErrorMsg(form, 'danger', 'We were unable to process your request. Please try again later.');
                     }
                 }
