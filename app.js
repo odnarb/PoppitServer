@@ -35,6 +35,7 @@ function stringifyOrEmpty(i){
 //TODO
 function sendEmail(email, cb){
     console.log( getTime() + " - TODO: Implement sendEmail()");
+    cb();
 }
 
 //////////////////////////////////////////////////////////////////
@@ -278,7 +279,7 @@ router.post('/user/signup', function(req, res) {
     }); //Users.find()
 });
 
-router.get('/user/forgotpassword', function(req, res) {
+router.post('/user/forgotpassword', function(req, res) {
     console.log( getTime() + '---POST /user/signup: ', req.body);
 
     if( !req.body ){
@@ -295,9 +296,15 @@ router.get('/user/forgotpassword', function(req, res) {
 
         if( found_user ){
             //send email
-            sendEmail( found_user.email_address, function(){
-                return res.send({ result: 'success' });
-            });
+            if( found_user.active == 1) {
+                sendEmail( found_user.email_address, function(){
+                    return res.send({ result: 'success' });
+                });
+            } else {
+                return res.status(400).json({ reason: 'not_active' });
+            }
+        } else {
+            return res.status(400).json({ reason: 'no_email' });
         }
     }); //Users.find()
 });

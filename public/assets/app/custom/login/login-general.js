@@ -23,6 +23,11 @@ var KTLoginGeneral = function() {
         login.removeClass('kt-login--forgot');
         login.removeClass('kt-login--signin');
 
+        var thisForm = login.find('.kt-login__signup form');
+        thisForm.find('.alert').remove();
+        thisForm.clearForm();
+        thisForm.validate().resetForm();
+
         login.addClass('kt-login--signup');
         KTUtil.animateClass(login.find('.kt-login__signup')[0], 'flipInX animated');
     }
@@ -30,6 +35,11 @@ var KTLoginGeneral = function() {
     var displaySignInForm = function() {
         login.removeClass('kt-login--forgot');
         login.removeClass('kt-login--signup');
+
+        var thisForm = login.find('.kt-login__signin form');
+        thisForm.find('.alert').remove();
+        thisForm.clearForm();
+        thisForm.validate().resetForm();
 
         login.addClass('kt-login--signin');
         KTUtil.animateClass(login.find('.kt-login__signin')[0], 'flipInX animated');
@@ -39,6 +49,11 @@ var KTLoginGeneral = function() {
     var displayForgotForm = function() {
         login.removeClass('kt-login--signin');
         login.removeClass('kt-login--signup');
+
+        var thisForm = login.find('.kt-login__forgot form');
+        thisForm.find('.alert').remove();
+        thisForm.clearForm();
+        thisForm.validate().resetForm();
 
         login.addClass('kt-login--forgot');
         //login.find('.kt-login--forgot').animateClass('flipInX animated');
@@ -164,8 +179,6 @@ var KTLoginGeneral = function() {
                 error: function(res,error){
                     btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
 
-                    console.log("--SIGNUP ERROR: ", error);
-
                     if( res.responseJSON.reason == "email_already_taken" ) {
                         showErrorMsg(form, 'danger', 'That email address is already in use.');
                     } else if( res.responseJSON.reason == "no_params_sent"){
@@ -182,7 +195,7 @@ var KTLoginGeneral = function() {
                         showErrorMsg(form, 'danger', 'Please confirm your password.');
                     } else if( res.responseJSON.reason == "password_mismatch" ) {
                         showErrorMsg(form, 'danger', 'Please make sure your passwords match.');
-                    } else if( res.responseJSON.reason == "server_error") {
+                    } else {
                         showErrorMsg(form, 'danger', 'We were unable to process your request. Please try again later.');
                     }
                 }
@@ -193,8 +206,6 @@ var KTLoginGeneral = function() {
     var handleForgotFormSubmit = function() {
         $('#kt_login_forgot_submit').click(function(e) {
             e.preventDefault();
-
-            console.log('FORGOTPASSWORD');
 
             var btn = $(this);
             var form = $(this).closest('form');
@@ -217,7 +228,8 @@ var KTLoginGeneral = function() {
             form.ajaxSubmit({
                 url: '/user/forgotpassword',
                 success: function(response, status, xhr, $form) { 
-                    btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false); // remove
+                    btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                     form.clearForm(); // clear form
                     form.validate().resetForm(); // reset validation states
 
@@ -228,6 +240,14 @@ var KTLoginGeneral = function() {
                     signInForm.validate().resetForm();
 
                     showErrorMsg(signInForm, 'success', 'Password recovery instructions have been sent to your email.');
+                }, error: function(res,error){
+                    btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
+                    if( res.responseJSON.reason == "not_active" ) {
+                        showErrorMsg(form, 'danger', 'Your account has not been activated yet. Please click the activation link in the email we sent. <a href="#">Resend activation email.</a>');
+                    } else {
+                        showErrorMsg(form, 'danger', 'We were unable to process your request. Please try again later.');
+                    }
                 }
             });
         });
