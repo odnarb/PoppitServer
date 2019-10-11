@@ -3,7 +3,10 @@ SET FOREIGN_KEY_CHECKS=0; -- to disable them
 DROP TABLE IF EXISTS `poppit_users`;
 DROP TABLE IF EXISTS `poppit_companies`;
 DROP TABLE IF EXISTS `poppit_campaigns`;
+DROP TABLE IF EXISTS `poppit_games`;
+DROP TABLE IF EXISTS `poppit_company_games`;
 DROP TABLE IF EXISTS `poppit_company_campaigns`;
+DROP TABLE IF EXISTS `poppit_company_locations`;
 DROP TABLE IF EXISTS `poppit_roles`;
 DROP TABLE IF EXISTS `poppit_user_role`;
 DROP TABLE IF EXISTS `poppit_roles_policies`;
@@ -13,7 +16,7 @@ SET FOREIGN_KEY_CHECKS=1; -- to re-enable them
 
 -- poppit_users
 CREATE TABLE `poppit_users` (
-    `id` INT AUTO_INCREMENT,
+    `id` BIGINT AUTO_INCREMENT,
     `first_name` VARCHAR(80) NOT NULL DEFAULT '',
     `last_name` VARCHAR(80) NOT NULL DEFAULT '',
     `email_address` VARCHAR(255) NOT NULL DEFAULT '',
@@ -30,7 +33,7 @@ CREATE TABLE `poppit_users` (
 
 -- poppit_companies
 CREATE TABLE `poppit_companies` (
-    `id` INT AUTO_INCREMENT,
+    `id` BIGINT AUTO_INCREMENT,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
     `first_name` VARCHAR(80) NOT NULL DEFAULT '',
@@ -47,30 +50,68 @@ CREATE TABLE `poppit_companies` (
 )  ENGINE=INNODB;
 
 -- poppit_campaigns
-CREATE TABLE `poppit_campaigns` (
-    `id` INT AUTO_INCREMENT,
+CREATE TABLE `poppit_company_campaigns` (
+    `id` BIGINT AUTO_INCREMENT,
+    `company_id` BIGINT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `data` JSON NOT NULL DEFAULT '',
+    `date_start` DATETIME NOT NULL DEFAULT NOW(),
+    `date_end` DATETIME NOT NULL DEFAULT NOW(),
+    `active` INT NOT NULL,
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- poppit_games
+CREATE TABLE `poppit_games` (
+    `id` BIGINT AUTO_INCREMENT,
+    `name` VARCHAR(80) NOT NULL DEFAULT '',
+    `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `images` JSON NOT NULL DEFAULT '',
+    `url` VARCHAR(2000) NOT NULL DEFAULT '',
+    `data` JSON NOT NULL DEFAULT '',
+    `is_live` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- poppit_company_campaigns
-CREATE TABLE `poppit_company_campaigns` (
-    `id` INT AUTO_INCREMENT,
-    `company_id` INT NOT NULL,
-    `campaign_id` INT NOT NULL,
+--need relational tables for categories of games...or tags
+
+-- poppit_company_games
+CREATE TABLE `poppit_company_games` (
+    `id` BIGINT AUTO_INCREMENT,
+    `company_id` BIGINT NOT NULL,
+    `game_id` BIGINT NOT NULL,
+    FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
+    FOREIGN KEY (`game_id`) REFERENCES poppit_games (`id`),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- poppit_company_locations
+CREATE TABLE `poppit_company_locations` (
+    `id` BIGINT AUTO_INCREMENT,
+    `company_id` BIGINT NOT NULL,
+    `name` VARCHAR(80) NOT NULL DEFAULT '',
+    `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `city` VARCHAR(80) NOT NULL DEFAULT '',
+    `state` VARCHAR(80) NOT NULL DEFAULT '',
+    `zip` VARCHAR(5) NOT NULL DEFAULT '',
+    `country_code` VARCHAR(2) NOT NULL DEFAULT '',
+    `latitude` VARCHAR(30) NOT NULL DEFAULT '',
+    `longitude` VARCHAR(30) NOT NULL DEFAULT '',
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (`campaign_id`) REFERENCES poppit_campaigns (`id`),
     FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
 -- poppit_roles
 CREATE TABLE `poppit_roles` (
-    `id` INT AUTO_INCREMENT,
+    `id` BIGINT AUTO_INCREMENT,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
     `admin_only` INT NOT NULL,
@@ -81,7 +122,7 @@ CREATE TABLE `poppit_roles` (
 
 -- poppit_policies
 CREATE TABLE `poppit_policies` (
-    `id` INT AUTO_INCREMENT,
+    `id` BIGINT AUTO_INCREMENT,
     `module_name` VARCHAR(80) NOT NULL DEFAULT '',
     `function_name` VARCHAR(1000) NOT NULL DEFAULT '',
     PRIMARY KEY (`id`)
@@ -89,7 +130,7 @@ CREATE TABLE `poppit_policies` (
 
 -- poppit_roles_policies
 CREATE TABLE `poppit_roles_policies` (
-    `id` INT AUTO_INCREMENT,
+    `id` BIGINT AUTO_INCREMENT,
     `policy_id` INT NOT NULL,
     `role_id` INT NOT NULL,
     FOREIGN KEY (`policy_id`) REFERENCES poppit_policies (`id`),
@@ -99,10 +140,10 @@ CREATE TABLE `poppit_roles_policies` (
 
 -- poppit_user_role
 CREATE TABLE `poppit_user_role` (
-    `id` INT AUTO_INCREMENT,
-    `user_id` INT NOT NULL,
-    `role_id` INT NOT NULL,
-    `company_id` INT NOT NULL,
+    `id` BIGINT AUTO_INCREMENT,
+    `user_id` BIGINT NOT NULL,
+    `role_id` BIGINT NOT NULL,
+    `company_id` BIGINT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
     FOREIGN KEY (`user_id`) REFERENCES poppit_users (`id`),
