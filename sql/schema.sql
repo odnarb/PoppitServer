@@ -50,6 +50,8 @@ CREATE TABLE `poppit_companies` (
 )  ENGINE=INNODB;
 
 -- poppit_campaigns
+-- NEED a json column for branding information, links to images, etc?
+-- One campaign will have 1 coupon.. so a campaign_id is essentially the same as a coupon
 CREATE TABLE `poppit_company_campaigns` (
     `id` BIGINT AUTO_INCREMENT,
     `company_id` BIGINT NOT NULL,
