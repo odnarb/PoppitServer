@@ -57,7 +57,7 @@ CREATE TABLE `poppit_company_campaigns` (
     `company_id` BIGINT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    `data` JSON NOT NULL DEFAULT '',
+    `data` JSON NOT NULL,
     `date_start` DATETIME NOT NULL DEFAULT NOW(),
     `date_end` DATETIME NOT NULL DEFAULT NOW(),
     `active` INT NOT NULL,
@@ -72,16 +72,16 @@ CREATE TABLE `poppit_games` (
     `id` BIGINT AUTO_INCREMENT,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    `images` JSON NOT NULL DEFAULT '',
+    `images` JSON NOT NULL,
     `url` VARCHAR(2000) NOT NULL DEFAULT '',
-    `data` JSON NOT NULL DEFAULT '',
+    `data` JSON NOT NULL,
     `is_live` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
---need relational tables for categories of games...or tags
+-- need relational tables for categories of games...or tags
 
 -- poppit_company_games
 CREATE TABLE `poppit_company_games` (
@@ -111,6 +111,7 @@ CREATE TABLE `poppit_company_locations` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
+/*
 -- poppit_roles
 CREATE TABLE `poppit_roles` (
     `id` BIGINT AUTO_INCREMENT,
@@ -153,7 +154,7 @@ CREATE TABLE `poppit_user_role` (
     FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
-
+*/
 -- some hard-coded data
 
 INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_hash`,`active`) VALUES ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',1);
