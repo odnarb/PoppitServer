@@ -61,6 +61,7 @@ connection.connect(function(err) {
 
 });
 
+///THIS IS REFERENCED IN THE DBAL FILES BUT WE NEED TO EXTEND THE DBAL FUNCTIONS WITH THIS FUNCTION
 let execSQL = function(sqlStr, cb){
     console.log("SQL STRING: ", sqlStr);
     connection.query(sqlStr, function (error, result, fields) {
@@ -72,44 +73,10 @@ let execSQL = function(sqlStr, cb){
     });
 }
 
-let Users = {
-    find: function(opts,cb){
-        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`active`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " limit 1;";
-
-        execSQL(sqlStr, function(error, result){
-            if (error) {
-                cb(error);
-            } else {
-                console.log(getTime() + " - Users.find() result?: ", result[0]);
-                cb(null,result[0]);
-            }
-        });
-    },
-    create: function(vals, cb){
-
-        let cols = ["first_name","last_name","email_address","password_hash"];
-        let sqlStr = "insert into poppit_users SET " +mysql.escape(vals)+ ";";
-
-        execSQL(sqlStr, function(error, result){
-            if (error) {
-                cb(error);
-            } else {
-                console.log(getTime() + " - Users.create() result?: ", result);
-                cb(null,result);
-            }
-        });
-    },
-    delete:  function(id, cb){
-        let sqlStr = 'delete from poppit_users where id=' + id;
-        execSQL(sqlStr, function(error, result){
-            if (error) {
-                cb(error);
-            } else {
-                cb(null, result);
-            }
-        });
-    }
-};
+//include the DBAL
+let Users = require('./models/PoppitUsers'),
+    Companies = require('./models/PoppitCompanies'),
+    Campaigns = require('./models/PoppitCampaigns');
 
 //////////////////////////////////////////////////////////////////
 // EXPRESS SETUP

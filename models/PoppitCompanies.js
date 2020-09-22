@@ -1,21 +1,21 @@
 /*
-    DBAL for PoppitUsers
+    DBAL for PoppitCompanies
 */
 module.exports = {
     find: function(opts,cb){
-        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`active`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " limit 1;";
+        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + mysql.escape(opts.id) + " limit 1;";
 
         execSQL(sqlStr, function(error, result){
             if (error) {
                 cb(error);
             } else {
-                console.log(getTime() + " - Users.find() result?: ", result[0]);
+                console.log(getTime() + " - Companies.find() result?: ", result[0]);
                 cb(null,result[0]);
             }
         });
     },
     create: function(vals, cb){
-        let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
+        let cols = ["name","description","first_name","last_name","email_address","password_hash","address","city","state","zip","updated_at","created_at"];
 
         vals.updated_at = "NOW()";
         vals.created_at = "NOW()";
@@ -23,13 +23,13 @@ module.exports = {
         if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
-            let sqlStr = "insert into poppit_users SET " +mysql.escape(vals)+ ";";
+            let sqlStr = "insert into poppit_companies SET " +mysql.escape(vals)+ ";";
 
             execSQL(sqlStr, function(error, result){
                 if (error) {
                     cb(error);
                 } else {
-                    console.log(getTime() + " - Users.create() result?: ", result);
+                    console.log(getTime() + " - Companies.create() result?: ", result);
                     cb(null,result);
                 }
             });
@@ -37,7 +37,8 @@ module.exports = {
     },
     update: function(vals, cb){
 
-        let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
+        //we need to filter the cols we're really using
+        let cols = ["name","description","first_name","last_name","email_address","password_hash","address","city","state","zip"];
 
         //only update what's been given to us
         let valCols = Object.keys(vals);
@@ -45,7 +46,8 @@ module.exports = {
         if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
-            let sqlStr = "update poppit_users SET " +mysql.escape(vals)+ ";";
+            vals.updated_at = "NOW()";
+            let sqlStr = "update poppit_companies SET " +mysql.escape(vals)+ ";";
 
             execSQL(sqlStr, function(error, result){
                 if (error) {
@@ -58,7 +60,7 @@ module.exports = {
         }
     },
     delete:  function(id, cb){
-        let sqlStr = 'delete from poppit_users where id=' + id;
+        let sqlStr = 'delete from poppit_companies where id=' + id;
         execSQL(sqlStr, function(error, result){
             if (error) {
                 cb(error);
