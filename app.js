@@ -25,7 +25,7 @@ let express = require('express'),
     bcrypt = require('bcrypt'),
     uuidv4 = require('uuid/v4');
 
-function stringifyOrEmpty(i){
+let stringifyOrEmpty = (i) => {
     if(i == "") return "";
     var newStr = JSON.stringify(i);
     newStr = newStr.replace(/'/g, "\'\'");
@@ -33,7 +33,7 @@ function stringifyOrEmpty(i){
 }
 
 //TODO
-function sendEmail(email, cb){
+let sendEmail = (email, cb) => {
     console.log( getTime() + " - TODO: Implement sendEmail()");
     cb();
 }
@@ -62,7 +62,7 @@ connection.connect(function(err) {
 });
 
 ///THIS IS REFERENCED IN THE DBAL FILES BUT WE NEED TO EXTEND THE DBAL FUNCTIONS WITH THIS FUNCTION
-let execSQL = function(sqlStr, cb){
+let execSQL = (sqlStr, cb) => {
     console.log("SQL STRING: ", sqlStr);
     connection.query(sqlStr, function (error, result, fields) {
         if (error) {
@@ -84,7 +84,7 @@ let Users = require('./models/PoppitUsers'),
 //Setup router configuration
 const allowedMethods = ['GET', 'POST', 'HEAD', 'OPTIONS'];
 
-app.use(function(error, req, res, next) {
+app.use((error, req, res, next) => {
     if (error) {
         return res.status(error.status).send(error.constructor.name);
     }
@@ -92,7 +92,7 @@ app.use(function(error, req, res, next) {
 });
 
 //check https methods and whatnot
-function policyFilter(req, res, next) {
+let policyFilter = (req, res, next) => {
     if (!allowedMethods.includes(req.method)) {
         return res.sendStatus(404);
     }
@@ -109,8 +109,8 @@ function policyFilter(req, res, next) {
     return next();
 }
 
-function getTime(){
-    var now = new Date();
+let getTime = () => {
+    let now = new Date();
     return '[' + (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear() + ':' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + ']';
 }
 
@@ -118,13 +118,13 @@ function getTime(){
 app.set('x-powered-by', false);
 
 //Hackers, nothing here to see, move along
-router.post('/', function(req, res, next) {
+router.post('/', (req, res, next) => {
     //just disable this..
     return res.sendStatus(404);
 });
 
 //This is the actual request we look for
-router.get('/', function(req, res) {
+router.get('/', (req, res) => {
     return res.render('pages/dashboard',{
         data: {
             pageTitle: process.env.APP_NAME + ' | Dashboard'
@@ -155,7 +155,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 //setup session
 //app.set('trust proxy', 1) // trust first proxy
 app.use(session({
-    genid: function(req) { return uuidv4(); },
+    genid: (req) => { return uuidv4(); },
     secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
     resave: false,
     saveUninitialized: true,
@@ -170,7 +170,7 @@ app.use(policyFilter, router);
 //////////////////////////////////////////////////////////////////
 
 //First wait for mysql connection
-eventEmitter.on('mysqlReady', function(){
+eventEmitter.on('mysqlReady', () => {
     // Now start Waterline passing adapters in
 
     // Start Server
