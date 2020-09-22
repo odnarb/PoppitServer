@@ -56,4 +56,13 @@ router.post('/login', function(req, res) {
     })
 });
 
+router.post('/signup', function(req, res) {
+    console.log("signup query: ", req.query);
+    console.log("signup params: ", req.params);
+    console.log("signup body: ", req.body);
+
+    return res.json({ register_params: true });
+});
+
+
 module.exports = router;

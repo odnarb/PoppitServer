@@ -6,6 +6,8 @@
 
 const dotenv = require('dotenv');
 
+const globals = require('./lib/globals.js');
+
 //load env vars from .env file
 dotenv.config();
 
@@ -34,7 +36,7 @@ let stringifyOrEmpty = (i) => {
 
 //TODO
 let sendEmail = (email, cb) => {
-    console.log( getTime() + " - TODO: Implement sendEmail()");
+    console.log( globals.getTime() + " - TODO: Implement sendEmail()");
     cb();
 }
 
@@ -54,7 +56,13 @@ connection.connect(function(err) {
         console.error('error connecting to DB: ' + err.stack);
         return;
     }
-    console.log( getTime() + '---DB connected as id ' + connection.threadId) ;
+    console.log( globals.getTime() + '---DB connected as id ' + connection.threadId) ;
+
+    //set a global for the db connection
+    app.set('db', connection );
+
+    //access it later with: req.app.get('db').usercollection.find()
+
 
     //continue to start the server
     eventEmitter.emit('mysqlReady');
@@ -73,23 +81,14 @@ let execSQL = (sqlStr, cb) => {
     });
 }
 
-//include the DBAL
-let Users = require('./models/PoppitUsers'),
-    Companies = require('./models/PoppitCompanies'),
-    Campaigns = require('./models/PoppitCampaigns');
+
+
 
 //////////////////////////////////////////////////////////////////
 // EXPRESS SETUP
 //////////////////////////////////////////////////////////////////
 //Setup router configuration
 const allowedMethods = ['GET', 'POST', 'HEAD', 'OPTIONS'];
-
-app.use((error, req, res, next) => {
-    if (error) {
-        return res.status(error.status).send(error.constructor.name);
-    }
-    return next();
-});
 
 //check https methods and whatnot
 let policyFilter = (req, res, next) => {
@@ -99,23 +98,56 @@ let policyFilter = (req, res, next) => {
 
     //check session... show login or show dashboard
     if( req.url == '/' && !req.session.isLoggedIn ) {
-        console.log( getTime() + ' - : User NOT logged in..routing to login page' );
+        console.log( globals.getTime() + ' - : User NOT logged in..routing to login page' );
         return res.redirect('/user/login');
     }
     if( req.url == '/user/login' && req.session.isLoggedIn ) {
-        console.log( getTime() + ' - : User logged in..routing to dashboard' );
+        console.log( globals.getTime() + ' - : User logged in..routing to dashboard' );
         return res.redirect('/');
     }
     return next();
 }
 
-let getTime = () => {
-    let now = new Date();
-    return '[' + (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear() + ':' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds() + ']';
-}
 
-// //disable powered by header
+////////////////////////////////////////////
+////    EXPRESS MIDDLEWARE & OPTIONS    ////
+////////////////////////////////////////////
+
+//disable powered by header
 app.set('x-powered-by', false);
+
+// set the view engine to ejs
+app.set('view engine', 'ejs');
+
+app.use((error, req, res, next) => {
+    if (error) {
+        return res.status(error.status).send(error.constructor.name);
+    }
+    return next();
+});
+
+//where are the static assets?
+app.use(express.static('public'))
+
+//Don't need to do parsing just yet..
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+//setup session
+app.use(session({
+    genid: (req) => { return uuidv4(); },
+    secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
+
+//apply our router function to ALL methods defined in router
+app.use(policyFilter, router);
+
+////////////////////////////////////////////////////////
+// APP ROUTER
+////////////////////////////////////////////////////////
 
 //Hackers, nothing here to see, move along
 router.post('/', (req, res, next) => {
@@ -134,36 +166,10 @@ router.get('/', (req, res) => {
 
 /// add routes here
 let user = require('./routes/user.js');
-
 app.use('/user', user);
 
-
-////////////////////////////////////////////
-////    EXPRESS MIDDLEWARE & OPTIONS    ////
-////////////////////////////////////////////
-
-// set the view engine to ejs
-app.set('view engine', 'ejs');
-
-//where are the static assets?
-app.use(express.static('public'))
-
-//Don't need to do parsing just yet..
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-
-//setup session
-//app.set('trust proxy', 1) // trust first proxy
-app.use(session({
-    genid: (req) => { return uuidv4(); },
-    secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
-
-//apply our router function to ALL methods defined in router
-app.use(policyFilter, router);
+let company = require('./routes/company.js');
+app.use('/company', company);
 
 //////////////////////////////////////////////////////////////////
 // START EXPRESS SERVER
@@ -178,5 +184,5 @@ eventEmitter.on('mysqlReady', () => {
 
     app.listen(port);
 
-    console.log(getTime() + '- Poppit Server is LIVE on port '+port);
+    console.log(globals.getTime() + '- Poppit Server is LIVE on port '+port);
 });

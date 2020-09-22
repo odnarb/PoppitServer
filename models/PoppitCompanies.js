@@ -1,20 +1,51 @@
 /*
     DBAL for PoppitCompanies
 */
-module.exports = {
-    find: function(opts,cb){
-        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + mysql.escape(opts.id) + " limit 1;";
+const mysql = require('mysql');
 
-        execSQL(sqlStr, function(error, result){
+const getTime = require('../lib/globals.js').getTime;
+
+let execSQL = (sqlStr, cb) => {
+    console.log("SQL STRING: ", sqlStr);
+    this.connection.query(sqlStr, function (error, result, fields) {
+        if (error) {
+            cb(error);
+        } else {
+            cb(null,result);
+        }
+    });
+};
+
+class Company {
+    constructor(c) {
+        this.connection = c;
+    }
+
+    execSQL(sqlStr, cb){
+        console.log("SQL STRING: ", sqlStr);
+        this.connection.query(sqlStr, function (error, result, fields) {
             if (error) {
                 cb(error);
             } else {
-                console.log(getTime() + " - Companies.find() result?: ", result[0]);
+                cb(null,result);
+            }
+        });
+    };
+
+    find(opts,cb){
+        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + mysql.escape(opts.id) + " limit 1;";
+
+        this.execSQL(sqlStr, (error, result) => {
+            if (error) {
+                cb(error);
+            } else {
+                console.log( getTime() + " - Companies.find() result?: ", result[0]);
                 cb(null,result[0]);
             }
         });
-    },
-    create: function(vals, cb){
+    }
+
+    create(vals, cb){
         let cols = ["name","description","first_name","last_name","email_address","password_hash","address","city","state","zip","updated_at","created_at"];
 
         vals.updated_at = "NOW()";
@@ -34,8 +65,9 @@ module.exports = {
                 }
             });
         }
-    },
-    update: function(vals, cb){
+    }
+
+    update(vals, cb){
 
         //we need to filter the cols we're really using
         let cols = ["name","description","first_name","last_name","email_address","password_hash","address","city","state","zip"];
@@ -58,8 +90,9 @@ module.exports = {
                 }
             });
         }
-    },
-    delete:  function(id, cb){
+    }
+
+    delete(id, cb){
         let sqlStr = 'delete from poppit_companies where id=' + id;
         execSQL(sqlStr, function(error, result){
             if (error) {
@@ -69,4 +102,6 @@ module.exports = {
             }
         });
     }
-};
+}
+
+module.exports = Company;
