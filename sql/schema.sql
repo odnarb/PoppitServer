@@ -21,11 +21,23 @@ CREATE TABLE `poppit_users` (
     `last_name` VARCHAR(80) NOT NULL DEFAULT '',
     `email_address` VARCHAR(255) NOT NULL DEFAULT '',
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
+    `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
     `active` INT NOT NULL DEFAULT 0,
-    -- `address` VARCHAR(255) NOT NULL DEFAULT '',
-    -- `city` VARCHAR(80) NOT NULL DEFAULT '',
-    -- `state` VARCHAR(80) NOT NULL DEFAULT '',
-    -- `zip` VARCHAR(5) NOT NULL DEFAULT '',
+    `notifications` JSON NOT NULL,
+    `registration_type` VARCHAR(80) NOT NULL DEFAULT '',
+    `city` VARCHAR(80) NOT NULL DEFAULT '',
+    `state` VARCHAR(2) NOT NULL DEFAULT '',
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- poppit_users_second_chance
+CREATE TABLE `poppit_users_second_chance` (
+    `id` BIGINT AUTO_INCREMENT,
+    `campaign_id` BIGINT NOT NULL,
+    `user_id` BIGINT AUTO_INCREMENT,
+    `coupon_state` VARCHAR(80) NOT NULL DEFAULT '',
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
@@ -42,7 +54,7 @@ CREATE TABLE `poppit_companies` (
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `address` VARCHAR(255) NOT NULL DEFAULT '',
     `city` VARCHAR(80) NOT NULL DEFAULT '',
-    `state` VARCHAR(80) NOT NULL DEFAULT '',
+    `state` VARCHAR(2) NOT NULL DEFAULT '',
     `zip` VARCHAR(5) NOT NULL DEFAULT '',
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
