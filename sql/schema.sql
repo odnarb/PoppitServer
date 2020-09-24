@@ -3,6 +3,8 @@ SET FOREIGN_KEY_CHECKS=0; -- to disable them
 DROP TABLE IF EXISTS `poppit_users`;
 DROP TABLE IF EXISTS `poppit_companies`;
 DROP TABLE IF EXISTS `poppit_games`;
+DROP TABLE IF EXISTS `poppit_company_invoices`;
+DROP TABLE IF EXISTS `poppit_company_subscriptions`;
 DROP TABLE IF EXISTS `poppit_company_games`;
 DROP TABLE IF EXISTS `poppit_company_users`;
 DROP TABLE IF EXISTS `poppit_company_campaigns`;
@@ -56,6 +58,31 @@ CREATE TABLE `poppit_companies` (
     `city` VARCHAR(80) NOT NULL DEFAULT '',
     `state` VARCHAR(2) NOT NULL DEFAULT '',
     `zip` VARCHAR(5) NOT NULL DEFAULT '',
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- poppit_company_invoices
+CREATE TABLE `poppit_company_invoices` (
+    `id` BIGINT AUTO_INCREMENT,
+    `company_id` BIGINT NOT NULL,
+    `amount` FLOAT NOT NULL DEFAULT 0,
+    `num_locations` INT NOT NULL DEFAULT 0,
+    `notes` VARCHAR(1000) NOT NULL DEFAULT '',
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- poppit_company_subscriptions
+CREATE TABLE `poppit_company_subscriptions` (
+    `id` BIGINT AUTO_INCREMENT,
+    `company_id` BIGINT NOT NULL,
+    `charge_frequency` INT NOT NULL DEFAULT 0,
+    `amount` FLOAT NOT NULL,
+    `subscription_start` DATETIME NOT NULL,
+    `subscription_end` DATETIME NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
