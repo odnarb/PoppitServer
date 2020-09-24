@@ -2,9 +2,9 @@ SET FOREIGN_KEY_CHECKS=0; -- to disable them
 
 DROP TABLE IF EXISTS `poppit_users`;
 DROP TABLE IF EXISTS `poppit_companies`;
-DROP TABLE IF EXISTS `poppit_campaigns`;
 DROP TABLE IF EXISTS `poppit_games`;
 DROP TABLE IF EXISTS `poppit_company_games`;
+DROP TABLE IF EXISTS `poppit_company_users`;
 DROP TABLE IF EXISTS `poppit_company_campaigns`;
 DROP TABLE IF EXISTS `poppit_company_locations`;
 DROP TABLE IF EXISTS `poppit_roles`;
@@ -61,14 +61,31 @@ CREATE TABLE `poppit_companies` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- poppit_campaigns
--- NEED a json column for branding information, links to images, etc?
--- One campaign will have 1 coupon.. so a campaign_id is essentially the same as a coupon
+-- poppit_company_users
+CREATE TABLE `poppit_company_users` (
+    `id` BIGINT AUTO_INCREMENT,
+    `company_id` BIGINT NOT NULL,
+    `first_name` VARCHAR(80) NOT NULL DEFAULT '',
+    `last_name` VARCHAR(80) NOT NULL DEFAULT '',
+    `email_address` VARCHAR(255) NOT NULL DEFAULT '',
+    `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
+    `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
+    `active` INT NOT NULL DEFAULT 0,
+    `company_permissions` JSON NOT NULL,
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- poppit_company_campaigns
+-- json column is for branding information, links to images, etc?
 CREATE TABLE `poppit_company_campaigns` (
     `id` BIGINT AUTO_INCREMENT,
     `company_id` BIGINT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
+    `category` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `game_id` INT NOT NULL,
     `data` JSON NOT NULL,
     `date_start` DATETIME NOT NULL DEFAULT NOW(),
     `date_end` DATETIME NOT NULL DEFAULT NOW(),
@@ -81,7 +98,7 @@ CREATE TABLE `poppit_company_campaigns` (
 
 -- poppit_games
 CREATE TABLE `poppit_games` (
-    `id` BIGINT AUTO_INCREMENT,
+    `id` INT AUTO_INCREMENT,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
     `images` JSON NOT NULL,
@@ -117,6 +134,7 @@ CREATE TABLE `poppit_company_locations` (
     `country_code` VARCHAR(2) NOT NULL DEFAULT '',
     `latitude` VARCHAR(30) NOT NULL DEFAULT '',
     `longitude` VARCHAR(30) NOT NULL DEFAULT '',
+    `polygon` JSON NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
