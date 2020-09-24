@@ -1,11 +1,16 @@
 /*
-* Log mover service for Engage
-* Takes log items from a redis db and moves to the SQL DB
-* Created: 5/22/2018 by Brandon Chambers
+*
+* Server for Poppit dashboard
+*
 */
 
+//get the local file
 const dotenv = require('dotenv');
 
+//get the args starting at position 2 (node app.js --port 3000)
+const args = require('minimist')(process.argv.slice(2));
+
+//get the globals
 const globals = require('./lib/globals.js');
 
 //load env vars from .env file
@@ -14,7 +19,7 @@ dotenv.config();
 const COOKIE_MAX_AGE = 72 * 60 * 60 * 1000;
 const SALT_ROUNDS = 10;
 
-let express = require('express'),
+const express = require('express'),
     app = express(),
     _ = require('lodash'),
     mysql = require('mysql');
@@ -180,9 +185,7 @@ eventEmitter.on('mysqlReady', () => {
     // Now start Waterline passing adapters in
 
     // Start Server
-    var port = process.argv[2] || 7777;
-
+    let port = args.port || 7777;
     app.listen(port);
-
     console.log(globals.getTime() + '- Poppit Server is LIVE on port '+port);
 });

@@ -10,8 +10,8 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-#Install latest version of node
-nvm install node
+#Install latest  long term support version of node (most stable)
+nvm install --lts
 
 #Install forever
 npm install -g forever
@@ -19,8 +19,21 @@ npm install -g forever
 #Git clone project
 git clone git@github.com:odnarb/PoppitServer.git
 
-cd PoppitServer
+sudo mysql -u root -p < PoppitServer/sql/create_user_and_db.sql
 
-sudo mysql -u root -p < sql/create_user_and_db.sql
+sudo mysql -u root -p poppit < PoppitServer/sql/schema.sql
 
-sudo mysql -u root -p poppit < sql/schema.sql
+sudo mkdir -p /var/log/PoppitServer
+sudo chown brandon:brandon /var/log/PoppitServer
+
+# replace path service script
+sed -i 's/__FOREVER_START_SCRIPT__/\/home\/brandon\/git-projects\/PoppitServer\/scripts\/forever-start.sh/g' PoppitServer/scripts/poppit.service
+sed -i 's/__FOREVER_START_USER__/brandon/g' PoppitServer/scripts/poppit.service
+sed -i 's/__FOREVER_START_GROUP__/brandon/g' PoppitServer/scripts/poppit.service
+
+#copy the script to the systemd path
+sudo cp PoppitServer/scripts/poppit.service /usr/lib/systemd/system/poppit.service
+
+#load the service
+sudo systemctl daemon-reload
+sudo systemctl enable poppit.service
