@@ -24,8 +24,3 @@ cd PoppitServer
 sudo mysql -u root -p < sql/create_user_and_db.sql
 
 sudo mysql -u root -p poppit < sql/schema.sql
-
-# These next steps are mainly for the build process
-# do some replace statements against .env now
-npm install
-cp .env-dev .env
