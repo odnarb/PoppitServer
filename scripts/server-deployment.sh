@@ -28,9 +28,11 @@ sudo chown brandon:brandon /var/log/PoppitServer
 
 # replace path service script
 sed -i 's/__FOREVER_START_SCRIPT__/\/home\/brandon\/git-projects\/PoppitServer\/scripts\/forever-start.sh/g' PoppitServer/scripts/poppit.service
+sed -i 's/__FOREVER_START_USER__/brandon/g' PoppitServer/scripts/poppit.service
+sed -i 's/__FOREVER_START_GROUP__/brandon/g' PoppitServer/scripts/poppit.service
 
 #copy the script to the systemd path
-sudo cp PoppitServer/scripts/poppit.service /etc/systemd/system/poppit.service
+sudo cp PoppitServer/scripts/poppit.service /usr/lib/systemd/system/poppit.service
 
 #load the service
 sudo systemctl daemon-reload
