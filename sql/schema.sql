@@ -1,6 +1,7 @@
 SET FOREIGN_KEY_CHECKS=0; -- to disable them
 
 DROP TABLE IF EXISTS `poppit_users`;
+DROP TABLE IF EXISTS `poppit_users_second_chance`;
 DROP TABLE IF EXISTS `poppit_companies`;
 DROP TABLE IF EXISTS `poppit_games`;
 DROP TABLE IF EXISTS `poppit_company_invoices`;
@@ -25,7 +26,7 @@ CREATE TABLE `poppit_users` (
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
     `active` INT NOT NULL DEFAULT 0,
-    `notifications` JSON NOT NULL,
+    `notifications` JSON NULL,
     `registration_type` VARCHAR(80) NOT NULL DEFAULT '',
     `city` VARCHAR(80) NOT NULL DEFAULT '',
     `state` VARCHAR(2) NOT NULL DEFAULT '',
@@ -38,7 +39,7 @@ CREATE TABLE `poppit_users` (
 CREATE TABLE `poppit_users_second_chance` (
     `id` BIGINT AUTO_INCREMENT,
     `campaign_id` BIGINT NOT NULL,
-    `user_id` BIGINT AUTO_INCREMENT,
+    `user_id` BIGINT NOT NULL,
     `coupon_state` VARCHAR(80) NOT NULL DEFAULT '',
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
@@ -98,7 +99,7 @@ CREATE TABLE `poppit_company_users` (
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
     `active` INT NOT NULL DEFAULT 0,
-    `company_permissions` JSON NOT NULL,
+    `company_permissions` JSON NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
@@ -113,7 +114,7 @@ CREATE TABLE `poppit_company_campaigns` (
     `category` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
     `game_id` INT NOT NULL,
-    `data` JSON NOT NULL,
+    `data` JSON NULL,
     `date_start` DATETIME NOT NULL DEFAULT NOW(),
     `date_end` DATETIME NOT NULL DEFAULT NOW(),
     `active` INT NOT NULL,
@@ -128,9 +129,9 @@ CREATE TABLE `poppit_games` (
     `id` INT AUTO_INCREMENT,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    `images` JSON NOT NULL,
+    `images` JSON NULL,
     `url` VARCHAR(2000) NOT NULL DEFAULT '',
-    `data` JSON NOT NULL,
+    `data` JSON NULL,
     `is_live` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
@@ -144,8 +145,8 @@ CREATE TABLE `poppit_company_games` (
     `id` BIGINT AUTO_INCREMENT,
     `company_id` BIGINT NOT NULL,
     `game_id` BIGINT NOT NULL,
-    FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
-    FOREIGN KEY (`game_id`) REFERENCES poppit_games (`id`),
+    -- FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
+    -- FOREIGN KEY (`game_id`) REFERENCES poppit_games (`id`),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
@@ -161,7 +162,7 @@ CREATE TABLE `poppit_company_locations` (
     `country_code` VARCHAR(2) NOT NULL DEFAULT '',
     `latitude` VARCHAR(30) NOT NULL DEFAULT '',
     `longitude` VARCHAR(30) NOT NULL DEFAULT '',
-    `polygon` JSON NOT NULL,
+    `polygon` JSON NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
