@@ -19,11 +19,19 @@ npm install -g forever
 #Git clone project
 git clone git@github.com:odnarb/PoppitServer.git
 
-cd PoppitServer
+sudo mysql -u root -p < PoppitServer/sql/create_user_and_db.sql
 
-sudo mysql -u root -p < sql/create_user_and_db.sql
-
-sudo mysql -u root -p poppit < sql/schema.sql
+sudo mysql -u root -p poppit < PoppitServer/sql/schema.sql
 
 sudo mkdir -p /var/log/PoppitServer
 sudo chown brandon:brandon /var/log/PoppitServer
+
+# replace path service script
+sed -i 's/__FOREVER_START_SCRIPT__/\/home\/brandon\/git-projects\/PoppitServer\/scripts\/forever-start.sh/g' PoppitServer/scripts/poppit.service
+
+#copy the script to the systemd path
+sudo cp PoppitServer/scripts/poppit.service /etc/systemd/system/poppit.service
+
+#load the service
+sudo systemctl daemon-reload
+sudo systemctl enable poppit.service

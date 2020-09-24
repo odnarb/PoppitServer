@@ -1,0 +1,12 @@
+#/etc/systemd/system/poppit.service
+
+[Unit]
+Description=Job that runs Poppit forever
+
+[Service]
+ExecStart=__FOREVER_START_SCRIPT__
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

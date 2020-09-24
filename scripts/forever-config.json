@@ -21,16 +21,5 @@
         "outFile": "__LOGS_OUT_PATH__",
         "errFile": "__LOGS_ERROR_PATH__",
         "args": ["--port", "3001"]
-    },
-    {
-        "uid": "poppit-server-3003",
-        "append": true,
-        "watch": true,
-        "script": "app.js",
-        "sourceDir": "__PROJECT_PATH__",
-        "logFile": "__LOGS_FOREVER_PATH__",
-        "outFile": "__LOGS_OUT_PATH__",
-        "errFile": "__LOGS_ERROR_PATH__",
-        "args": ["--port", "3003"]
     }
 ]
