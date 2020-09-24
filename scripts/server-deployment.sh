@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install mysql redis-server curl vim wget
-sudo apt-get -y install mysql-server redis-server curl vim wget git build-essential
+sudo apt-get -y install mysql-server redis-server curl vim wget git build-essential nginx
 
 # Install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
