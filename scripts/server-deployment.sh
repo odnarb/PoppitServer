@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install mysql redis-server curl vim wget
-sudo apt-get -y install mysql-server redis-server curl vim wget git build-essential nginx
+sudo apt-get -y install mysql-server redis-server curl vim wget git build-essential nginx logrotate
 
 # Install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
@@ -25,6 +25,9 @@ sudo mysql -u root -p poppit < PoppitServer/sql/schema.sql
 
 sudo mkdir -p /var/log/PoppitServer
 sudo chown brandon:brandon /var/log/PoppitServer
+sudo chown root:root scripts/poppit-server-logrotate.conf
+sudo chmod 644 scripts/poppit-server-logrotate.conf
+sudo logrotate -v scripts/poppit-server-logrotate.conf
 
 # replace path service script
 sed -i 's/__FOREVER_START_SCRIPT__/\/home\/brandon\/git-projects\/PoppitServer\/scripts\/forever-start.sh/g' PoppitServer/scripts/poppit.service
