@@ -1,20 +1,69 @@
 /*
     DBAL for PoppitUsers
 */
-module.exports = {
-    find: function(opts,cb){
-        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`active`,`created_at`,`updated_at` from poppit_users where email_address=" + mysql.escape(opts.email) + " limit 1;";
 
-        execSQL(sqlStr, function(error, result){
+class User {
+    constructor(globals) {
+        this.globals = globals;
+        this.execSQL = globals.execSQL;
+        this.db = globals.db;
+        this.dbescape = globals.dbescape;
+    }
+
+    find(opts,cb){
+        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`active`,`created_at`,`updated_at` from poppit_users";
+
+        if( opts && opts.limit && opts.limit <= 100 && opts.limit > 0 ){
+            sqlStr += " limit " + this.dbescape(opts.limit);
+        } else {
+            sqlStr += " limit 10";
+        }
+
+        if( opts && opts.offset && opts.offset > 0 && opts.offset < 10000000000 ){
+            sqlStr += " offset " + this.dbescape(opts.offset) + ";";
+        } else {
+            sqlStr += " offset 0;";
+        }
+
+        this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
                 cb(error);
             } else {
-                console.log(getTime() + " - Users.find() result?: ", result[0]);
+                this.globals.logger.debug( "Companies.find() result?: ", result[0]);
                 cb(null,result[0]);
             }
         });
-    },
-    create: function(vals, cb){
+    }
+
+    findOne(opts,cb){
+        if( !opts.email && !opts.id ){
+            return cb("ERROR: email or must be passed in");
+        }
+
+        //use email
+        let whereClause = "";
+        if( opts.email && opts.email !== "" ){ 
+            whereClause = "email_address=" + this.dbescape(opts.email) + " limit 1;";
+        } else if ( opts.id && opts.id > 0 ) {
+            whereClause = "id=" + this.dbescape(opts.id) + " limit 1;";
+        } else {
+            return cb("ERROR: email or must be passed in");
+        }
+        this.globals.logger.debug( "-- GET USER? ", whereClause );
+
+        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where " + whereClause;
+
+        this.execSQL(this.db, sqlStr, (error, result) => {
+            if (error) {
+                cb(error);
+            } else {
+                this.globals.logger.debug("Company.find() result?: ", result[0]);
+                cb(null,result[0]);
+            }
+        });
+    }
+
+    create(vals, cb){
         let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
 
         vals.updated_at = "NOW()";
@@ -23,19 +72,20 @@ module.exports = {
         if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
-            let sqlStr = "insert into poppit_users SET " +mysql.escape(vals)+ ";";
+            let sqlStr = "insert into poppit_users SET " + this.dbescape(vals)+ ";";
 
-            execSQL(sqlStr, function(error, result){
+            this.execSQL(sqlStr, (error, result) => {
                 if (error) {
                     cb(error);
                 } else {
-                    console.log(getTime() + " - Users.create() result?: ", result);
+                    this.globals.logger.debug("PoppitUsers.create() result?: ", result);
                     cb(null,result);
                 }
             });
         }
-    },
-    update: function(vals, cb){
+    }
+
+    update(vals, cb){
 
         let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
 
@@ -45,26 +95,30 @@ module.exports = {
         if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
-            let sqlStr = "update poppit_users SET " +mysql.escape(vals)+ ";";
+            let sqlStr = "update poppit_users SET " + this.dbescape(vals)+ ";";
 
-            execSQL(sqlStr, function(error, result){
+            this.execSQL(sqlStr, (error, result) => {
                 if (error) {
                     cb(error);
                 } else {
-                    console.log(getTime() + " - Companies.create() result?: ", result);
+                    this.globals.logger.debug("PoppitUsers.update() result?: ", result);
                     cb(null,result);
                 }
             });
         }
-    },
-    delete:  function(id, cb){
+    }
+
+    delete(id, cb){
         let sqlStr = 'delete from poppit_users where id=' + id;
-        execSQL(sqlStr, function(error, result){
+        this.execSQL(sqlStr, (error, result) => {
             if (error) {
                 cb(error);
             } else {
+                this.globals.logger.debug("PoppitUsers.delete() result?: ", result);
                 cb(null, result);
             }
         });
     }
 };
+
+module.exports = User;

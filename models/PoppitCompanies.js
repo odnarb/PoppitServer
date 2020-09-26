@@ -1,49 +1,56 @@
 /*
     DBAL for PoppitCompanies
 */
-const mysql = require('mysql');
-
-const getTime = require('../lib/globals.js').getTime;
-
-let execSQL = (sqlStr, cb) => {
-    console.log("SQL STRING: ", sqlStr);
-    this.connection.query(sqlStr, function (error, result, fields) {
-        if (error) {
-            cb(error);
-        } else {
-            cb(null,result);
-        }
-    });
-};
 
 class Company {
-    constructor(c) {
-        this.connection = c;
+    constructor(globals) {
+        this.globals = globals;
+        this.execSQL = globals.execSQL;
+        this.db = globals.db;
+        this.dbescape = globals.dbescape;
     }
 
-    execSQL(sqlStr, cb){
-        console.log("SQL STRING: ", sqlStr);
-        this.connection.query(sqlStr, function (error, result, fields) {
+    find(opts,cb){
+        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies";
+
+        if( opts && opts.limit && opts.limit <= 100 && opts.limit > 0 ){
+            sqlStr += " limit " + this.dbescape(opts.limit);
+        } else {
+            sqlStr += " limit 10";
+        }
+
+        if( opts && opts.offset && opts.offset > 0 && opts.offset < 10000000000 ){
+            sqlStr += " offset " + this.dbescape(opts.offset) + ";";
+        } else {
+            sqlStr += " offset 0;";
+        }
+
+        this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
                 cb(error);
             } else {
-                cb(null,result);
+                this.globals.logger.debug( "Companies.find() result?: ", result[0]);
+                cb(null,result[0]);
             }
         });
     };
 
-    find(opts,cb){
-        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + mysql.escape(opts.id) + " limit 1;";
+    findOne(opts,cb){
+        if( !opts.id ){
+            return cb("ERROR: id must be passed in");
+        }
 
-        this.execSQL(sqlStr, (error, result) => {
+        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + this.dbescape(opts.id) + ";";
+
+        this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
                 cb(error);
             } else {
-                console.log( getTime() + " - Companies.find() result?: ", result[0]);
+                this.globals.logger.debug("Company.find() result?: ", result[0]);
                 cb(null,result[0]);
             }
         });
-    }
+    };
 
     create(vals, cb){
         let cols = ["name","description","first_name","last_name","email_address","password_hash","address","city","state","zip","updated_at","created_at"];
@@ -54,13 +61,13 @@ class Company {
         if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
-            let sqlStr = "insert into poppit_companies SET " +mysql.escape(vals)+ ";";
+            let sqlStr = "insert into poppit_companies SET " + this.dbescape(vals)+ ";";
 
-            execSQL(sqlStr, function(error, result){
+            this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
                     cb(error);
                 } else {
-                    console.log(getTime() + " - Companies.create() result?: ", result);
+                    this.globals.logger.debug("Company.create() result?: ", result);
                     cb(null,result);
                 }
             });
@@ -79,13 +86,13 @@ class Company {
             cb({ "error": "invalid_data" });
         } else {
             vals.updated_at = "NOW()";
-            let sqlStr = "update poppit_companies SET " +mysql.escape(vals)+ ";";
+            let sqlStr = "update poppit_companies SET " + this.dbescape(vals)+ ";";
 
-            execSQL(sqlStr, function(error, result){
+            this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
                     cb(error);
                 } else {
-                    console.log(getTime() + " - Companies.create() result?: ", result);
+                    this.globals.logger.debug("Company.update() result?: ", result);
                     cb(null,result);
                 }
             });
@@ -93,11 +100,12 @@ class Company {
     }
 
     delete(id, cb){
-        let sqlStr = 'delete from poppit_companies where id=' + id;
-        execSQL(sqlStr, function(error, result){
+        let sqlStr = 'delete from poppit_companies where id=' + this.dbescape(id);
+        this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
                 cb(error);
             } else {
+                this.globals.logger.debug("Company.delete() result?: ", result);
                 cb(null, result);
             }
         });
