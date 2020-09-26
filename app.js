@@ -30,7 +30,11 @@ const express = require('express'),
     events = require('events'),
     eventEmitter = new events.EventEmitter(),
     bcrypt = require('bcrypt'),
-    uuidv4 = require('uuid/v4');
+
+//setup redis
+const redis = require('redis');
+let redisStore = require('connect-redis')(session);
+let redisClient = redis.createClient();
 
 let stringifyOrEmpty = (i) => {
     if(i == "") return "";
@@ -86,9 +90,6 @@ let execSQL = (sqlStr, cb) => {
     });
 }
 
-
-
-
 //////////////////////////////////////////////////////////////////
 // EXPRESS SETUP
 //////////////////////////////////////////////////////////////////
@@ -138,13 +139,21 @@ app.use(express.static('public'))
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
+let redis_config = {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    client: redisClient,
+    ttl: process.env.REDIS_TTL
+};
+
 //setup session
 app.use(session({
-    genid: (req) => { return uuidv4(); },
     secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
+    name: '_poppit',
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
+    saveUninitialized: false,
+    cookie: { secure: false },
+    store: new redisStore(redis_config)
 }));
 
 //apply our router function to ALL methods defined in router

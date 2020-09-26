@@ -1,1 +1,1 @@
-* * * * * __PROJECT_PATH__/scripts/backup.sh
+0 0 * * * __PROJECT_PATH__/scripts/backup.sh
