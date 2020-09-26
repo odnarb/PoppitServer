@@ -29,9 +29,6 @@ const app = express();
 const eventEmitter = new events.EventEmitter();
 const router = express.Router();
 
-const COOKIE_MAX_AGE = 72 * 60 * 60 * 1000;
-const SALT_ROUNDS = 10;
-
 //setup redis
 const redis = require('redis');
 let redisStore = require('connect-redis')(session);
