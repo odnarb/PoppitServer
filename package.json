@@ -1,5 +1,5 @@
 {
-  "name": "poppitserver",
+  "name": "Poppitserver",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -18,10 +18,12 @@
     "mysql": "^2.17.1",
     "redis": "^3.0.2"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "devDependencies": {
+    "jshint": "latest"
   },
-  "author": "",
-  "license": "ISC"
+  "scripts": {
+    "lint": "jshint **.js"
+  },
+  "author": "Brandon Chambers",
+  "license": "Copyright 2020 Brandon Chambers - All rights reserved."
 }
