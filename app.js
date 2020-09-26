@@ -16,20 +16,21 @@ const globals = require('./lib/globals.js');
 //load env vars from .env file
 dotenv.config();
 
-const COOKIE_MAX_AGE = 72 * 60 * 60 * 1000;
-const SALT_ROUNDS = 10;
-
 const express = require('express'),
-    app = express(),
     _ = require('lodash'),
-    mysql = require('mysql');
+    mysql = require('mysql'),
     moment = require('moment'),
-    router = express.Router(),
     session = require('express-session'),
     bodyParser = require('body-parser'),
     events = require('events'),
-    eventEmitter = new events.EventEmitter(),
-    bcrypt = require('bcrypt'),
+    bcrypt = require('bcrypt');
+
+const app = express();
+const eventEmitter = new events.EventEmitter();
+const router = express.Router();
+
+const COOKIE_MAX_AGE = 72 * 60 * 60 * 1000;
+const SALT_ROUNDS = 10;
 
 //setup redis
 const redis = require('redis');
@@ -41,13 +42,13 @@ let stringifyOrEmpty = (i) => {
     var newStr = JSON.stringify(i);
     newStr = newStr.replace(/'/g, "\'\'");
     return newStr;
-}
+};
 
 //TODO
 let sendEmail = (email, cb) => {
     console.log( globals.getTime() + " - TODO: Implement sendEmail()");
     cb();
-}
+};
 
 //////////////////////////////////////////////////////////////////
 // MYSQL CONFIG
@@ -88,7 +89,7 @@ let execSQL = (sqlStr, cb) => {
             cb(null,result);
         }
     });
-}
+};
 
 //////////////////////////////////////////////////////////////////
 // EXPRESS SETUP
@@ -112,7 +113,7 @@ let policyFilter = (req, res, next) => {
         return res.redirect('/');
     }
     return next();
-}
+};
 
 
 ////////////////////////////////////////////
@@ -133,7 +134,7 @@ app.use((error, req, res, next) => {
 });
 
 //where are the static assets?
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 //Don't need to do parsing just yet..
 app.use(bodyParser.json()); // support json encoded bodies

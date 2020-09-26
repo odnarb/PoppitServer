@@ -2,6 +2,7 @@
 
 # install dependencies for this project
 npm install
+npm run lint || { echo 'JS Lint Failed, exiting build process' ; exit 1; }
 
 # get the env file ready
 cp .env-dev .env
