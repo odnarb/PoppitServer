@@ -24,7 +24,7 @@ router.get('/', function(req, res) {
 });
 
 // /company/123
-router.get('/:id', function(req, res) {
+router.get('/:id', (req, res) => {
     return res.render('pages/company',{
         data: {
             pageTitle: process.env.APP_NAME + ' | Company ID: ' + req.params.id
