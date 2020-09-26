@@ -4,19 +4,16 @@
 *
 */
 
-//get the local file
-const dotenv = require('dotenv');
-
 //get the args starting at position 2 (node app.js --port 3000)
 const args = require('minimist')(process.argv.slice(2));
 
-//get the globals
-const globals = require('./lib/globals.js');
+//get the log level, depending on what's passed
+let level = { loglevel: args.loglevel || 'debug' }
 
-//load env vars from .env file
-dotenv.config();
-
-const express = require('express'),
+const
+    globals = require('./lib/globals.js')(level),
+    express = require('express'),
+    dotenv = require('dotenv'),
     _ = require('lodash'),
     mysql = require('mysql'),
     moment = require('moment'),
@@ -29,23 +26,13 @@ const app = express();
 const eventEmitter = new events.EventEmitter();
 const router = express.Router();
 
+//load env vars from .env file
+dotenv.config();
+
 //setup redis
 const redis = require('redis');
 let redisStore = require('connect-redis')(session);
 let redisClient = redis.createClient();
-
-let stringifyOrEmpty = (i) => {
-    if(i == "") return "";
-    var newStr = JSON.stringify(i);
-    newStr = newStr.replace(/'/g, "\'\'");
-    return newStr;
-};
-
-//TODO
-let sendEmail = (email, cb) => {
-    console.log( globals.getTime() + " - TODO: Implement sendEmail()");
-    cb();
-};
 
 //////////////////////////////////////////////////////////////////
 // MYSQL CONFIG
@@ -58,35 +45,28 @@ let connection = mysql.createConnection({
     database :  process.env.DB_NAME
 });
 
-connection.connect(function(err) {
+connection.connect( (err) => {
     if (err) {
-        console.error('error connecting to DB: ' + err.stack);
+        globals.logger.error('error connecting to DB: ' + err.stack);
         return;
     }
-    console.log( globals.getTime() + '---DB connected as id ' + connection.threadId) ;
+
+    // examples of log output at different levels..
+    // globals.logger.silly("127.0.0.1 - there's no place like home");
+    // globals.logger.debug( "127.0.0.1 - there's no place like home");
+    // globals.logger.verbose( "127.0.0.1 - there's no place like home");
+    // globals.logger.info( "127.0.0.1 - there's no place like home");
+    // globals.logger.warn( "127.0.0.1 - there's no place like home");
+    // globals.logger.error("127.0.0.1 - there's no place like home", { test: 123, blah: () => { return "test"} });
+
+    globals.logger.info( 'DB connected as id ' + connection.threadId );
 
     //set a global for the db connection
-    app.set('db', connection );
-
-    //access it later with: req.app.get('db').usercollection.find()
-
+    globals.db = connection;
 
     //continue to start the server
     eventEmitter.emit('mysqlReady');
-
 });
-
-///THIS IS REFERENCED IN THE DBAL FILES BUT WE NEED TO EXTEND THE DBAL FUNCTIONS WITH THIS FUNCTION
-let execSQL = (sqlStr, cb) => {
-    console.log("SQL STRING: ", sqlStr);
-    connection.query(sqlStr, function (error, result, fields) {
-        if (error) {
-            cb(error);
-        } else {
-            cb(null,result);
-        }
-    });
-};
 
 //////////////////////////////////////////////////////////////////
 // EXPRESS SETUP
@@ -102,11 +82,11 @@ let policyFilter = (req, res, next) => {
 
     //check session... show login or show dashboard
     if( req.url == '/' && !req.session.isLoggedIn ) {
-        console.log( globals.getTime() + ' - : User NOT logged in..routing to login page' );
+        globals.logger.debug( "User NOT logged in..routing to login page" );
         return res.redirect('/user/login');
     }
     if( req.url == '/user/login' && req.session.isLoggedIn ) {
-        console.log( globals.getTime() + ' - : User logged in..routing to dashboard' );
+        globals.logger.debug( "User logged in..routing to dashboard" );
         return res.redirect('/');
     }
     return next();
@@ -116,6 +96,9 @@ let policyFilter = (req, res, next) => {
 ////////////////////////////////////////////
 ////    EXPRESS MIDDLEWARE & OPTIONS    ////
 ////////////////////////////////////////////
+
+//create the logger for routes
+app.set('logger', globals.logger);
 
 //disable powered by header
 app.set('x-powered-by', false);
@@ -177,10 +160,10 @@ router.get('/', (req, res) => {
 });
 
 /// add routes here
-let user = require('./routes/user.js');
+let user = require('./routes/user.js')(globals);
 app.use('/user', user);
 
-let company = require('./routes/company.js');
+let company = require('./routes/company.js')(globals);
 app.use('/company', company);
 
 //////////////////////////////////////////////////////////////////
@@ -194,5 +177,5 @@ eventEmitter.on('mysqlReady', () => {
     // Start Server
     let port = args.port || 7777;
     app.listen(port);
-    console.log(globals.getTime() + '- Poppit Server is LIVE on port '+port);
+    globals.logger.info(`Poppit Server is LIVE on port ${port}`);
 });
