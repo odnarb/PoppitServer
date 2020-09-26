@@ -13,6 +13,9 @@ sed -i 's/__DB_USER__/mydbuser/g' .env
 sed -i 's/__DB_NAME__/mydbname/g' .env
 sed -i 's/__APP_NAME__/Acme/g' .env
 sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' .env
+sed -i 's/__REDIS_HOST__/localhost/g' .env
+sed -i 's/__REDIS_PORT__/6379/g' .env
+sed -i 's/__REDIS_TTL__/86400/g' .env
 
 #replace forever options
 sed -i 's/__SCRIPT_PATH__/\/home\/brandon\/git-projects\/PoppitServer\/app.js/g' scripts/forever-config.json
