@@ -30,13 +30,17 @@ router.post('/login', (req, res) =>{
         }
 
         //user not found at all
-        ( user == undefined ) && return res.status(400).json({reason: "no_user"});
+        if ( user == undefined ){
+            return res.status(400).json({reason: "no_user"});
+        }
 
         if( bcrypt.compareSync(req.body.password, user.password_hash) ){
 
             //only check if the passwords match
             //user has not been activated
-            ( user.active == 0 ) && return res.status(400).json({reason: "not_active"});
+            if( user.active == 0 ){
+                return res.status(400).json({reason: "not_active"});
+            }
 
             req.session.regenerate( (err) => {
                 console.log( getTime() + ' - : User logged IN' );
