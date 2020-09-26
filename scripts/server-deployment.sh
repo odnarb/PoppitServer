@@ -43,7 +43,7 @@ chmod +x PoppitServer/scripts/backup.sh
 sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' PoppitServer/scripts/poppit.cron
 
 #copy the crontab to the system's /etc/cron.d/ area
-sudo cp PoppitServer/scripts/poppit.cron /etc/cron.d/
+sudo crontab PoppitServer/scripts/poppit.cron
 
 #add the logs paths and logrotate configs
 sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' PoppitServer/scripts/poppit-server-logrotate.conf
