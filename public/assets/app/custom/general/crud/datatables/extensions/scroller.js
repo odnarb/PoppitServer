@@ -7,7 +7,7 @@ var KTDatatablesExtensionsScroller = function() {
 		// begin first table
 		table.DataTable({
 			responsive: true,
-			ajax: 'inc/api/datatables/demos/server.php',
+			ajax: 'https://keenthemes.com/metronic/themes/themes/metronic/dist/preview/inc/api/datatables/demos/server.php',
 			deferRender: true,
 			scrollY: '500px',
 			scrollCollapse: true,

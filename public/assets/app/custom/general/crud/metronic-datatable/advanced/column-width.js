@@ -12,7 +12,7 @@ var KTDatatableColumnWidthDemo = function() {
 				type: 'remote',
 				source: {
 					read: {
-						url: 'inc/api/datatables/demos/default.php',
+						url: 'https://keenthemes.com/metronic/themes/themes/metronic/dist/preview/inc/api/datatables/demos/default.php',
 					},
 				},
 				pageSize: 10,

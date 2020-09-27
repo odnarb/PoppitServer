@@ -11,7 +11,7 @@ var KTDatatableJsonRemoteDemo = function () {
 			// datasource definition
 			data: {
 				type: 'remote',
-				source: 'inc/api/datatables/datasource/default.json',
+				source: 'https://keenthemes.com/metronic/themes/themes/metronic/dist/preview/inc/api/datatables/datasource/default.json',
 				pageSize: 10,
 			},
 

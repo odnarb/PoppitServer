@@ -13,7 +13,7 @@ var KTDatatableChildRemoteDataDemo = function() {
 				type: 'remote',
 				source: {
 					read: {
-						url: 'inc/api/datatables/demos/customers.php',
+						url: 'https://keenthemes.com/metronic/themes/themes/metronic/dist/preview/inc/api/datatables/demos/customers.php',
 					},
 				},
 				pageSize: 10, // display 20 records per page
@@ -152,7 +152,7 @@ var KTDatatableChildRemoteDataDemo = function() {
 					type: 'remote',
 					source: {
 						read: {
-							url: 'inc/api/datatables/demos/orders.php',
+							url: 'https://keenthemes.com/metronic/themes/themes/metronic/dist/preview/inc/api/datatables/demos/orders.php',
 							params: {
 								// custom query params
 								query: {
