@@ -73,26 +73,10 @@ connection.connect( (err) => {
 // EXPRESS SETUP
 //////////////////////////////////////////////////////////////////
 //Setup router configuration
-const allowedMethods = ['GET', 'POST', 'HEAD', 'OPTIONS'];
 
-//check https methods and whatnot
-let policyFilter = (req, res, next) => {
-    if (!allowedMethods.includes(req.method)) {
-        return res.sendStatus(404);
-    }
-
-    //check session... show login or show dashboard
-    // if( req.url == '/' && !req.session.isLoggedIn ) {
-    //     globals.logger.debug( "User NOT logged in..routing to login page" );
-    //     return res.redirect('/user/login');
-    // }
-    // if( req.url == '/user/login' && req.session.isLoggedIn ) {
-    //     globals.logger.debug( "User logged in..routing to dashboard" );
-    //     return res.redirect('/');
-    // }
-    return next();
-};
-
+//apply our router function to ALL methods defined in router
+let policyFilter = require('./policies/main.js')(globals);
+app.use(policyFilter, router);
 
 ////////////////////////////////////////////
 ////    EXPRESS MIDDLEWARE & OPTIONS    ////
@@ -106,17 +90,8 @@ app.set('x-powered-by', false);
 
 // set the view engine to ejs
 app.use(expressLayouts);
-
 app.set('view engine', 'ejs');
-
 app.set('layout', './layout.ejs');
-
-app.use((error, req, res, next) => {
-    if (error) {
-        return res.status(error.status).send(error.constructor.name);
-    }
-    return next();
-});
 
 //where are the static assets?
 app.use(express.static('public'));
@@ -142,9 +117,6 @@ app.use(session({
     store: new redisStore(redis_config)
 }));
 
-//apply our router function to ALL methods defined in router
-app.use(policyFilter, router);
-
 ////////////////////////////////////////////////////////
 // APP ROUTER
 ////////////////////////////////////////////////////////
@@ -157,6 +129,16 @@ app.use('/user', user);
 
 let company = require('./routes/company.js')(globals);
 app.use('/company', company);
+
+//handle 404's
+app.use( (req, res, next) => {
+    globals.logger.info("ERROR 404 :: requested url: " + req.url );
+    res.status(404).render('errors/404.ejs');
+});
+
+//error handler
+let errorHandler = require('./policies/errorHandler.js')(globals);
+app.use(errorHandler);
 
 //////////////////////////////////////////////////////////////////
 // START EXPRESS SERVER

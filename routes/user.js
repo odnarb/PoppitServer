@@ -69,10 +69,10 @@ module.exports = (globals) => {
         let User = new UserModel( globals );
 
         //get users
-        User.find({ id: req.params.id }, (err, users) => {
+        User.find({}, (err, users) => {
             if(err){
                 globals.logger.error("fetch error: ", err);
-                return res.sendError();
+                return res.sendStatus(404);
             }
 
             globals.logger.info(`GET /user :: `, users);
@@ -85,11 +85,11 @@ module.exports = (globals) => {
 
         globals.logger.info( "GET /user/login" );
 
-        return res.render('pages/login',{
+        return res.render('pages/login', {
             data: {
                 pageTitle: process.env.APP_NAME + ' | Login'
             },
-            layout: './login_layout'
+            layout: 'login_layout'
         });
     })
     // user/login
@@ -116,7 +116,7 @@ module.exports = (globals) => {
         User.findOne({ id: parseInt(req.params.id) }, (err, user) => {
             if(err){
                 globals.logger.error("fetch error: ", err);
-                return res.sendError();
+                return res.sendStatus(404);
             }
 
             globals.logger.info( "GET /user/:id :: user? ", user );
