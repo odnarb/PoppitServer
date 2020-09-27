@@ -81,14 +81,14 @@ let policyFilter = (req, res, next) => {
     }
 
     //check session... show login or show dashboard
-    if( req.url == '/' && !req.session.isLoggedIn ) {
-        globals.logger.debug( "User NOT logged in..routing to login page" );
-        return res.redirect('/user/login');
-    }
-    if( req.url == '/user/login' && req.session.isLoggedIn ) {
-        globals.logger.debug( "User logged in..routing to dashboard" );
-        return res.redirect('/');
-    }
+    // if( req.url == '/' && !req.session.isLoggedIn ) {
+    //     globals.logger.debug( "User NOT logged in..routing to login page" );
+    //     return res.redirect('/user/login');
+    // }
+    // if( req.url == '/user/login' && req.session.isLoggedIn ) {
+    //     globals.logger.debug( "User logged in..routing to dashboard" );
+    //     return res.redirect('/');
+    // }
     return next();
 };
 
@@ -144,22 +144,9 @@ app.use(policyFilter, router);
 // APP ROUTER
 ////////////////////////////////////////////////////////
 
-//Hackers, nothing here to see, move along
-router.post('/', (req, res, next) => {
-    //just disable this..
-    return res.sendStatus(404);
-});
+let main = require('./routes/main.js')(globals);
+app.use('/', main);
 
-//This is the actual request we look for
-router.get('/', (req, res) => {
-    return res.render('pages/dashboard',{
-        data: {
-            pageTitle: process.env.APP_NAME + ' | Dashboard'
-        }
-    });
-});
-
-/// add routes here
 let user = require('./routes/user.js')(globals);
 app.use('/user', user);
 
