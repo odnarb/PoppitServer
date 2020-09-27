@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS=0; -- to disable them
 
 DROP TABLE IF EXISTS `poppit_users`;
-DROP TABLE IF EXISTS `poppit_users_second_chance`;
+DROP TABLE IF EXISTS `poppit_users_campaigns`;
 DROP TABLE IF EXISTS `poppit_companies`;
 DROP TABLE IF EXISTS `poppit_games`;
 DROP TABLE IF EXISTS `poppit_company_invoices`;
@@ -34,12 +34,13 @@ CREATE TABLE `poppit_users` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- poppit_users_second_chance
-CREATE TABLE `poppit_users_second_chance` (
+-- poppit_users_campaigns
+CREATE TABLE `poppit_users_campaigns` (
     `id` BIGINT AUTO_INCREMENT,
     `campaign_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
     `coupon_state` VARCHAR(80) NOT NULL DEFAULT '',
+    `tries` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
