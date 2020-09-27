@@ -20,7 +20,8 @@ const
     session = require('express-session'),
     bodyParser = require('body-parser'),
     events = require('events'),
-    bcrypt = require('bcrypt');
+    bcrypt = require('bcrypt'),
+    expressLayouts = require('express-ejs-layouts');
 
 const app = express();
 const eventEmitter = new events.EventEmitter();
@@ -104,7 +105,11 @@ app.set('logger', globals.logger);
 app.set('x-powered-by', false);
 
 // set the view engine to ejs
+app.use(expressLayouts);
+
 app.set('view engine', 'ejs');
+
+app.set('layout', './layout.ejs');
 
 app.use((error, req, res, next) => {
     if (error) {
