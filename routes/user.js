@@ -3,17 +3,8 @@
 let express = require('express');
 let router = express.Router();
 
-// // user/login
-// router.get('/login', (req, res) => {
+// user/login
 
-//     console.log( "user :: globals? ", globals );
-
-//     return res.render('pages/login',{
-//         data: {
-//             pageTitle: process.env.APP_NAME + ' | Login'
-//         }
-//     });
-// });
 
 // // user/login
 // router.post('/login', (req, res) =>{
@@ -28,7 +19,7 @@ let router = express.Router();
 //     let userEmail = { email: req.body.email };
 //     Users.find(userEmail, (err,user) => {
 //         if(err){
-//             console.log( "DB User.find() error: ", err);
+//             globals.logger.info( "DB User.find() error: ", err);
 //             return res.status(500).json({reason: "server_error"});
 //         }
 
@@ -46,7 +37,7 @@ let router = express.Router();
 //             }
 
 //             req.session.regenerate( (err) => {
-//                 console.log( "User logged IN" );
+//                 globals.logger.info( "User logged IN" );
 //                 req.session.isLoggedIn = true;
 //                 req.session.user = user;
 //                 if( req.body.remember && req.body.remember == "on" ){
@@ -61,9 +52,9 @@ let router = express.Router();
 // });
 
 // router.post('/signup', (req, res) => {
-//     console.log("signup query: ", req.query);
-//     console.log("signup params: ", req.params);
-//     console.log("signup body: ", req.body);
+//     globals.logger.info("signup query: ", req.query);
+//     globals.logger.info("signup params: ", req.params);
+//     globals.logger.info("signup body: ", req.body);
 
 //     return res.json({ register_params: true });
 // });
@@ -91,24 +82,30 @@ module.exports = (globals) => {
     })
     // user/login
     .get('/login', (req, res) => {
-        let gres = (globals.logger == undefined )? true : false;
-        console.log( "GET /user/login :: globals? ", gres );
-        return res.json({ page: 'GET /user/login'});
+
+        globals.logger.info( "GET /user/login" );
+
+        return res.render('pages/login',{
+            data: {
+                pageTitle: process.env.APP_NAME + ' | Login'
+            },
+            layout: './login_layout'
+        });
     })
     // user/login
     .post('/login', (req, res) => {
         let gres = (globals.logger == undefined )? true : false;
-        console.log( "POST /user/login :: globals? ", gres );
+        globals.logger.info( "POST /user/login :: globals? ", gres );
         return res.json({ page: 'POST /user/login'});
     })
     .post('/signup', (req, res) => {
         let gres = (globals.logger == undefined )? true : false;
-        console.log( "POST /user/signup :: globals? ", gres );
+        globals.logger.info( "POST /user/signup :: globals? ", gres );
         return res.json({ page: 'POST /user/signup'});
     })
     .get('/something', (req, res) => {
         let gres = (globals.logger == undefined )? true : false;
-        console.log( "GET /user/something :: globals? ", gres );
+        globals.logger.info( "GET /user/something :: globals? ", gres );
         return res.json({ page: 'GET /user/something'});
     })
     // user/:id

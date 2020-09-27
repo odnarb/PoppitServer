@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS `poppit_companies`;
 DROP TABLE IF EXISTS `poppit_games`;
 DROP TABLE IF EXISTS `poppit_company_invoices`;
 DROP TABLE IF EXISTS `poppit_company_subscriptions`;
-DROP TABLE IF EXISTS `poppit_company_games`;
 DROP TABLE IF EXISTS `poppit_company_users`;
 DROP TABLE IF EXISTS `poppit_company_campaigns`;
 DROP TABLE IF EXISTS `poppit_company_locations`;
@@ -139,16 +138,6 @@ CREATE TABLE `poppit_games` (
 )  ENGINE=INNODB;
 
 -- need relational tables for categories of games...or tags
-
--- poppit_company_games
-CREATE TABLE `poppit_company_games` (
-    `id` BIGINT AUTO_INCREMENT,
-    `company_id` BIGINT NOT NULL,
-    `game_id` BIGINT NOT NULL,
-    -- FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
-    -- FOREIGN KEY (`game_id`) REFERENCES poppit_games (`id`),
-    PRIMARY KEY (`id`)
-)  ENGINE=INNODB;
 
 -- poppit_company_locations
 CREATE TABLE `poppit_company_locations` (
