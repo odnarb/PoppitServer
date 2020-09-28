@@ -95,7 +95,7 @@ var KTLoginGeneral = function() {
             form.ajaxSubmit({
                 url: '/user/login',
                 dataType : 'json', // data type
-                data : form.serialize()
+                data : form.serialize(),
                 success: function(response, status, xhr, $form) {
                     btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
                     showErrorMsg(form, 'danger', 'Incorrect username or password. Please try again.');
