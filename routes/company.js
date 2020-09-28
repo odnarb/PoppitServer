@@ -49,9 +49,6 @@ module.exports = (globals) => {
                 return res.sendError();
             }
 
-            let gres = (global.logger == undefined )? true : false;
-            globals.logger.info( "GET /company/:id :: globals? ", gres );
-
             globals.logger.info(`GET /company/:id :: company.id: ${req.params.id}`, company);
 
             return res.render('pages/company',{
@@ -62,9 +59,25 @@ module.exports = (globals) => {
             });
         });
     })
-    .put('/:id', (req, res) => {
-        globals.logger.info( "PUT /company/:id " );
-        return res.json({ success: true });
+    .put('/:id', (req, res, next) => {
+        let Company = new CompanyModel( globals );
+
+        let routeHeader = "PUT /company/:id ";
+        globals.logger.info( routeHeader  + " :: BEGIN" );
+
+        let updateParams = { id: parseInt(req.params.id), company: req.body };
+
+        globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
+
+        Company.update(updateParams, (err, company) => {
+            if(err){
+                res.status(500);
+                return next(err);
+            }
+
+            globals.logger.info( routeHeader  + " :: END" );
+            return res.json({ success: true });
+        });
     })
     .delete('/:id', (req, res) => {
         globals.logger.info( "DELETE /company/:id " );
