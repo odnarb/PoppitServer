@@ -2,6 +2,8 @@
     DBAL for PoppitCompanies
 */
 
+const VALID_COLS = ["name","description","address","city","state","zip"];
+
 class Company {
     constructor(globals) {
         this.globals = globals;
@@ -53,12 +55,7 @@ class Company {
     };
 
     create(vals, cb){
-        let cols = ["name","description","first_name","last_name","email_address","password_hash","address","city","state","zip","updated_at","created_at"];
-
-        vals.updated_at = "NOW()";
-        vals.created_at = "NOW()";
-
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ error_type: "system", "error": "invalid_cols" });
         } else {
             let sqlStr = "insert into poppit_companies SET " + this.dbescape(vals)+ ";";
@@ -75,16 +72,12 @@ class Company {
     }
 
     update(vals, cb){
-
-        //we need to filter the cols we're really using
-        let cols = ["name","description","address","city","state","zip"];
-
         //only update what's been given to us
         let valCols = Object.keys(vals);
 
         //need more resilience: send back which columns are invalid?
 
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ error_type: "system", "error": "invalid_cols" });
         } else {
             vals.updated_at = "NOW()";

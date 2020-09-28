@@ -2,6 +2,8 @@
     DBAL for PoppitUsers
 */
 
+const VALID_COLS = ["first_name","last_name","email_address","password_hash"];
+
 class User {
     constructor(globals) {
         this.globals = globals;
@@ -64,12 +66,7 @@ class User {
     }
 
     create(vals, cb){
-        let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
-
-        vals.updated_at = "NOW()";
-        vals.created_at = "NOW()";
-
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
             let sqlStr = "insert into poppit_users SET " + this.dbescape(vals)+ ";";
@@ -86,13 +83,10 @@ class User {
     }
 
     update(vals, cb){
-
-        let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
-
         //only update what's been given to us
         let valCols = Object.keys(vals);
 
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
             let sqlStr = "update poppit_users SET " + this.dbescape(vals)+ ";";
