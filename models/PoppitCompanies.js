@@ -27,7 +27,7 @@ class Company {
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 this.globals.logger.debug( "Companies.find() result?: ", result[0]);
                 cb(null,result[0]);
@@ -37,19 +37,19 @@ class Company {
 
     findOne(opts,cb){
         if( !opts.id ){
-            return cb("ERROR: id must be passed in");
+            cb({ error_type: "system", error: "id must be passed in" });
+        } else {
+            let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + this.dbescape(opts.id) + ";";
+
+            this.execSQL(this.db, sqlStr, (error, result) => {
+                if (error) {
+                    cb({ error_type: "system", error: error });
+                } else {
+                    this.globals.logger.debug("Company.find() result?: ", result[0]);
+                    cb(null,result[0]);
+                }
+            });
         }
-
-        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + this.dbescape(opts.id) + ";";
-
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                cb(error);
-            } else {
-                this.globals.logger.debug("Company.find() result?: ", result[0]);
-                cb(null,result[0]);
-            }
-        });
     };
 
     create(vals, cb){
@@ -59,13 +59,13 @@ class Company {
         vals.created_at = "NOW()";
 
         if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
-            cb({ "error": "invalid_data" });
+            cb({ error_type: "system", "error": "invalid_cols" });
         } else {
             let sqlStr = "insert into poppit_companies SET " + this.dbescape(vals)+ ";";
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("Company.create() result?: ", result);
                     cb(null,result);
@@ -82,15 +82,17 @@ class Company {
         //only update what's been given to us
         let valCols = Object.keys(vals);
 
+        //need more resilience: send back which columns are invalid?
+
         if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
-            cb({ "error": "invalid_data" });
+            cb({ error_type: "system", "error": "invalid_cols" });
         } else {
             vals.updated_at = "NOW()";
             let sqlStr = "update poppit_companies SET " + this.dbescape(vals)+ ";";
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("Company.update() result?: ", result);
                     cb(null,result);
@@ -103,7 +105,7 @@ class Company {
         let sqlStr = 'delete from poppit_companies where id=' + this.dbescape(id);
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 this.globals.logger.debug("Company.delete() result?: ", result);
                 cb(null, result);

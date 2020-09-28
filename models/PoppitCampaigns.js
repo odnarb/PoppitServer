@@ -27,7 +27,7 @@ class Campaign {
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 this.globals.logger.debug("PoppitCampaigns.find() result?: ", result[0]);
                 cb(null,result[0]);
@@ -37,19 +37,18 @@ class Campaign {
 
     findOne(opts,cb){
         if( !opts.id ){
-            cb("ERROR: id must be passed in");
+            cb({ error_type: "system", error: "id must be passed in" });
+        } else {
+            let sqlStr = "select `company_id`,`name`,`description`,`data`,`date_start`,`date_end`,`active`,`updated_at`,`created_at` from poppit_company_campaigns where id=" + this.dbescape(opts.id) + " limit 1;";
+            this.execSQL(this.db, sqlStr, (error, result) => {
+                if (error) {
+                    cb({ error_type: "system", error: error });
+                } else {
+                    this.globals.logger.debug("PoppitCampaigns.findOne() result?: ", result[0]);
+                    cb(null,result[0]);
+                }
+            });
         }
-
-        let sqlStr = "select `company_id`,`name`,`description`,`data`,`date_start`,`date_end`,`active`,`updated_at`,`created_at` from poppit_company_campaigns where id=" + this.dbescape(opts.id) + " limit 1;";
-
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                cb(error);
-            } else {
-                this.globals.logger.debug("PoppitCampaigns.findOne() result?: ", result[0]);
-                cb(null,result[0]);
-            }
-        });
     };
 
     create(vals, cb){
@@ -62,10 +61,9 @@ class Campaign {
             cb({ "error": "invalid_data" });
         } else {
             let sqlStr = "insert into poppit_company_campaigns SET " +this.dbescape(vals)+ ";";
-
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("PoppitCampaigns.create() result?: ", result);
                     cb(null,result);
@@ -90,7 +88,7 @@ class Campaign {
 
             this.execSQL(sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("PoppitCampaigns.create() result?: ", result);
                     cb(null,result);
@@ -103,7 +101,7 @@ class Campaign {
         let sqlStr = 'delete from poppit_company_campaigns where id=' + id;
         execSQL(sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 cb(null, result);
             }
