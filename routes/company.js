@@ -5,57 +5,40 @@ let router = express.Router();
 
 let CompanyModel = require('../models/PoppitCompanies');
 
-// router.get('/', function(req, res) {
-//     let Company = new CompanyModel( req.app.get('db') );
-
-//     //get companies
-//     Company.find({id: 1}, (err, company) => {
-//         if(err){
-//             console.log("fetch error: ", err)
-//             return res.sendError();
-//         }
-//         return res.render('pages/company',{
-//             data: {
-//                 pageTitle: process.env.APP_NAME + ' | Company ID: ' + req.params.id,
-//                 company: company
-//             }
-//         });
-//     });
-// });
-
-// // /company/123
-// router.get('/:id', (req, res) => {
-//     return res.render('pages/company',{
-//         data: {
-//             pageTitle: process.env.APP_NAME + ' | Company ID: ' + req.params.id
-//         }
-//     });
-// });
-
 module.exports = (globals) => {
     company: return router
     // /company (get all companies)
     .get('/', (req, res) => {
-        let Company = new CompanyModel( globals );
+        if( req.xhr == true ){
+            let Company = new CompanyModel( globals );
 
-        //get companies
-        Company.find({}, (err, companies) => {
-            if(err){
-                globals.logger.error("fetch error: ", err);
-                return res.sendError();
-            }
+            //get companies
+            Company.find({}, (err, companies) => {
+                if(err){
+                    globals.logger.error("fetch error: ", err);
+                    return res.sendError();
+                }
 
-            globals.logger.info("GET /company :: company list: ", companies);
+                globals.logger.info("GET /company :: company list: ", companies);
+
+                return res.json({ companies: companies });
+            });
+        } else {
+            globals.logger.info("GET /company :: main page ");
 
             return res.render('pages/company',{
                 data: {
-                    pageTitle: process.env.APP_NAME + ' | Search Companies',
-                    companies: companies
+                    pageTitle: process.env.APP_NAME + ' | Search Companies'
                 }
             });
-        });
+        }
     })
-    // company/:id
+    //create company
+    .post('/', (req, res) => {
+        globals.logger.info( "POST /company " );
+        return res.json({ success: true });
+    })
+    // company/:id operations
     .get('/:id', (req, res) => {
         let Company = new CompanyModel( globals );
 
@@ -78,5 +61,13 @@ module.exports = (globals) => {
                 }
             });
         });
+    })
+    .put('/:id', (req, res) => {
+        globals.logger.info( "PUT /company/:id " );
+        return res.json({ success: true });
+    })
+    .delete('/:id', (req, res) => {
+        globals.logger.info( "DELETE /company/:id " );
+        return res.json({ success: true });
     })
 };
