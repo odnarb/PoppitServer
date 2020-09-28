@@ -77,7 +77,7 @@ class Company {
     update(vals, cb){
 
         //we need to filter the cols we're really using
-        let cols = ["name","description","first_name","last_name","email_address","password_hash","address","city","state","zip"];
+        let cols = ["name","description","address","city","state","zip"];
 
         //only update what's been given to us
         let valCols = Object.keys(vals);
