@@ -12,17 +12,18 @@ module.exports = (globals) => {
         if( req.xhr == true ){
             let Company = new CompanyModel( globals );
 
+            globals.logger.info("GET /company :: filtered company list");
+
             //later filter or sort on the # of locations
             //later filter or sort on the # of compaigns
 
             //get companies
-            Company.find(req.body, (err, companies) => {
+            Company.find(req.query, (err, companies) => {
                 if(err){
                     res.status(500);
                     return next(err);
                 }
 
-                globals.logger.info("GET /company :: company list: ", companies);
                 return res.json({ companies: companies });
             });
         } else {

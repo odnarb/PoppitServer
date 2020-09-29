@@ -30,6 +30,8 @@ class Company {
             opts.offset = 0;
         }
 
+        this.globals.logger.debug( "Companies.find() opts: ", opts);
+
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
         if( Object.keys(opts.where).length > 0 ) {
@@ -45,30 +47,33 @@ class Company {
         } else {
             //json to  col -> val
             let whereStr = "";
+            let whereCount = 0;
             Object.keys( opts.where ).map( (col) => {
-                whereStr += `${col}=${this.dbescape(opts.where[col])},`;
+                whereCount++;
+                if( whereCount > 1 ) whereStr += " AND ";
+                whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
-            //remove the last comma
-            whereStr = whereStr.slice(0,-1);
 
-            let sqlStr = "select name,description,address,city,state,zip,created_at,updated_at from poppit_companies";
+            // whereStr = whereStr.slice(0,-1);
+
+            let sqlStr = "SELECT name,description,address,city,state,zip,created_at,updated_at FROM poppit_companies";
 
             if( whereStr !== "" ) {
-                sqlStr += ` where ${whereStr}`
+                sqlStr += ` WHERE ${whereStr}`
             }
 
             let limit = parseInt(opts.limit);
             if( limit <= 100 && limit > 0 ){
-                sqlStr += " limit " + this.dbescape(limit);
+                sqlStr += " LIMIT " + this.dbescape(limit);
             } else {
-                sqlStr += " limit 10";
+                sqlStr += " LIMIT 10";
             }
 
             let offset = parseInt(opts.offset);
             if( offset > 0 && offset < 10000000000 ){
-                sqlStr += " offset " + this.dbescape(offset) + ";";
+                sqlStr += " OFFSET " + this.dbescape(offset) + ";";
             } else {
-                sqlStr += " offset 0;";
+                sqlStr += " OFFSET 0;";
             }
 
             this.globals.logger.debug( "Companies.find() sqlStr: ", sqlStr);
