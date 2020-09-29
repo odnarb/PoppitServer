@@ -3,6 +3,7 @@
 */
 
 const VALID_COLS = ["name","description","address","city","state","zip"];
+const VALID_FILTER_COLS = ["name","address","city","state","zip"];
 
 class Company {
     constructor(globals) {
@@ -13,29 +14,77 @@ class Company {
     }
 
     find(opts,cb){
-        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies";
+        //allow filter on name, address, city, state, zip
+        // let filters = ["name", "address", "city", "state", "zip"];
 
-        if( opts && opts.limit && opts.limit <= 100 && opts.limit > 0 ){
-            sqlStr += " limit " + this.dbescape(opts.limit);
-        } else {
-            sqlStr += " limit 10";
+        if (opts == undefined || !opts) {
+            opts = {};
+        }
+        if (opts.where == undefined) {
+            opts.where = {};
+        }
+        if (opts.limit == undefined) {
+            opts.limit = 10;
+        }
+        if (opts.offset == undefined) {
+            opts.offset = 0;
         }
 
-        if( opts && opts.offset && opts.offset > 0 && opts.offset < 10000000000 ){
-            sqlStr += " offset " + this.dbescape(opts.offset) + ";";
-        } else {
-            sqlStr += " offset 0;";
+        //need more resilience: send back which columns are invalid?
+        let colErrors = [];
+        if( Object.keys(opts.where).length > 0 ) {
+            Object.keys(opts.where).filter(el => {
+                if( VALID_FILTER_COLS.indexOf(el) < 0 ){
+                    colErrors.push({ "invalid_col": el });
+                }
+            });
         }
 
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                this.globals.logger.error("Company.find() :: ERROR : ", error);
-                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
-            } else {
-                this.globals.logger.debug( "Companies.find() result?: ", result[0]);
-                cb(null,result[0]);
+        if( colErrors.length > 0 ){
+            cb({ error_type: "system", "error": colErrors });
+        } else {
+            //json to  col -> val
+            let whereStr = "";
+            Object.keys( opts.where ).map( (col) => {
+                whereStr += `${col}=${this.dbescape(opts.where[col])},`;
+            });
+            //remove the last comma
+            whereStr = whereStr.slice(0,-1);
+
+            let sqlStr = "select name,description,address,city,state,zip,created_at,updated_at from poppit_companies";
+
+            if( whereStr !== "" ) {
+                sqlStr += ` where ${whereStr}`
             }
-        });
+
+            let limit = parseInt(opts.limit);
+            if( limit <= 100 && limit > 0 ){
+                sqlStr += " limit " + this.dbescape(limit);
+            } else {
+                sqlStr += " limit 10";
+            }
+
+            let offset = parseInt(opts.offset);
+            if( offset > 0 && offset < 10000000000 ){
+                sqlStr += " offset " + this.dbescape(offset) + ";";
+            } else {
+                sqlStr += " offset 0;";
+            }
+
+            this.globals.logger.debug( "Companies.find() sqlStr: ", sqlStr);
+
+            cb(null,true);
+
+            // this.execSQL(this.db, sqlStr, (error, result) => {
+            //     if (error) {
+            //         this.globals.logger.error("Company.find() :: ERROR : ", error);
+            //         cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+            //     } else {
+            //         this.globals.logger.debug( "Companies.find() result?: ", result[0]);
+            //         cb(null,result[0]);
+            //     }
+            // });
+        }
     };
 
     findOne(opts,cb){
@@ -56,19 +105,41 @@ class Company {
         }
     };
 
-    create(vals, cb){
-        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
-            cb({ error_type: "system", "error": "invalid_cols" });
+    create(company, cb){
+        //need more resilience: send back which columns are invalid?
+        let colErrors = [];
+        Object.keys(company).filter(el => {
+            if( VALID_COLS.indexOf(el) < 0 ){
+                colErrors.push({ "invalid_col": el });
+            }
+        });
+
+        if( colErrors.length > 0 ){
+            cb({ error_type: "system", "error": colErrors });
         } else {
-            let sqlStr = "insert into poppit_companies SET " + this.dbescape(vals)+ ";";
+            //json to  col -> val
+            let colsStr = VALID_COLS.join(',');
+            let valsStr = "";
+
+            Object.keys( company ).map( (col) => {
+                valsStr += `${this.dbescape(company[col])},`;
+            });
+
+            //remove the last comma
+            valsStr = valsStr.slice(0,-1);
+
+            let sqlStr = `INSERT INTO poppit_companies (${colsStr}) `;
+            sqlStr += `VALUES (${valsStr});`;
+
+            this.globals.logger.debug("Company.create() sqlStr: ", sqlStr);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
                     this.globals.logger.error("Company.create() :: ERROR : ", error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Company.create() result?: ", result);
-                    cb(null,result);
+                    this.globals.logger.debug("Company.create() result?: ", result.insertId);
+                    cb(null,result.insertId);
                 }
             });
         }
@@ -98,7 +169,7 @@ class Company {
             //remove the last comma
             updateStr = updateStr.slice(0,-1);
 
-            let sqlStr = `update poppit_companies SET ${updateStr} `;
+            let sqlStr = `UPDATE poppit_companies SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
             this.globals.logger.debug("Company.update() sqlStr: ", sqlStr);
@@ -116,7 +187,10 @@ class Company {
     }
 
     delete(id, cb){
-        let sqlStr = 'delete from poppit_companies where id=' + this.dbescape(id);
+        let sqlStr = 'DELETE FROM poppit_companies WHERE id=' + this.dbescape(id);
+
+        this.globals.logger.debug("Company.delete() sqlStr: ", sqlStr);
+
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
                 this.globals.logger.error("Company.delete() :: ERROR : ", error);
