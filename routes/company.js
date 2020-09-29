@@ -6,7 +6,7 @@ let router = express.Router();
 let CompanyModel = require('../models/PoppitCompanies');
 
 module.exports = (globals) => {
-    company: return router
+    return router
     // /company (get all companies)
     .get('/', (req, res, next) => {
         if( req.xhr == true ){
@@ -110,5 +110,5 @@ module.exports = (globals) => {
             globals.logger.info( routeHeader  + " :: END" );
             return res.json({ success: true });
         });
-    })
+    });
 };

@@ -59,7 +59,7 @@ class Company {
             let sqlStr = "SELECT name,description,address,city,state,zip,created_at,updated_at FROM poppit_companies";
 
             if( whereStr !== "" ) {
-                sqlStr += ` WHERE ${whereStr}`
+                sqlStr += ` WHERE ${whereStr}`;
             }
 
             let limit = parseInt(opts.limit);
@@ -90,7 +90,7 @@ class Company {
             //     }
             // });
         }
-    };
+    }
 
     findOne(opts,cb){
         if( !opts.id ){
@@ -108,7 +108,7 @@ class Company {
                 }
             });
         }
-    };
+    }
 
     create(company, cb){
         //need more resilience: send back which columns are invalid?

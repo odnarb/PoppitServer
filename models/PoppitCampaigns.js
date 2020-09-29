@@ -51,7 +51,7 @@ class Campaign {
                 }
             });
         }
-    };
+    }
 
     create(vals, cb){
         if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
@@ -100,6 +100,6 @@ class Campaign {
             }
         });
     }
-};
+}
 
 module.exports = Campaign;

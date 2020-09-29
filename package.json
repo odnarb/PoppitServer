@@ -24,7 +24,7 @@
     "jshint": "latest"
   },
   "scripts": {
-    "lint": "jshint **.js"
+    "lint": "jshint **.js models/*.js routes/*.js policies/*.js lib/*.js"
   },
   "author": "Brandon Chambers",
   "license": "Copyright 2020 Brandon Chambers - All rights reserved."

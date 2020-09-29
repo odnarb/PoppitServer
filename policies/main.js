@@ -1,5 +1,5 @@
 module.exports = (globals) => {
-    main: return (req, res, next) => {
+    return (req, res, next) => {
         // const allowedMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS'];
 
         // // globals.logger.info("main policy :: METHOD: ", req.method);
@@ -23,5 +23,5 @@ module.exports = (globals) => {
         //     return res.redirect('/');
         // }
         next();
-    }
+    };
 };
