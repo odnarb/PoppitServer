@@ -208,10 +208,6 @@ INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_h
 INSERT INTO `poppit_companies` (
     `name`,
     `description`,
-    `first_name`,
-    `last_name`,
-    `email_address`,
-    `password_hash`,
     `address`,
     `city`,
     `state`,
@@ -219,12 +215,54 @@ INSERT INTO `poppit_companies` (
 ) VALUES (
     'ACME 123',
     'first company ever!',
-    'John',
-    'Smith',
-    'test@gmail.com',
-    '$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',
     '123 Nowhere Dr.',
     'Tucson',
     'AZ',
     '85737'
+);
+INSERT INTO `poppit_companies` (
+    `name`,
+    `description`,
+    `address`,
+    `city`,
+    `state`,
+    `zip`
+) VALUES (
+    'ACME 321',
+    'second company ever!',
+    '321 Nowhere Dr.',
+    'Phoenix',
+    'AZ',
+    '12345'
+);
+
+INSERT INTO `poppit_companies` (
+    `name`,
+    `description`,
+    `address`,
+    `city`,
+    `state`,
+    `zip`
+) VALUES (
+    '7 Eleven',
+    'home of the slurpee',
+    '321 Nowhere Dr.',
+    'Phoenix',
+    'AZ',
+    '12345'
+);
+INSERT INTO `poppit_companies` (
+    `name`,
+    `description`,
+    `address`,
+    `city`,
+    `state`,
+    `zip`
+) VALUES (
+    'QuikTrip',
+    'gas and food',
+    '321 Nowhere Dr.',
+    'Phoenix',
+    'AZ',
+    '12345'
 );
