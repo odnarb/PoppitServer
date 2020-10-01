@@ -15,12 +15,10 @@ class Company {
     }
 
     find(opts,cb){
-        //allow filter on name, address, city, state, zip
-        // let filters = ["name", "address", "city", "state", "zip"];
 
-console.log("Companies.find() :: opts BEFORE: ", opts);
+        this.globals.logger.debug(`Companies.find() :: BEFORE opts initialized: `, opts);
 
-        if (opts == undefined || !opts) {
+        if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
                 order: {
                     by: CREATED_AT_COL,
@@ -31,6 +29,8 @@ console.log("Companies.find() :: opts BEFORE: ", opts);
                 where: {}
             };
         }
+
+        this.globals.logger.debug(`Companies.find() :: AFTER opts initialized: `, opts);
 
         //need to initialize filter out opts.order.by
 
@@ -59,9 +59,7 @@ console.log("Companies.find() :: opts BEFORE: ", opts);
             opts.offset = parseInt(opts.offset);
         }
 
-console.log("Companies.find() :: opts AFTER: ", opts);
-
-        this.globals.logger.debug( "Companies.find() opts: ", opts);
+        this.globals.logger.debug(`Companies.find() :: AFTER opts validation: `, opts);
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -73,8 +71,10 @@ console.log("Companies.find() :: opts AFTER: ", opts);
             });
         }
 
+        this.globals.logger.debug(`Companies.find() :: colErrors: `, colErrors);
+
         if( colErrors.length > 0 ){
-            cb({ error_type: "system", "error": colErrors });
+            cb({ error_type: "user", "error": colErrors });
         } else {
             //json to  col -> val
             let whereStr = "";
@@ -95,7 +95,7 @@ console.log("Companies.find() :: opts AFTER: ", opts);
             sqlStr += ` LIMIT ${opts.limit}`;
             sqlStr += ` OFFSET ${opts.offset};`;
 
-            this.globals.logger.debug( "Companies.find() sqlStr: ", sqlStr);
+            this.globals.logger.debug( `Companies.find() sqlStr: ${sqlStr}` );
 
             cb(null,true);
 
@@ -113,9 +113,9 @@ console.log("Companies.find() :: opts AFTER: ", opts);
 
     findOne(opts,cb){
         if( !opts.id ){
-            cb({ error_type: "system", error: "id must be passed in" });
+            cb({ error_type: "user", error: "id must be passed in" });
         } else {
-            let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where id=" + this.dbescape(opts.id) + ";";
+            let sqlStr = "select name,description,address,city,state,zip,created_at,updated_at from poppit_companies where id=" + this.dbescape(opts.id) + ";";
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
@@ -139,7 +139,7 @@ console.log("Companies.find() :: opts AFTER: ", opts);
         });
 
         if( colErrors.length > 0 ){
-            cb({ error_type: "system", "error": colErrors });
+            cb({ error_type: "user", "error": colErrors });
         } else {
             //json to  col -> val
             let colsStr = VALID_COLS.join(',');
@@ -181,7 +181,7 @@ console.log("Companies.find() :: opts AFTER: ", opts);
         });
 
         if( colErrors.length > 0 ){
-            cb({ error_type: "system", "error": colErrors });
+            cb({ error_type: "user", "error": colErrors });
         } else {
             company.updated_at = new Date();
 
