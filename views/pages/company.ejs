@@ -1,1 +1,13 @@
-company.ejs
+typeof: <%- typeof companies %>
+
+<% if(typeof companies !== 'undefined') { %>
+    <% companies.forEach( (company) => { %>
+        name: <%= company.name %>
+        description: <%= company.description %>
+        address: <%= company.address %>
+        city: <%= company.city %>
+        state: <%= company.state %>
+        zip: <%= company.zip %>
+
+    <% }) %>
+<% } %>

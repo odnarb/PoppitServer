@@ -97,17 +97,15 @@ class Company {
 
             this.globals.logger.debug( `Companies.find() sqlStr: ${sqlStr}` );
 
-            cb(null,true);
-
-            // this.execSQL(this.db, sqlStr, (error, result) => {
-            //     if (error) {
-            //         this.globals.logger.error("Company.find() :: ERROR : ", error);
-            //         cb({ error_type: "system", error: "A system error has occurred, please contact support" });
-            //     } else {
-            //         this.globals.logger.debug( "Companies.find() result?: ", result[0]);
-            //         cb(null,result[0]);
-            //     }
-            // });
+            this.execSQL(this.db, sqlStr, (error, result) => {
+                if (error) {
+                    this.globals.logger.error("Company.find() :: ERROR : ", error);
+                    cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+                } else {
+                    this.globals.logger.debug( "Companies.find() result?: ", result);
+                    cb(null,result);
+                }
+            });
         }
     }
 

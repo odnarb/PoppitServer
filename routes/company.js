@@ -43,11 +43,27 @@ module.exports = (globals) => {
         } else {
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
-                globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/company',{
-                    data: {
-                        pageTitle: process.env.APP_NAME + ' | Search Companies'
+
+                //send empty obj to get top 10
+                Company.find({}, (err, companies) => {
+                    globals.logger.debug( `${routeHeader} :: DB CB: `, err);
+
+                    if(err && err.error_type === "system"){
+                        globals.logger.debug( `${routeHeader} :: DB ERROR: `, err);
+                        res.status(500);
+                        return next(err);
+                    } else if( err && err.error_type === "user"){
+                        globals.logger.debug( `${routeHeader} :: User DB ERROR: `, err);
+                        res.status(400);
+                        return next(err);
                     }
+                    globals.logger.debug( `${routeHeader} :: companies: `, companies);
+
+                    globals.logger.debug( `${routeHeader} :: DONE`);
+                    return res.render('pages/company',{
+                        pageTitle: `${process.env.APP_NAME} | Search Companies`,
+                        companies: companies
+                    });
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
