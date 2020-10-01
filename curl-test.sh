@@ -7,7 +7,8 @@ curl -w "\n" -I http://localhost:7777/company
 # GET /company (xhr)
 curl -w "\n" -H "X-Requested-With: XMLHttpRequest" http://localhost:7777/company
 
-curl -w "\n" -H "X-Requested-With: XMLHttpRequest" http://localhost:7777/company --data-urlencode "limit=50&offset=40"
+# GET /company (xhr) with filtering
+curl -w "\n" -X GET -H "X-Requested-With: XMLHttpRequest" "http://localhost:7777/company?limit=50&offset=40&where[name]=acme&order[by]=name&order[direction]=desc"
 
 # GET /company/:id route for getting a company
 curl curl -w "\n" -H "X-Requested-With: XMLHttpRequest" -H "Content-Type: application/json" http://localhost:7777/company/1

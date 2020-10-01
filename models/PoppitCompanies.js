@@ -4,6 +4,7 @@
 
 const VALID_COLS = ["name","description","address","city","state","zip"];
 const VALID_FILTER_COLS = ["name","address","city","state","zip"];
+const CREATED_AT_COL = "created_at";
 
 class Company {
     constructor(globals) {
@@ -17,18 +18,48 @@ class Company {
         //allow filter on name, address, city, state, zip
         // let filters = ["name", "address", "city", "state", "zip"];
 
+console.log("Companies.find() :: opts BEFORE: ", opts);
+
         if (opts == undefined || !opts) {
-            opts = {};
+            opts = {
+                order: {
+                    by: CREATED_AT_COL,
+                    direction: "DESC"
+                },
+                limit: 10,
+                offset: 0,
+                where: {}
+            };
         }
-        if (opts.where == undefined) {
-            opts.where = {};
+
+        //need to initialize filter out opts.order.by
+
+        if( opts.order.direction == undefined ){
+            opts.order.direction = "DESC";
         }
-        if (opts.limit == undefined) {
-            opts.limit = 10;
+        if (opts.order.direction.toUpperCase() === "DESC") {
+            opts.order.direction = "DESC";
+        } else {
+            opts.order.direction = "ASC";
         }
-        if (opts.offset == undefined) {
+
+        if ( parseInt(opts.limit) > 100 ) {
+            opts.limit = 100;
+        } else if ( parseInt(opts.limit) < 0 ) {
+            opts.limit = 0;
+        } else {
+            opts.limit = parseInt(opts.limit);
+        }
+
+        if( parseInt(opts.offset) > Number.MAX_SAFE_INTEGER ) {
+            opts.offset = 100;
+        } else if ( parseInt(opts.offset) < 0 ) {
             opts.offset = 0;
+        } else {
+            opts.offset = parseInt(opts.offset);
         }
+
+console.log("Companies.find() :: opts AFTER: ", opts);
 
         this.globals.logger.debug( "Companies.find() opts: ", opts);
 
@@ -54,27 +85,15 @@ class Company {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            // whereStr = whereStr.slice(0,-1);
-
             let sqlStr = "SELECT name,description,address,city,state,zip,created_at,updated_at FROM poppit_companies";
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
             }
 
-            let limit = parseInt(opts.limit);
-            if( limit <= 100 && limit > 0 ){
-                sqlStr += " LIMIT " + this.dbescape(limit);
-            } else {
-                sqlStr += " LIMIT 10";
-            }
-
-            let offset = parseInt(opts.offset);
-            if( offset > 0 && offset < 10000000000 ){
-                sqlStr += " OFFSET " + this.dbescape(offset) + ";";
-            } else {
-                sqlStr += " OFFSET 0;";
-            }
+            sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
+            sqlStr += ` LIMIT ${opts.limit}`;
+            sqlStr += ` OFFSET ${opts.offset};`;
 
             this.globals.logger.debug( "Companies.find() sqlStr: ", sqlStr);
 
