@@ -20,6 +20,11 @@ var KTDatatablesExtensionsKeytable = function() {
             //tell datatables that our structure is in obj.companies
             dataSrc: '',
 
+            //give the row an id, for filling modals later
+            rowId: function(row) {
+                  return `company-${row.id}`;
+            },
+
             //define the columns
             columns: [
                 { "data": "id" },
@@ -65,7 +70,21 @@ var KTDatatablesExtensionsKeytable = function() {
                 e.preventDefault();
                 console.log("SHOW MODAL FOR COMPANY :: event: ", e)
 
-                console.log( `view company id?: ${$(event.currentTarget).data('company-id')}` );
+                // let company_id = $(event.currentTarget).parent('tr').data('row-id');
+
+                let company_id = $(event.currentTarget).data('company-id');
+                let company_row_id = `company-${company_id}`;
+                let tableRow = table.row(company_row_id);
+                let row_data = table.row(company_row_id).data();
+                console.log( `edit company_id?: ${company_id}` );
+                console.log( `edit company_row_id?: ${company_row_id}` );
+
+                console.log( "tableRow? : ", tableRow.id() );
+
+                console.log( "row data? : ", row_data );
+                //{$(event.currentTarget).data('company-id')}
+
+                // $('#kt_company_modal .company-header').html( `${} (Company ID: ${})`);
 
                 $('#kt_company_modal').modal('show');
             });
@@ -82,7 +101,7 @@ var KTDatatablesExtensionsKeytable = function() {
 
                 console.log( `edit company id?: ${$(event.currentTarget).data('company-id')}` );
 
-                $('#kt_edit_company_modal').modal('show');
+                $('#kt_company_add-edit_modal').modal('show');
             });
         });
     };

@@ -103,29 +103,114 @@
                             </div>
                         </div>
 
-                            <div id="kt_company_modal" class="modal fade" role="dialog" aria-hidden="true">
-                                <div class="modal-dialog modal-l modal-dialog-centered" role="document">
-                                    <div class="modal-content" style="min-height: 590px;">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">
-                                                Company ID: 10 | Acme 123
-                                            </h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            This is the modal body.. replace content as needed...
-                                        </div>
-                                        <!-- <div class="modal-body modal-body-fit"></div> -->
-                                        <div class="modal-footer kt-hidden">
-                                            <button type="button" class="btn btn-clean btn-bold btn-upper btn-font-md" data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-default btn-bold btn-upper btn-font-md">Submit</button>
-                                        </div>
+                        <div id="kt_company_modal" class="modal fade" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-l modal-dialog-centered" role="document">
+                                <div class="modal-content" style="min-height: 590px;">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            Company ID: <span class="company-id"></span> | <span class="company-name"></span>
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        This is the modal body.. replace content as needed...
+                                    </div>
+                                    <!-- <div class="modal-body modal-body-fit"></div> -->
+                                    <div class="modal-footer kt-hidden">
+                                        <button type="button" class="btn btn-clean btn-bold btn-upper btn-font-md" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-default btn-bold btn-upper btn-font-md">Submit</button>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
+
+                        <div id="kt_company_add-edit_modal" class="modal fade" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-l modal-dialog-centered" role="document">
+                                <div class="modal-content" style="min-height: 590px;">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            Company ID: 10 | Acme 123
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+
+
+                                        <form class="kt-form kt-form--label-right" _lpchecked="1">
+                                            <div class="kt-portlet__body">
+                                                <div class="form-group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">Company Name</label>
+                                                    <div class="col-10">
+                                                        <input class="form-control" type="text" value="Acme 123" id="example-text-input">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">Company Description</label>
+                                                    <div class="col-10">
+                                                        <input class="form-control" type="text" value="this is a sample company" id="example-text-input">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">Corporate Address</label>
+                                                    <div class="col-10">
+                                                        <input class="form-control" type="text" value="123 Nowhere Dr." id="example-text-input">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">City</label>
+                                                    <div class="col-10">
+                                                        <input class="form-control" type="text" value="Phoenix" id="example-text-input">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">State</label>
+                                                    <div class="col-10">
+                                                        <input class="form-control" type="text" value="AZ" id="example-text-input">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="example-text-input" class="col-2 col-form-label">Zip</label>
+                                                    <div class="col-10">
+                                                        <input class="form-control" type="text" value="99999" id="example-text-input">
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="kt-portlet__foot">
+                                                <div class="kt-form__actions">
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                        </div>
+                                                        <div class="col-10">
+                                                            <button type="reset" class="btn btn-success">Submit</button>
+                                                            <button type="reset" class="btn btn-secondary">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+
+
+
+                                    </div>
+                                    <!-- <div class="modal-body modal-body-fit"></div> -->
+                                    <div class="modal-footer kt-hidden">
+                                        <button type="button" class="btn btn-clean btn-bold btn-upper btn-font-md" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-default btn-bold btn-upper btn-font-md">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <!-- end:: Content -->
 <link href="assets/vendors/custom/datatables/datatables.bundle.min.css" rel="stylesheet" type="text/css" />
 
