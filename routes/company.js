@@ -28,7 +28,7 @@ module.exports = (globals) => {
 
                 let params = req.query;
 
-                //remove timestamp param
+                //remove timestamp param for datatables
                 if( params._ !== undefined ) delete params._;
 
                 //get companies

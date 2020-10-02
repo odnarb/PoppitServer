@@ -4,11 +4,33 @@ var KTDatatablesExtensionsKeytable = function() {
     var initCompanyTable = function() {
         // begin first table
         var table = $('#kt_table_1').DataTable({
+            processing: true,
             responsive: true,
             select: true,
+            deferRender: true,
             pagingType: 'full_numbers',
             order: [[ 7, "desc" ]],
+
+            //reques uri
             ajax: "/company",
+
+            //tell datatables that our structure is in obj.companies
+            dataSrc: '',
+
+            //define the columns
+            columns: [
+                { "data": "id" },
+                { "data": "name" },
+                { "data": "description" },
+                { "data": "address" },
+                { "data": "city" },
+                { "data": "state" },
+                { "data": "zip" },
+                { "data": "created_at" },
+                { "data": "updated_at" },
+                { "data": "actions" }
+            ],
+
             columnDefs: [
                 {
                     targets: -1,
@@ -30,7 +52,7 @@ var KTDatatablesExtensionsKeytable = function() {
                         </a>`;
                     },
                 }
-            ],
+            ]
         });
 
     };
