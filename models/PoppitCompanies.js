@@ -85,7 +85,7 @@ class Company {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let sqlStr = "SELECT name,description,address,city,state,zip,created_at,updated_at FROM poppit_companies";
+            let sqlStr = "SELECT id,name,description,address,city,state,zip,created_at,updated_at FROM poppit_companies";
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
