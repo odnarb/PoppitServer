@@ -14,11 +14,22 @@ module.exports = (globals) => {
 
         if( req.xhr == true ){
             routeHeader = "GET /company (XHR)";
+
+
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN :: filtered company list` );
 
+                globals.logger.debug( `${routeHeader} :: req.params: `, req.params );
+                globals.logger.debug( `${routeHeader} :: req.query: `, req.query );
+                globals.logger.debug( `${routeHeader} :: req.body: `, req.body );
+
                 //later filter or sort on the # of locations
                 //later filter or sort on the # of compaigns
+
+                let params = req.query;
+
+                //remove timestamp param
+                if( params._ !== undefined ) delete params._;
 
                 //get companies
                 Company.find(req.query, (err, companies) => {
@@ -34,7 +45,7 @@ module.exports = (globals) => {
                         return next(err);
                     }
                     globals.logger.debug( `${routeHeader} :: DONE`);
-                    return res.json({ companies: companies });
+                    return res.json({ aaData: companies });
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -44,26 +55,9 @@ module.exports = (globals) => {
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
-                //send empty obj to get top 10
-                Company.find({}, (err, companies) => {
-                    globals.logger.debug( `${routeHeader} :: DB CB: `, err);
-
-                    if(err && err.error_type === "system"){
-                        globals.logger.debug( `${routeHeader} :: DB ERROR: `, err);
-                        res.status(500);
-                        return next(err);
-                    } else if( err && err.error_type === "user"){
-                        globals.logger.debug( `${routeHeader} :: User DB ERROR: `, err);
-                        res.status(400);
-                        return next(err);
-                    }
-                    globals.logger.debug( `${routeHeader} :: companies: `, companies);
-
-                    globals.logger.debug( `${routeHeader} :: DONE`);
-                    return res.render('pages/company',{
-                        pageTitle: `${process.env.APP_NAME} | Search Companies`,
-                        companies: companies
-                    });
+                globals.logger.debug( `${routeHeader} :: DONE`);
+                return res.render('pages/company',{
+                    pageTitle: `${process.env.APP_NAME} | Search Companies`
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);

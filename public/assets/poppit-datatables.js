@@ -1,12 +1,14 @@
 "use strict";
 var KTDatatablesExtensionsKeytable = function() {
 
-    var initTable1 = function() {
+    var initCompanyTable = function() {
         // begin first table
         var table = $('#kt_table_1').DataTable({
             responsive: true,
             select: true,
             pagingType: 'full_numbers',
+            order: [[ 7, "desc" ]],
+            ajax: "/company",
             columnDefs: [
                 {
                     targets: -1,
@@ -37,7 +39,7 @@ var KTDatatablesExtensionsKeytable = function() {
 
         //main function to initiate the module
         init: function() {
-            initTable1();
+            initCompanyTable();
         },
 
     };
