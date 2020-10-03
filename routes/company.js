@@ -103,7 +103,7 @@ module.exports = (globals) => {
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
 
-            //get companies
+            //get company
             Company.findOne({ id: parseInt(req.params.id) }, (err, company) => {
                 if(err){
                     res.status(500);
