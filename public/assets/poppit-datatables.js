@@ -19,23 +19,21 @@ let KTDatatablesExtensionsKeytable = function() {
             $('.view-company').on('click', function(e) {
                 e.preventDefault();
 
-                console.log("SHOW MODAL FOR COMPANY");
-
+                //get company object
                 let company = getRowDataFromEvent(e);
-                $('#kt_view_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
 
+                //load company information into modal and show it
+                $('#kt_view_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
                 $('#kt_view_modal').modal('show');
             });
 
             $('.edit-company').on('click', function(e) {
                 e.preventDefault();
 
-                console.log("SHOW [EDIT] MODAL FOR COMPANY ");
-
-                let company_id = $(e.currentTarget).data('company-id');
-                console.log( `edit company id?: ${company_id}` );
-
+                //get company object
                 let company = getRowDataFromEvent(e);
+
+                //fill modal with content
                 $('#kt_object_add-edit_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
 
                 //fill form with content from company row
@@ -82,7 +80,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.cancel-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    console.log("close dialog and reset form");
+                    //close and reset form
                     $('#kt_object_add-edit_modal').modal('hide');
                     resetForm();
                 });
@@ -94,8 +92,8 @@ let KTDatatablesExtensionsKeytable = function() {
             $('.add-company').on('click', function(e) {
                 e.preventDefault();
 
-                console.log("SHOW [ADD] MODAL");
-                console.log( `add new company` );
+                //make sure the form is empty
+                resetForm();
 
                 $('#kt_object_add-edit_modal .view-object-header').html( `Add New Company`);
                 $('#kt_object_add-edit_modal').modal('show');
@@ -103,15 +101,14 @@ let KTDatatablesExtensionsKeytable = function() {
                 //unbind any handlers
                 $('.submit-edit-add-form').off();
                 $('.cancel-edit-add-form').off();
+
                 //bind the submit/cancel buttons
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    console.log("submit form and reset");
-
                     let company = getFormData();
 
-                    console.log("company obj: ", company);
+                    console.log("new company obj: ", company);
 
                     //add the company
                     $.ajax({
@@ -180,7 +177,7 @@ let KTDatatablesExtensionsKeytable = function() {
             pagingType: 'full_numbers',
             order: [[ 7, "desc" ]],
 
-            //reques uri
+            //request uri
             ajax: "/company",
 
             //tell datatables that our structure is in obj.companies
