@@ -21,6 +21,8 @@ const
     bodyParser = require('body-parser'),
     events = require('events'),
     bcrypt = require('bcrypt'),
+    favicon = require('serve-favicon'),
+    path = require('path'),
     expressLayouts = require('express-ejs-layouts');
 
 const app = express();
@@ -94,8 +96,19 @@ app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('layout', './layout.ejs');
 
+//set some local variables to boot, so routes and views can access
+app.use( (req,res,next) => {
+    req.app.locals.title = `POPPIT GAMES | `;
+    req.app.locals.url = req.url;
+    next();
+});
+
+
 //where are the static assets?
 app.use(express.static('public'));
+
+//set the favicon
+app.use(favicon(path.join(__dirname, 'public', 'assets', 'favicon.png')))
 
 //Don't need to do parsing just yet..
 app.use(bodyParser.json()); // support json encoded bodies
