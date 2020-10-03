@@ -76,29 +76,46 @@ var KTDatatablesExtensionsKeytable = function() {
                 let company_row_id = `company-${company_id}`;
                 let tableRow = table.row(company_row_id);
                 let row_data = table.row(company_row_id).data();
+
                 console.log( `edit company_id?: ${company_id}` );
                 console.log( `edit company_row_id?: ${company_row_id}` );
 
                 console.log( "tableRow? : ", tableRow.id() );
-
                 console.log( "row data? : ", row_data );
-                //{$(event.currentTarget).data('company-id')}
 
+                //{$(event.currentTarget).data('company-id')}
                 // $('#kt_company_modal .company-header').html( `${} (Company ID: ${})`);
 
                 $('#kt_company_modal').modal('show');
             });
             $('.remove-company').on('click', function(e){
                 e.preventDefault();
+
                 console.log("[REMOVE] COMPANY :: event: ", e)
 
-                console.log( `remove company id?: ${$(event.currentTarget).data('company-id')}` );
+                let company_id = $(event.currentTarget).data('company-id');
+
+                console.log( `remove company id?: ${company_id}` );
+
+                //delete the company
+                // $.ajax({
+                //     method: "DELETE",
+                //     url: `/company/${company_id}`,
+                //     success: function(res) {
+                //         console.log("company deleted!: ", res);
+                //     },
+                //     error: function(e) {
+                //         console.error(e);
+                //     }
+                // });
+
+                //remove the row from the table
 
             });
             $('.edit-company').on('click', function(e){
                 e.preventDefault();
-                console.log("SHOW [EDIT] MODAL FOR COMPANY :: event: ", e)
 
+                console.log("SHOW [EDIT] MODAL FOR COMPANY :: event: ", e)
                 console.log( `edit company id?: ${$(event.currentTarget).data('company-id')}` );
 
                 $('#kt_company_add-edit_modal').modal('show');
