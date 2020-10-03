@@ -23,12 +23,16 @@ let KTDatatablesExtensionsKeytable = function() {
                 let user_id = $(e.currentTarget).data('user-id');
                 let user = getRowData(user_id);
 
-                // $('#kt_view_modal .object-field-name').html(user.name);
-                // $('#kt_view_modal .object-field-description').html(user.description);
-                // $('#kt_view_modal .object-field-address').html(user.address);
-                // $('#kt_view_modal .object-field-city').html(user.city);
-                // $('#kt_view_modal .object-field-state').html(user.state);
-                // $('#kt_view_modal .object-field-zip').html(user.zip);
+                $('#kt_view_modal .object-field-first_name').html(user.first_name);
+                $('#kt_view_modal .object-field-last_name').html(user.last_name);
+                $('#kt_view_modal .object-field-email_address').html(user.email_address);
+                $('#kt_view_modal .object-field-city').html(user.city);
+                $('#kt_view_modal .object-field-state').html(user.state);
+                $('#kt_view_modal .object-field-notifications').html(user.notifications);
+                $('#kt_view_modal .object-field-registration_type').html(user.registration_type);
+                $('#kt_view_modal .object-field-active').html(user.active);
+                $('#kt_view_modal .object-field-created_at').html(user.created_at);
+                $('#kt_view_modal .object-field-updated_at').html(user.updated_at);
 
                 //load user information into modal and show it
                 $('#kt_view_modal .view-object-header').html( `${user.name} (User ID: ${user.id})`);
@@ -46,12 +50,20 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal .view-object-header').html( `${user.name} (User ID: ${user.id})`);
 
                 //fill form with content from user row
-                // $('#kt_object_add-edit_modal form input[name=name]').val(user.name);
-                // $('#kt_object_add-edit_modal form input[name=description]').val(user.description);
-                // $('#kt_object_add-edit_modal form input[name=address]').val(user.address);
-                // $('#kt_object_add-edit_modal form input[name=city]').val(user.city);
-                // $('#kt_object_add-edit_modal form input[name=state]').val(user.state);
-                // $('#kt_object_add-edit_modal form input[name=zip]').val(user.zip);
+                $('#kt_object_add-edit_modal form input[name=first_name]').val(user.first_name);
+                $('#kt_object_add-edit_modal form input[name=last_name]').val(user.last_name);
+                $('#kt_object_add-edit_modal form input[name=email_address]').val(user.email_address);
+                $('#kt_object_add-edit_modal form input[name=city]').val(user.city);
+                $('#kt_object_add-edit_modal form input[name=state]').val(user.state);
+
+                $('#kt_object_add-edit_modal form input[name=notifications]').val(user.notifications);
+                $('#kt_object_add-edit_modal form input[name=registration_type]').val(user.registration_type);
+
+                if( user.active === true ){
+                    $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
+                } else {
+                    $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+                }
 
                 //unbind any handlers
                 $('.submit-edit-add-form').off();
@@ -63,13 +75,19 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     let user = getFormData();
 
-                    console.log("user obj: ", user);
+                    if( user.active === "on" ) {
+                        user.active = 1;
+                    } else {
+                        user.active = 0;
+                    }
+
+                    console.log("save [EDIT to] user obj: ", user);
 
                     //add the user
                     $.ajax({
                         method: "PUT",
                         url: `/user/${user_id}`,
-                        data: $('.user-add-edit-form').serializeArray(),
+                        data: user,
                         success: function(res) {
                             //reset form
                             resetForm();
@@ -116,6 +134,12 @@ let KTDatatablesExtensionsKeytable = function() {
                     e.preventDefault();
 
                     let user = getFormData();
+
+                    if( user.active === "on" ) {
+                        user.active = 1;
+                    } else {
+                        user.active = 0;
+                    }
 
                     console.log("new user obj: ", user);
 
@@ -188,7 +212,6 @@ let KTDatatablesExtensionsKeytable = function() {
             //request uri
             ajax: "/user",
 
-            //tell datatables that our structure is in obj.companies
             dataSrc: '',
 
             //give the row an id, for filling modals later
@@ -199,16 +222,23 @@ let KTDatatablesExtensionsKeytable = function() {
             //define the columns
             columns: [
                 { "data": "id" },
-                { "data": "name" },
-                { "data": "description" },
-                { "data": "address" },
+                { "data": "first_name" },
+                { "data": "last_name" },
+                { "data": "email_address" },
                 { "data": "city" },
                 { "data": "state" },
-                { "data": "zip" },
+                { "data": "notifications" },
+                { "data": "registration_type" },
+                { "data": "active" },
                 { "data": "created_at" },
                 { "data": "updated_at" },
                 { "data": "actions" }
             ],
+
+            // --add disable/activate user quick button -- as a per-row toggle button
+            // --add send forgotpassword email quick button
+
+            //--fix click handlers after ADD new item
 
             columnDefs: [
                 {
