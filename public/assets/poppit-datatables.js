@@ -22,6 +22,13 @@ let KTDatatablesExtensionsKeytable = function() {
                 //get company object
                 let company = getRowDataFromEvent(e);
 
+                $('#kt_view_modal .object-field-name').html(company.name);
+                $('#kt_view_modal .object-field-description').html(company.description);
+                $('#kt_view_modal .object-field-address').html(company.address);
+                $('#kt_view_modal .object-field-city').html(company.city);
+                $('#kt_view_modal .object-field-state').html(company.state);
+                $('#kt_view_modal .object-field-zip').html(company.zip);
+
                 //load company information into modal and show it
                 $('#kt_view_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
                 $('#kt_view_modal').modal('show');
@@ -160,7 +167,6 @@ let KTDatatablesExtensionsKeytable = function() {
                         table.row(`#${row_id}`).remove().draw();
 
                         //show toast to help undo or to go see in the trash
-
                     },
                     error: function(e) {
                         console.error(e);
