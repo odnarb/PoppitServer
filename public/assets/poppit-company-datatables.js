@@ -29,6 +29,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-city').html(company.city);
                 $('#kt_view_modal .object-field-state').html(company.state);
                 $('#kt_view_modal .object-field-zip').html(company.zip);
+                $('#kt_view_modal .object-field-created_at').html( formatDate(company.created_at) );
+                $('#kt_view_modal .object-field-updated_at').html( formatDate(company.updated_at) );
 
                 //load company information into modal and show it
                 $('#kt_view_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
@@ -211,6 +213,20 @@ let KTDatatablesExtensionsKeytable = function() {
             ],
 
             columnDefs: [
+                //render time stamp
+                {
+                    targets: -3,
+                    render: function(data, type, company, meta) {
+                        return `${formatDate(company.created_at)}`;
+                    }
+                },
+                //render time stamp
+                {
+                    targets: -2,
+                    render: function(data, type, company, meta) {
+                        return `${formatDate(company.updated_at)}`;
+                    }
+                },
                 {
                     targets: -1,
                     title: 'Actions',
@@ -233,6 +249,12 @@ let KTDatatablesExtensionsKeytable = function() {
                 }
             ]
         });
+
+        let formatDate = function(dateStamp){
+            let date = dateStamp.split('T')[0];
+            let time = dateStamp.split('T')[1].substr(0,8);
+            return `${date} ${time}`;
+        };
 
         let getRowData = function(id) {
             //drill in to get the row id from the event

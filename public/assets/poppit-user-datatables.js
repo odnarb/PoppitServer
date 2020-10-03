@@ -31,8 +31,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-notifications').html(user.notifications);
                 $('#kt_view_modal .object-field-registration_type').html(user.registration_type);
                 $('#kt_view_modal .object-field-active').html(user.active);
-                $('#kt_view_modal .object-field-created_at').html(user.created_at);
-                $('#kt_view_modal .object-field-updated_at').html(user.updated_at);
+                $('#kt_view_modal .object-field-created_at').html( formatDate(company.created_at) );
+                $('#kt_view_modal .object-field-updated_at').html( formatDate(company.updated_at) );
 
                 //load user information into modal and show it
                 $('#kt_view_modal .view-object-header').html( `${user.name} (User ID: ${user.id})`);
@@ -238,9 +238,21 @@ let KTDatatablesExtensionsKeytable = function() {
             // --add disable/activate user quick button -- as a per-row toggle button
             // --add send forgotpassword email quick button
 
-            //--fix click handlers after ADD new item
-
             columnDefs: [
+                //render time stamp
+                {
+                    targets: -3,
+                    render: function(data, type, user, meta) {
+                        return `${formatDate(user.created_at)}`;
+                    }
+                },
+                //render time stamp
+                {
+                    targets: -2,
+                    render: function(data, type, user, meta) {
+                        return `${formatDate(user.updated_at)}`;
+                    }
+                },
                 {
                     targets: -1,
                     title: 'Actions',
@@ -263,6 +275,12 @@ let KTDatatablesExtensionsKeytable = function() {
                 }
             ]
         });
+
+        let formatDate = function(dateStamp){
+            let date = dateStamp.split('T')[0];
+            let time = dateStamp.split('T')[1].substr(0,8);
+            return `${date} ${time}`;
+        };
 
         let getRowData = function(id) {
             //drill in to get the row id from the event
