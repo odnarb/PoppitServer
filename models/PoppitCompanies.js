@@ -4,7 +4,10 @@
 
 const VALID_COLS = ["name","description","address","city","state","zip"];
 const VALID_FILTER_COLS = ["name","address","city","state","zip"];
+
+const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
+const UPDATED_AT_COL = "updated_at";
 
 class Company {
     constructor(globals) {
@@ -85,7 +88,8 @@ class Company {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let sqlStr = "SELECT id,name,description,address,city,state,zip,created_at,updated_at FROM poppit_companies";
+            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let sqlStr = `SELECT ${cols} FROM poppit_companies`;
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
@@ -113,7 +117,10 @@ class Company {
         if( !opts.id ){
             cb({ error_type: "user", error: "id must be passed in" });
         } else {
-            let sqlStr = "select name,description,address,city,state,zip,created_at,updated_at from poppit_companies where id=" + this.dbescape(opts.id) + ";";
+
+            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+
+            let sqlStr = `SELECT ${cols} FROM poppit_companies where id=${this.dbescape(opts.id)};`;
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
