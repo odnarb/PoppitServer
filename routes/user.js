@@ -89,7 +89,11 @@ module.exports = (globals) => {
                         return next(err);
                     }
                     globals.logger.debug( `${routeHeader} :: DONE`);
-                    return res.json({ aaData: users });
+                    return res.json({
+                        aaData: users[0],
+                        iTotalRecords: users[1].totalCount,
+                        iTotalDisplayRecords: users[2].totalCountWithFilter
+                    });
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -134,10 +138,10 @@ module.exports = (globals) => {
     })
     //create user
     .post('/', (req, res, next) => {
-        try {
-            let User = new UserModel( globals );
+        let User = new UserModel( globals );
+        let routeHeader = "POST /user";
 
-            let routeHeader = "POST /user";
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             let createParams = req.body;
@@ -162,10 +166,10 @@ module.exports = (globals) => {
     })
     // user/:id operations
     .get('/:id', (req, res, next) => {
-        try {
-            let User = new UserModel( globals );
+        let User = new UserModel( globals );
+        let routeHeader = "GET /user/:id";
 
-            let routeHeader = "GET /user/:id";
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
@@ -189,10 +193,10 @@ module.exports = (globals) => {
         }
     })
     .put('/:id', (req, res, next) => {
-        try {
-            let User = new UserModel( globals );
-            let routeHeader = "PUT /user/:id ";
+        let User = new UserModel( globals );
+        let routeHeader = "PUT /user/:id ";
 
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
@@ -216,10 +220,10 @@ module.exports = (globals) => {
         }
     })
     .delete('/:id', (req, res, next) => {
-        try {
-            let User = new UserModel( globals );
+        let User = new UserModel( globals );
+        let routeHeader = "DELETE /user/:id ";
 
-            let routeHeader = "DELETE /user/:id ";
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );

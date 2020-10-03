@@ -91,13 +91,20 @@ class User {
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
             let sqlStr = `SELECT ${cols} FROM poppit_users`;
 
+            let totalCount = `SELECT count(*) as totalCount FROM poppit_users;`;
+            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_users;`;
+
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
+                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_users WHERE ${whereStr};`;
             }
 
             sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
             sqlStr += ` LIMIT ${opts.limit}`;
             sqlStr += ` OFFSET ${opts.offset};`;
+
+            //add  these to the call
+            sqlStr += `${totalCount}${totalCountWithFilter}`;
 
             this.globals.logger.debug( `Users.find() sqlStr: ${sqlStr}` );
 
