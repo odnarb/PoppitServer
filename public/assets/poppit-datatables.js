@@ -20,7 +20,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 e.preventDefault();
 
                 //get company object
-                let company = getRowDataFromEvent(e);
+                let company_id = $(e.currentTarget).data('company-id');
+                let company = getRowData(company_id);
 
                 $('#kt_view_modal .object-field-name').html(company.name);
                 $('#kt_view_modal .object-field-description').html(company.description);
@@ -38,7 +39,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 e.preventDefault();
 
                 //get company object
-                let company = getRowDataFromEvent(e);
+                let company_id = $(e.currentTarget).data('company-id');
+                let company = getRowData(company_id);
 
                 //fill modal with content
                 $('#kt_object_add-edit_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
@@ -232,10 +234,9 @@ let KTDatatablesExtensionsKeytable = function() {
             ]
         });
 
-        let getRowDataFromEvent = function(e) {
+        let getRowData = function(id) {
             //drill in to get the row id from the event
-            let company_id = $(e.currentTarget).data('company-id');
-            let row_id = `company-${company_id}`;
+            let row_id = `company-${id}`;
             return table.row(`#${row_id}`).data();
         };
 
