@@ -51,14 +51,6 @@ let router = express.Router();
 //     })
 // });
 
-// router.post('/signup', (req, res) => {
-//     globals.logger.info("signup query: ", req.query);
-//     globals.logger.info("signup params: ", req.params);
-//     globals.logger.info("signup body: ", req.body);
-
-//     return res.json({ register_params: true });
-// });
-
 let UserModel = require('../models/PoppitUsers');
 
 module.exports = (globals) => {
