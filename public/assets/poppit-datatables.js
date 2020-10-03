@@ -1,12 +1,178 @@
 "use strict";
-var KTDatatablesExtensionsKeytable = function() {
+let KTDatatablesExtensionsKeytable = function() {
 
     // $('#kt_view_modal').modal('show');
-    var modal = $('#kt_view_modal');
+    let modal = $('#kt_view_modal');
 
-    var initCompanyTable = function() {
-        // begin first table
-        var table = $('#kt_table_1').DataTable({
+    let initCompanyTable = function() {
+
+        let initTableHandlers = function() {
+            // clear click handlers
+            $('.view-company').off();
+            $('.edit-company').off();
+            $('.add-company').off();
+            $('.remove-company').off();
+            $('.submit-edit-add-form').off();
+            $('.cancel-edit-add-form').off();
+
+            //bind everything needed
+            $('.view-company').on('click', function(e) {
+                e.preventDefault();
+
+                console.log("SHOW MODAL FOR COMPANY");
+
+                let company = getRowDataFromEvent(e);
+                $('#kt_view_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
+
+                $('#kt_view_modal').modal('show');
+            });
+
+            $('.edit-company').on('click', function(e) {
+                e.preventDefault();
+
+                console.log("SHOW [EDIT] MODAL FOR COMPANY ");
+
+                let company_id = $(e.currentTarget).data('company-id');
+                console.log( `edit company id?: ${company_id}` );
+
+                let company = getRowDataFromEvent(e);
+                $('#kt_object_add-edit_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
+
+                //fill form with content from company row
+                $('#kt_object_add-edit_modal form input[name=name]').val(company.name);
+                $('#kt_object_add-edit_modal form input[name=description]').val(company.description);
+                $('#kt_object_add-edit_modal form input[name=address]').val(company.address);
+                $('#kt_object_add-edit_modal form input[name=city]').val(company.city);
+                $('#kt_object_add-edit_modal form input[name=state]').val(company.state);
+                $('#kt_object_add-edit_modal form input[name=zip]').val(company.zip);
+
+                //unbind any handlers
+                $('.submit-edit-add-form').off();
+                $('.cancel-edit-add-form').off();
+
+                //bind the submit/cancel buttons
+                $('.submit-edit-add-form').on('click', function(e) {
+                    e.preventDefault();
+
+                    let company = getFormData();
+
+                    console.log("company obj: ", company);
+
+                    //add the company
+                    $.ajax({
+                        method: "PUT",
+                        url: `/company/${company_id}`,
+                        data: $('.company-add-edit-form').serializeArray(),
+                        success: function(res) {
+                            //reset form
+                            resetForm();
+
+                            //hide this, re-fetch and redraw table
+                            $('#kt_object_add-edit_modal').modal('hide');
+
+                            //refresh the data
+                            table.ajax.reload();
+                        },
+                        error: function(e) {
+                            console.error(e);
+                        }
+                    });
+                });
+
+                $('.cancel-edit-add-form').on('click', function(e) {
+                    e.preventDefault();
+
+                    console.log("close dialog and reset form");
+                    $('#kt_object_add-edit_modal').modal('hide');
+                    resetForm();
+                });
+
+                //show the modal
+                $('#kt_object_add-edit_modal').modal('show');
+            });
+
+            $('.add-company').on('click', function(e) {
+                e.preventDefault();
+
+                console.log("SHOW [ADD] MODAL");
+                console.log( `add new company` );
+
+                $('#kt_object_add-edit_modal .view-object-header').html( `Add New Company`);
+                $('#kt_object_add-edit_modal').modal('show');
+
+                //unbind any handlers
+                $('.submit-edit-add-form').off();
+                $('.cancel-edit-add-form').off();
+                //bind the submit/cancel buttons
+                $('.submit-edit-add-form').on('click', function(e) {
+                    e.preventDefault();
+
+                    console.log("submit form and reset");
+
+                    let company = getFormData();
+
+                    console.log("company obj: ", company);
+
+                    //add the company
+                    $.ajax({
+                        method: "POST",
+                        url: `/company`,
+                        data: company,
+                        success: function(res) {
+                            //reset form
+                            resetForm();
+
+                            //hide this, re-fetch and redraw table
+                            $('#kt_object_add-edit_modal').modal('hide');
+
+                            //refresh the data
+                            table.ajax.reload(function() {
+                                initTableHandlers();
+                            });
+                        },
+                        error: function(e) {
+                            console.error(e);
+                        }
+                    });
+                });
+
+                $('.cancel-edit-add-form').on('click', function(e) {
+                    e.preventDefault();
+
+                    $('#kt_object_add-edit_modal').modal('hide');
+                    resetForm();
+                });
+            });
+
+            $('.remove-company').on('click', function(e) {
+                e.preventDefault();
+
+                let company_id = $(e.currentTarget).data('company-id');
+                let row_id = `company-${company_id}`;
+
+                console.log( `remove company id?: ${company_id}` );
+
+                //delete the company
+                $.ajax({
+                    method: "DELETE",
+                    url: `/company/${company_id}`,
+                    success: function(res) {
+                        console.log("company deleted!: ", res);
+
+                        //remove the row from the table
+                        table.row(`#${row_id}`).remove().draw();
+
+                        //show toast to help undo or to go see in the trash
+
+                    },
+                    error: function(e) {
+                        console.error(e);
+                    }
+                });
+            });
+        }; //end initTableHandlers()
+
+        let table = $('#kt_table_1').DataTable({
             processing: true,
             responsive: true,
             select: true,
@@ -63,100 +229,35 @@ var KTDatatablesExtensionsKeytable = function() {
             ]
         });
 
-        var getRowDataFromEvent = function(e){
+        let getRowDataFromEvent = function(e) {
             //drill in to get the row id from the event
-            let company_id = $(event.currentTarget).data('company-id');
+            let company_id = $(e.currentTarget).data('company-id');
             let row_id = `company-${company_id}`;
             return table.row(`#${row_id}`).data();
-        }
+        };
 
-        table.on( 'init', function ( e, settings, json ) {
-            // console.log("rowData: ", rowData );
+        let getFormData = function() {
+            let companyFormData = $('.company-add-edit-form').serializeArray();
 
-            $('.view-company').on('click', function(e){
-                e.preventDefault();
-                console.log("SHOW MODAL FOR COMPANY :: event: ", e)
-
-                let company = getRowDataFromEvent(e);
-                $('#kt_view_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
-
-                $('#kt_view_modal').modal('show');
+            //loop through and prepare as a company object
+            let company = {};
+            companyFormData.forEach(function(item) {
+                company[item.name] = item.value;
             });
+            return company;
+        };
 
-            $('.edit-company').on('click', function(e){
-                e.preventDefault();
+        let resetForm = function() {
+            $('#form-company-name').val('');
+            $('#form-company-description').val('');
+            $('#form-company-address').val('');
+            $('#form-company-city').val('');
+            $('#form-company-state').val('');
+            $('#form-company-zip').val('');
+        };
 
-                console.log("SHOW [EDIT] MODAL FOR COMPANY :: event: ", e)
-                console.log( `edit company id?: ${$(event.currentTarget).data('company-id')}` );
-
-                let company = getRowDataFromEvent(e);
-                $('#kt_object_add-edit_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
-                $('#kt_object_add-edit_modal').modal('show');
-            });
-
-            $('.add-company').on('click', function(e){
-                e.preventDefault();
-
-                console.log("SHOW [ADD] MODAL");
-                console.log( `add new company` );
-
-                $('#kt_object_add-edit_modal .view-object-header').html( `Add New Company`);
-                $('#kt_object_add-edit_modal').modal('show');
-
-                //bind the submit/cancel buttons
-                $('.submit-edit-add-form').on('click', function (e) {
-                    console.log("submit form and reset")
-
-                    //add the company
-                    // $.ajax({
-                    //     method: "POST",
-                    //     url: `/company`,
-                    //     data: $('.kt-form').serializeArray();
-                    //     success: function(res) {
-                    //         console.log("company added!: ", res);
-                    //         //reset form
-                    //         //unbind buttons
-                    //     },
-                    //     error: function(e) {
-                    //         console.error(e);
-                    //     }
-                    // });
-                });
-
-                $('.cancel-edit-add-form').on('click', function (e) {
-                    console.log("close dialog and reset form")
-                })
-            });
-
-            $('.remove-company').on('click', function(e){
-                e.preventDefault();
-
-                console.log("[REMOVE] COMPANY :: event: ", e)
-
-                let company_id = $(event.currentTarget).data('company-id');
-                let row_id = `company-${company_id}`;
-
-                console.log( `remove company id?: ${company_id}` );
-
-                //delete the company
-                $.ajax({
-                    method: "DELETE",
-                    url: `/company/${company_id}`,
-                    success: function(res) {
-                        console.log("company deleted!: ", res);
-
-                        //remove the row from the table
-                        table.row(`#${row_id}`).remove().draw();
-
-                        //show toast to help undo or to go see in the trash
-
-                    },
-                    error: function(e) {
-                        console.error(e);
-                    }
-                });
-            });
-
+        table.on( 'init', function(e, settings, json ) {
+            initTableHandlers();
         });
     };
 
