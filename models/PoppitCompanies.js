@@ -4,7 +4,10 @@
 
 const VALID_COLS = ["name","description","address","city","state","zip"];
 const VALID_FILTER_COLS = ["name","address","city","state","zip"];
+
+const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
+const UPDATED_AT_COL = "updated_at";
 
 class Company {
     constructor(globals) {
@@ -85,15 +88,23 @@ class Company {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let sqlStr = "SELECT id,name,description,address,city,state,zip,created_at,updated_at FROM poppit_companies";
+            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let sqlStr = `SELECT ${cols} FROM poppit_companies`;
+
+            let totalCount = `SELECT count(*) as totalCount FROM poppit_companies;`;
+            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_companies;`;
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
+                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_companies WHERE ${whereStr};`;
             }
 
             sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
             sqlStr += ` LIMIT ${opts.limit}`;
             sqlStr += ` OFFSET ${opts.offset};`;
+
+            //add  these to the call
+            sqlStr += `${totalCount}${totalCountWithFilter}`;
 
             this.globals.logger.debug( `Companies.find() sqlStr: ${sqlStr}` );
 
@@ -113,7 +124,10 @@ class Company {
         if( !opts.id ){
             cb({ error_type: "user", error: "id must be passed in" });
         } else {
-            let sqlStr = "select name,description,address,city,state,zip,created_at,updated_at from poppit_companies where id=" + this.dbescape(opts.id) + ";";
+
+            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+
+            let sqlStr = `SELECT ${cols} FROM poppit_companies where id=${this.dbescape(opts.id)};`;
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
@@ -128,10 +142,19 @@ class Company {
     }
 
     create(company, cb){
+ 
+
+
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
-        Object.keys(company).filter(el => {
-            if( VALID_COLS.indexOf(el) < 0 ){
+
+        let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
+
+        //START remove sensitive data
+        //END remove sensitive data
+
+        Object.keys(user).filter(el => {
+            if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
         });
@@ -140,15 +163,23 @@ class Company {
             cb({ error_type: "user", "error": colErrors });
         } else {
             //json to  col -> val
-            let colsStr = VALID_COLS.join(',');
+            let colsStr = "";
             let valsStr = "";
 
-            Object.keys( company ).map( (col) => {
-                valsStr += `${this.dbescape(company[col])},`;
+            Object.keys( user ).map( (col) => {
+                colsStr += `${this.dbescape(col)},`;
+            });
+
+            Object.keys( user ).map( (col) => {
+                valsStr += `${this.dbescape(user[col])},`;
             });
 
             //remove the last comma
             valsStr = valsStr.slice(0,-1);
+            colsStr = colsStr.slice(0,-1);
+
+            //remove quotes around columns
+            colsStr = colsStr.replace(/\'/g, "");
 
             let sqlStr = `INSERT INTO poppit_companies (${colsStr}) `;
             sqlStr += `VALUES (${valsStr});`;

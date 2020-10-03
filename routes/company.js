@@ -45,7 +45,11 @@ module.exports = (globals) => {
                         return next(err);
                     }
                     globals.logger.debug( `${routeHeader} :: DONE`);
-                    return res.json({ aaData: companies });
+                    return res.json({
+                        aaData: companies[0],
+                        iTotalRecords: companies[1].totalCount,
+                        iTotalDisplayRecords: companies[2].totalCountWithFilter
+                    });
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -67,10 +71,10 @@ module.exports = (globals) => {
     })
     //create company
     .post('/', (req, res, next) => {
-        try {
-            let Company = new CompanyModel( globals );
+        let Company = new CompanyModel( globals );
+        let routeHeader = "POST /company";
 
-            let routeHeader = "POST /company";
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             let createParams = req.body;
@@ -95,15 +99,15 @@ module.exports = (globals) => {
     })
     // company/:id operations
     .get('/:id', (req, res, next) => {
-        try {
-            let Company = new CompanyModel( globals );
+        let Company = new CompanyModel( globals );
+        let routeHeader = "GET /company/:id";
 
-            let routeHeader = "GET /company/:id";
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
 
-            //get companies
+            //get company
             Company.findOne({ id: parseInt(req.params.id) }, (err, company) => {
                 if(err){
                     res.status(500);
@@ -122,10 +126,10 @@ module.exports = (globals) => {
         }
     })
     .put('/:id', (req, res, next) => {
-        try {
-            let Company = new CompanyModel( globals );
-            let routeHeader = "PUT /company/:id ";
+        let Company = new CompanyModel( globals );
+        let routeHeader = "PUT /company/:id ";
 
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
@@ -149,10 +153,10 @@ module.exports = (globals) => {
         }
     })
     .delete('/:id', (req, res, next) => {
-        try {
-            let Company = new CompanyModel( globals );
+        let Company = new CompanyModel( globals );
+        let routeHeader = "DELETE /company/:id ";
 
-            let routeHeader = "DELETE /company/:id ";
+        try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );

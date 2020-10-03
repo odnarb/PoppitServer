@@ -51,37 +51,70 @@ let router = express.Router();
 //     })
 // });
 
-// router.post('/signup', (req, res) => {
-//     globals.logger.info("signup query: ", req.query);
-//     globals.logger.info("signup params: ", req.params);
-//     globals.logger.info("signup body: ", req.body);
-
-//     return res.json({ register_params: true });
-// });
-
 let UserModel = require('../models/PoppitUsers');
 
 module.exports = (globals) => {
     return router
     // user/ (get all users)
-    .get('/', (req, res) => {
-
+    .get('/', (req, res, next) => {
         let User = new UserModel( globals );
+        let routeHeader = "GET /user (HTTP)";
 
-        //get users
-        User.find({}, (err, users) => {
-            if(err){
-                globals.logger.error("fetch error: ", err);
-                return res.sendStatus(404);
+        if( req.xhr == true ){
+            routeHeader = "GET /user (XHR)";
+
+            try {
+                globals.logger.debug( `${routeHeader} :: BEGIN :: filtered user list` );
+
+                globals.logger.debug( `${routeHeader} :: req.params: `, req.params );
+                globals.logger.debug( `${routeHeader} :: req.query: `, req.query );
+                globals.logger.debug( `${routeHeader} :: req.body: `, req.body );
+
+                let params = req.query;
+
+                //remove timestamp param for datatables
+                if( params._ !== undefined ) delete params._;
+
+                //get users
+                User.find(req.query, (err, users) => {
+                    globals.logger.debug( `${routeHeader} :: DB CB: `, err);
+
+                    if(err && err.error_type === "system"){
+                        globals.logger.debug( `${routeHeader} :: DB ERROR: `, err);
+                        res.status(500);
+                        return next(err);
+                    } else if( err && err.error_type === "user"){
+                        globals.logger.debug( `${routeHeader} :: User DB ERROR: `, err);
+                        res.status(400);
+                        return next(err);
+                    }
+                    globals.logger.debug( `${routeHeader} :: DONE`);
+                    return res.json({
+                        aaData: users[0],
+                        iTotalRecords: users[1].totalCount,
+                        iTotalDisplayRecords: users[2].totalCountWithFilter
+                    });
+                });
+            } catch( err ) {
+                globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+                return next(err);
             }
+        } else {
+            try {
+                globals.logger.debug( `${routeHeader} :: BEGIN`);
 
-            globals.logger.info(`GET /user :: `, users);
-
-            return res.json({ page: 'GET /user'});
-        });
+                globals.logger.debug( `${routeHeader} :: DONE`);
+                return res.render('pages/user',{
+                    pageTitle: `${process.env.APP_NAME} | Search Users`
+                });
+            } catch( err ) {
+                globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+                return next(err);
+            }
+        }
     })
     // user/login
-    .get('/login', (req, res) => {
+    .get('/login', (req, res, next) => {
 
         globals.logger.info( "GET /user/login" );
 
@@ -93,34 +126,121 @@ module.exports = (globals) => {
         });
     })
     // user/login
-    .post('/login', (req, res) => {
+    .post('/login', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;
         globals.logger.info( "POST /user/login :: globals? ", gres );
         return res.json({ page: 'POST /user/login'});
     })
-    .post('/signup', (req, res) => {
+    .post('/signup', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;
         globals.logger.info( "POST /user/signup :: globals? ", gres );
         return res.json({ page: 'POST /user/signup'});
     })
-    .get('/something', (req, res) => {
-        let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "GET /user/something :: globals? ", gres );
-        return res.json({ page: 'GET /user/something'});
-    })
-    // user/:id
-    .get('/:id', (req, res) => {
+    //create user
+    .post('/', (req, res, next) => {
         let User = new UserModel( globals );
+        let routeHeader = "POST /user";
 
-        //get user
-        User.findOne({ id: parseInt(req.params.id) }, (err, user) => {
-            if(err){
-                globals.logger.error("fetch error: ", err);
-                return res.sendStatus(404);
-            }
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
 
-            globals.logger.info( "GET /user/:id :: user? ", user );
-            return res.json({ page: 'GET /user/:id'});
-        });
+            let createParams = req.body;
+
+            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
+
+            User.create(createParams, (err, new_user_id) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.info( `${routeHeader} :: User created: ${new_user_id}` );
+
+                globals.logger.info( `${routeHeader} :: END` );
+                return res.json({ success: true, user_id: new_user_id });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // user/:id operations
+    .get('/:id', (req, res, next) => {
+        let User = new UserModel( globals );
+        let routeHeader = "GET /user/:id";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            //get user
+            User.findOne({ id: parseInt(req.params.id) }, (err, user) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.info(`GET /user/:id :: user.id: ${req.params.id}`, user);
+
+                globals.logger.info( `${routeHeader} :: END` );
+
+                return res.json(user);
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .put('/:id', (req, res, next) => {
+        let User = new UserModel( globals );
+        let routeHeader = "PUT /user/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
+
+            let updateParams = { id: parseInt(req.params.id), user: req.body };
+
+            globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
+
+            User.update(updateParams, (err, user) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true, user: user });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .delete('/:id', (req, res, next) => {
+        let User = new UserModel( globals );
+        let routeHeader = "DELETE /user/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            User.delete( parseInt(req.params.id), (err, deleteRes) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+                globals.logger.info( routeHeader  + " :: res", deleteRes );
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
     });
 };
