@@ -8,7 +8,7 @@
 const args = require('minimist')(process.argv.slice(2));
 
 //get the log level, depending on what's passed
-let level = { loglevel: args.loglevel || 'debug' }
+let level = { loglevel: args.loglevel || 'debug' };
 
 const
     globals = require('./lib/globals.js')(level),

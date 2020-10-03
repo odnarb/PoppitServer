@@ -2,6 +2,8 @@
     DBAL for PoppitUsers
 */
 
+const VALID_COLS = ["first_name","last_name","email_address","password_hash"];
+
 class User {
     constructor(globals) {
         this.globals = globals;
@@ -27,7 +29,7 @@ class User {
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 this.globals.logger.debug( "Companies.find() result?: ", result[0]);
                 cb(null,result[0]);
@@ -37,46 +39,41 @@ class User {
 
     findOne(opts,cb){
         if( !opts.email && !opts.id ){
-            return cb("ERROR: email or must be passed in");
-        }
-
-        //use email
-        let whereClause = "";
-        if( opts.email && opts.email !== "" ){ 
-            whereClause = "email_address=" + this.dbescape(opts.email) + " limit 1;";
-        } else if ( opts.id && opts.id > 0 ) {
-            whereClause = "id=" + this.dbescape(opts.id) + " limit 1;";
+            cb({ error_type: "system", error: "email or id must be passed in" });
         } else {
-            return cb("ERROR: email or must be passed in");
-        }
-        this.globals.logger.debug( "-- GET USER? ", whereClause );
-
-        let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where " + whereClause;
-
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                cb(error);
+            //use email
+            let whereClause = "";
+            if( opts.email && opts.email !== "" ){
+                whereClause = "email_address=" + this.dbescape(opts.email) + " limit 1;";
+            } else if ( opts.id && opts.id > 0 ) {
+                whereClause = "id=" + this.dbescape(opts.id) + " limit 1;";
             } else {
-                this.globals.logger.debug("Company.find() result?: ", result[0]);
-                cb(null,result[0]);
+                return cb({ error_type: "system", error: "email or id must be passed in" });
             }
-        });
+            this.globals.logger.debug( "-- GET USER? ", whereClause );
+
+            let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where " + whereClause;
+
+            this.execSQL(this.db, sqlStr, (error, result) => {
+                if (error) {
+                    cb({ error_type: "system", error: error });
+                } else {
+                    this.globals.logger.debug("Company.find() result?: ", result[0]);
+                    cb(null,result[0]);
+                }
+            });
+        }
     }
 
     create(vals, cb){
-        let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
-
-        vals.updated_at = "NOW()";
-        vals.created_at = "NOW()";
-
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
             let sqlStr = "insert into poppit_users SET " + this.dbescape(vals)+ ";";
 
             this.execSQL(sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("PoppitUsers.create() result?: ", result);
                     cb(null,result);
@@ -86,20 +83,17 @@ class User {
     }
 
     update(vals, cb){
-
-        let cols = ["first_name","last_name","email_address","password_hash","updated_at","created_at"];
-
         //only update what's been given to us
         let valCols = Object.keys(vals);
 
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
             let sqlStr = "update poppit_users SET " + this.dbescape(vals)+ ";";
 
             this.execSQL(sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("PoppitUsers.update() result?: ", result);
                     cb(null,result);
@@ -112,13 +106,13 @@ class User {
         let sqlStr = 'delete from poppit_users where id=' + id;
         this.execSQL(sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 this.globals.logger.debug("PoppitUsers.delete() result?: ", result);
                 cb(null, result);
             }
         });
     }
-};
+}
 
 module.exports = User;

@@ -2,6 +2,8 @@
     DBAL for PoppitCampaigns
 */
 
+const VALID_COLS = ["company_id","name","description","data","date_start","date_end","active"];
+
 class Campaign {
     constructor(globals) {
         this.globals = globals;
@@ -27,7 +29,7 @@ class Campaign {
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 this.globals.logger.debug("PoppitCampaigns.find() result?: ", result[0]);
                 cb(null,result[0]);
@@ -37,35 +39,28 @@ class Campaign {
 
     findOne(opts,cb){
         if( !opts.id ){
-            cb("ERROR: id must be passed in");
+            cb({ error_type: "system", error: "id must be passed in" });
+        } else {
+            let sqlStr = "select `company_id`,`name`,`description`,`data`,`date_start`,`date_end`,`active`,`updated_at`,`created_at` from poppit_company_campaigns where id=" + this.dbescape(opts.id) + " limit 1;";
+            this.execSQL(this.db, sqlStr, (error, result) => {
+                if (error) {
+                    cb({ error_type: "system", error: error });
+                } else {
+                    this.globals.logger.debug("PoppitCampaigns.findOne() result?: ", result[0]);
+                    cb(null,result[0]);
+                }
+            });
         }
-
-        let sqlStr = "select `company_id`,`name`,`description`,`data`,`date_start`,`date_end`,`active`,`updated_at`,`created_at` from poppit_company_campaigns where id=" + this.dbescape(opts.id) + " limit 1;";
-
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                cb(error);
-            } else {
-                this.globals.logger.debug("PoppitCampaigns.findOne() result?: ", result[0]);
-                cb(null,result[0]);
-            }
-        });
-    };
+    }
 
     create(vals, cb){
-        let cols = ["company_id","name","description","data","date_start","date_end","active","updated_at","created_at"];
- 
-        vals.updated_at = "NOW()";
-        vals.created_at = "NOW()";
-
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
             let sqlStr = "insert into poppit_company_campaigns SET " +this.dbescape(vals)+ ";";
-
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("PoppitCampaigns.create() result?: ", result);
                     cb(null,result);
@@ -75,14 +70,10 @@ class Campaign {
     }
 
     update(vals, cb){
-
-        //we need to filter the cols we're really using
-        let cols = ["company_id","name","description","data","date_start","date_end","active","updated_at","created_at"];
-
         //only update what's been given to us
         let valCols = Object.keys(vals);
 
-        if( valCols.filter(el => cols.indexOf(el) < 0).length > 0 ){
+        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
             cb({ "error": "invalid_data" });
         } else {
             vals.updated_at = "NOW()";
@@ -90,7 +81,7 @@ class Campaign {
 
             this.execSQL(sqlStr, (error, result) => {
                 if (error) {
-                    cb(error);
+                    cb({ error_type: "system", error: error });
                 } else {
                     this.globals.logger.debug("PoppitCampaigns.create() result?: ", result);
                     cb(null,result);
@@ -103,12 +94,12 @@ class Campaign {
         let sqlStr = 'delete from poppit_company_campaigns where id=' + id;
         execSQL(sqlStr, (error, result) => {
             if (error) {
-                cb(error);
+                cb({ error_type: "system", error: error });
             } else {
                 cb(null, result);
             }
         });
     }
-};
+}
 
 module.exports = Campaign;

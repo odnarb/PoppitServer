@@ -62,7 +62,7 @@ let router = express.Router();
 let UserModel = require('../models/PoppitUsers');
 
 module.exports = (globals) => {
-    user: return router
+    return router
     // user/ (get all users)
     .get('/', (req, res) => {
 
@@ -122,5 +122,5 @@ module.exports = (globals) => {
             globals.logger.info( "GET /user/:id :: user? ", user );
             return res.json({ page: 'GET /user/:id'});
         });
-    })
+    });
 };
