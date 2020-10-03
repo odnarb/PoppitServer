@@ -3,6 +3,8 @@
 */
 
 const VALID_COLS = ["first_name","last_name","email_address","password_hash"];
+const VALID_FILTER_COLS = ["name","address","city","state","zip"];
+const CREATED_AT_COL = "created_at";
 
 class User {
     constructor(globals) {
@@ -13,89 +15,193 @@ class User {
     }
 
     find(opts,cb){
-        let sqlStr = "select `first_name`,`last_name`,`email_address`,`password_hash`,`active`,`created_at`,`updated_at` from poppit_users";
 
-        if( opts && opts.limit && opts.limit <= 100 && opts.limit > 0 ){
-            sqlStr += " limit " + this.dbescape(opts.limit);
-        } else {
-            sqlStr += " limit 10";
+        this.globals.logger.debug(`Users.find() :: BEFORE opts initialized: `, opts);
+
+        if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
+            opts = {
+                order: {
+                    by: CREATED_AT_COL,
+                    direction: "DESC"
+                },
+                limit: 10,
+                offset: 0,
+                where: {}
+            };
         }
 
-        if( opts && opts.offset && opts.offset > 0 && opts.offset < 10000000000 ){
-            sqlStr += " offset " + this.dbescape(opts.offset) + ";";
+        this.globals.logger.debug(`Users.find() :: AFTER opts initialized: `, opts);
+
+        //need to initialize filter out opts.order.by
+
+        if( opts.order.direction == undefined ){
+            opts.order.direction = "DESC";
+        }
+        if (opts.order.direction.toUpperCase() === "DESC") {
+            opts.order.direction = "DESC";
         } else {
-            sqlStr += " offset 0;";
+            opts.order.direction = "ASC";
         }
 
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                cb({ error_type: "system", error: error });
-            } else {
-                this.globals.logger.debug( "Companies.find() result?: ", result[0]);
-                cb(null,result[0]);
-            }
-        });
-    }
-
-    findOne(opts,cb){
-        if( !opts.email && !opts.id ){
-            cb({ error_type: "system", error: "email or id must be passed in" });
+        if ( parseInt(opts.limit) > 100 ) {
+            opts.limit = 100;
+        } else if ( parseInt(opts.limit) < 0 ) {
+            opts.limit = 0;
         } else {
-            //use email
-            let whereClause = "";
-            if( opts.email && opts.email !== "" ){
-                whereClause = "email_address=" + this.dbescape(opts.email) + " limit 1;";
-            } else if ( opts.id && opts.id > 0 ) {
-                whereClause = "id=" + this.dbescape(opts.id) + " limit 1;";
-            } else {
-                return cb({ error_type: "system", error: "email or id must be passed in" });
-            }
-            this.globals.logger.debug( "-- GET USER? ", whereClause );
+            opts.limit = parseInt(opts.limit);
+        }
 
-            let sqlStr = "select `name`,`description`,`first_name`,`last_name`,`email_address`,`password_hash`,`address`,`city`,`state`,`zip`,`created_at`,`updated_at` from poppit_companies where " + whereClause;
+        if( parseInt(opts.offset) > Number.MAX_SAFE_INTEGER ) {
+            opts.offset = 100;
+        } else if ( parseInt(opts.offset) < 0 ) {
+            opts.offset = 0;
+        } else {
+            opts.offset = parseInt(opts.offset);
+        }
 
-            this.execSQL(this.db, sqlStr, (error, result) => {
-                if (error) {
-                    cb({ error_type: "system", error: error });
-                } else {
-                    this.globals.logger.debug("Company.find() result?: ", result[0]);
-                    cb(null,result[0]);
+        this.globals.logger.debug(`Users.find() :: AFTER opts validation: `, opts);
+
+        //need more resilience: send back which columns are invalid?
+        let colErrors = [];
+        if( Object.keys(opts.where).length > 0 ) {
+            Object.keys(opts.where).filter(el => {
+                if( VALID_FILTER_COLS.indexOf(el) < 0 ){
+                    colErrors.push({ "invalid_col": el });
                 }
             });
         }
-    }
 
-    create(vals, cb){
-        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
-            cb({ "error": "invalid_data" });
+        this.globals.logger.debug(`Users.find() :: colErrors: `, colErrors);
+
+        if( colErrors.length > 0 ){
+            cb({ error_type: "user", "error": colErrors });
         } else {
-            let sqlStr = "insert into poppit_users SET " + this.dbescape(vals)+ ";";
+            //json to  col -> val
+            let whereStr = "";
+            let whereCount = 0;
+            Object.keys( opts.where ).map( (col) => {
+                whereCount++;
+                if( whereCount > 1 ) whereStr += " AND ";
+                whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
+            });
 
-            this.execSQL(sqlStr, (error, result) => {
+            let sqlStr = "SELECT id,first_name,last_name,email_address,password_hash,created_at,updated_at FROM poppit_users";
+
+            if( whereStr !== "" ) {
+                sqlStr += ` WHERE ${whereStr}`;
+            }
+
+            sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
+            sqlStr += ` LIMIT ${opts.limit}`;
+            sqlStr += ` OFFSET ${opts.offset};`;
+
+            this.globals.logger.debug( `Users.find() sqlStr: ${sqlStr}` );
+
+            this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    cb({ error_type: "system", error: error });
+                    this.globals.logger.error("Users.find() :: ERROR : ", error);
+                    cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("PoppitUsers.create() result?: ", result);
+                    this.globals.logger.debug( "Users.find() result?: ", result);
                     cb(null,result);
                 }
             });
         }
     }
 
-    update(vals, cb){
-        //only update what's been given to us
-        let valCols = Object.keys(vals);
-
-        if( valCols.filter(el => VALID_COLS.indexOf(el) < 0).length > 0 ){
-            cb({ "error": "invalid_data" });
+    findOne(opts,cb){
+        if( !opts.id ){
+            cb({ error_type: "user", error: "id must be passed in" });
         } else {
-            let sqlStr = "update poppit_users SET " + this.dbescape(vals)+ ";";
+            let sqlStr = "select id,first_name,last_name,email_address,password_hash,created_at,updated_at from poppit_users where id=" + this.dbescape(opts.id) + ";";
 
-            this.execSQL(sqlStr, (error, result) => {
+            this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    cb({ error_type: "system", error: error });
+                    this.globals.logger.error("User.find() :: ERROR : ", error);
+                    cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("PoppitUsers.update() result?: ", result);
+                    this.globals.logger.debug("User.find() result?: ", result[0]);
+                    cb(null,result[0]);
+                }
+            });
+        }
+    }
+
+    create(user, cb){
+        //need more resilience: send back which columns are invalid?
+        let colErrors = [];
+        Object.keys(user).filter(el => {
+            if( VALID_COLS.indexOf(el) < 0 ){
+                colErrors.push({ "invalid_col": el });
+            }
+        });
+
+        if( colErrors.length > 0 ){
+            cb({ error_type: "user", "error": colErrors });
+        } else {
+            //json to  col -> val
+            let colsStr = VALID_COLS.join(',');
+            let valsStr = "";
+
+            Object.keys( user ).map( (col) => {
+                valsStr += `${this.dbescape(user[col])},`;
+            });
+
+            //remove the last comma
+            valsStr = valsStr.slice(0,-1);
+
+            let sqlStr = `INSERT INTO poppit_users (${colsStr}) `;
+            sqlStr += `VALUES (${valsStr});`;
+
+            this.globals.logger.debug("User.create() sqlStr: ", sqlStr);
+
+            this.execSQL(this.db, sqlStr, (error, result) => {
+                if (error) {
+                    this.globals.logger.error("User.create() :: ERROR : ", error);
+                    cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+                } else {
+                    this.globals.logger.debug("User.create() result?: ", result.insertId);
+                    cb(null,result.insertId);
+                }
+            });
+        }
+    }
+
+    update(vals, cb){
+        let user = vals.user;
+
+        //need more resilience: send back which columns are invalid?
+        let colErrors = [];
+        Object.keys(user).filter(el => {
+            if( VALID_COLS.indexOf(el) < 0 ){
+                colErrors.push({ "invalid_col": el });
+            }
+        });
+
+        if( colErrors.length > 0 ){
+            cb({ error_type: "user", "error": colErrors });
+        } else {
+            user.updated_at = new Date();
+
+            //json to  col -> val
+            let updateStr = "";
+            Object.keys( user ).map( (col) => {
+                updateStr += `${col}=${this.dbescape(user[col])},`;
+            });
+            //remove the last comma
+            updateStr = updateStr.slice(0,-1);
+
+            let sqlStr = `UPDATE poppit_users SET ${updateStr} `;
+            sqlStr += `where id = ${this.dbescape(vals.id)};`;
+
+            this.globals.logger.debug("Users.update() sqlStr: ", sqlStr);
+
+            this.execSQL(this.db, sqlStr, (error, result) => {
+                if (error) {
+                    this.globals.logger.error("Users.update() :: ERROR : ", error);
+                    cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+                } else {
+                    this.globals.logger.debug("Users.update() result?: ", result);
                     cb(null,result);
                 }
             });
@@ -103,10 +209,14 @@ class User {
     }
 
     delete(id, cb){
-        let sqlStr = 'delete from poppit_users where id=' + id;
-        this.execSQL(sqlStr, (error, result) => {
+        let sqlStr = 'DELETE FROM poppit_users WHERE id=' + this.dbescape(id);
+
+        this.globals.logger.debug("PoppitUsers.delete() sqlStr: ", sqlStr);
+
+        this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                cb({ error_type: "system", error: error });
+                this.globals.logger.error("PoppitUsers.delete() :: ERROR : ", error);
+                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
             } else {
                 this.globals.logger.debug("PoppitUsers.delete() result?: ", result);
                 cb(null, result);
