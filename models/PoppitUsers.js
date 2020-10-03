@@ -141,10 +141,37 @@ class User {
     }
 
     create(user, cb){
+        //TODO: POP-168.. this poisons the notifications field
+        user.notifications = {};
+
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
+
+        let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
+
+        //START remove sensitive data
+        //TODO: POP-168
+        let search_index = local_valid_cols.indexOf("password_hash");
+        if (search_index > -1) {
+            local_valid_cols.splice(search_index, 1);
+        }
+
+        search_index = local_valid_cols.indexOf("forgot_password_token");
+        if (search_index > -1) {
+            local_valid_cols.splice(search_index, 1);
+        }
+        search_index = local_valid_cols.indexOf("notifications");
+        if (search_index > -1) {
+            local_valid_cols.splice(search_index, 1);
+        }
+
+        //TODO: POP-168
+        delete user.notifications;
+
+        //END remove sensitive data
+
         Object.keys(user).filter(el => {
-            if( VALID_COLS.indexOf(el) < 0 ){
+            if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
         });
@@ -153,8 +180,12 @@ class User {
             cb({ error_type: "user", "error": colErrors });
         } else {
             //json to  col -> val
-            let colsStr = VALID_COLS.join(',');
+            let colsStr = "";
             let valsStr = "";
+
+            Object.keys( user ).map( (col) => {
+                colsStr += `${this.dbescape(col)},`;
+            });
 
             Object.keys( user ).map( (col) => {
                 valsStr += `${this.dbescape(user[col])},`;
@@ -162,6 +193,10 @@ class User {
 
             //remove the last comma
             valsStr = valsStr.slice(0,-1);
+            colsStr = colsStr.slice(0,-1);
+
+            //remove quotes around columns
+            colsStr = colsStr.replace(/\'/g, "");
 
             let sqlStr = `INSERT INTO poppit_users (${colsStr}) `;
             sqlStr += `VALUES (${valsStr});`;
@@ -196,10 +231,17 @@ class User {
         } else {
             user.updated_at = new Date();
 
+            //TODO, POP-168: save a legit object for notifications
+                //or, make it more generic
+            user.notifications = { type: "JSON" };
+
             //json to  col -> val
             let updateStr = "";
             Object.keys( user ).map( (col) => {
-                updateStr += `${col}=${this.dbescape(user[col])},`;
+                //TODO, POP-168: this poisons the query so JSON columns don't get written to
+                if( user[col].type !== "JSON" ) {
+                    updateStr += `${col}=${this.dbescape(user[col])},`;
+                }
             });
             //remove the last comma
             updateStr = updateStr.slice(0,-1);

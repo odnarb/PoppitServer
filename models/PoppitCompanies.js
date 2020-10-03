@@ -142,10 +142,19 @@ class Company {
     }
 
     create(company, cb){
+ 
+
+
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
-        Object.keys(company).filter(el => {
-            if( VALID_COLS.indexOf(el) < 0 ){
+
+        let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
+
+        //START remove sensitive data
+        //END remove sensitive data
+
+        Object.keys(user).filter(el => {
+            if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
         });
@@ -154,15 +163,23 @@ class Company {
             cb({ error_type: "user", "error": colErrors });
         } else {
             //json to  col -> val
-            let colsStr = VALID_COLS.join(',');
+            let colsStr = "";
             let valsStr = "";
 
-            Object.keys( company ).map( (col) => {
-                valsStr += `${this.dbescape(company[col])},`;
+            Object.keys( user ).map( (col) => {
+                colsStr += `${this.dbescape(col)},`;
+            });
+
+            Object.keys( user ).map( (col) => {
+                valsStr += `${this.dbescape(user[col])},`;
             });
 
             //remove the last comma
             valsStr = valsStr.slice(0,-1);
+            colsStr = colsStr.slice(0,-1);
+
+            //remove quotes around columns
+            colsStr = colsStr.replace(/\'/g, "");
 
             let sqlStr = `INSERT INTO poppit_companies (${colsStr}) `;
             sqlStr += `VALUES (${valsStr});`;
