@@ -9,7 +9,7 @@ const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class User {
+class CompanyUser {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -280,4 +280,4 @@ class User {
     }
 }
 
-module.exports = User;
+module.exports = CompanyUser;
