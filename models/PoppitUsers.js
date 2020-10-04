@@ -3,7 +3,7 @@
 */
 
 const VALID_COLS = ["first_name","last_name","email_address","password_hash","forgot_password_token","active","notifications","registration_type","city","state"];
-const VALID_FILTER_COLS = ["name","address","city","state","active","registration_type"];
+const VALID_FILTER_COLS = ["first_name","last_name","email_address","active","registration_type","city","state"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
@@ -19,7 +19,7 @@ class User {
 
     find(opts,cb){
 
-        this.globals.logger.debug(`Users.find() :: BEFORE opts initialized: `, opts);
+        this.globals.logger.debug(`User.find() :: BEFORE opts initialized: `, opts);
 
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
@@ -33,7 +33,7 @@ class User {
             };
         }
 
-        this.globals.logger.debug(`Users.find() :: AFTER opts initialized: `, opts);
+        this.globals.logger.debug(`User.find() :: AFTER opts initialized: `, opts);
 
         //need to initialize filter out opts.order.by
 
@@ -62,7 +62,7 @@ class User {
             opts.offset = parseInt(opts.offset);
         }
 
-        this.globals.logger.debug(`Users.find() :: AFTER opts validation: `, opts);
+        this.globals.logger.debug(`User.find() :: AFTER opts validation: `, opts);
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -74,7 +74,7 @@ class User {
             });
         }
 
-        this.globals.logger.debug(`Users.find() :: colErrors: `, colErrors);
+        this.globals.logger.debug(`User.find() :: colErrors: `, colErrors);
 
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
@@ -106,14 +106,14 @@ class User {
             //add  these to the call
             sqlStr += `${totalCount}${totalCountWithFilter}`;
 
-            this.globals.logger.debug( `Users.find() sqlStr: ${sqlStr}` );
+            this.globals.logger.debug( `User.find() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Users.find() :: ERROR : ", error);
+                    this.globals.logger.error("User.find() :: ERROR : ", error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug( "Users.find() result?: ", result);
+                    this.globals.logger.debug( "User.find() result?: ", result);
                     cb(null,result);
                 }
             });
@@ -249,14 +249,14 @@ class User {
             let sqlStr = `UPDATE poppit_users SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
-            this.globals.logger.debug("Users.update() sqlStr: ", sqlStr);
+            this.globals.logger.debug("User.update() sqlStr: ", sqlStr);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Users.update() :: ERROR : ", error);
+                    this.globals.logger.error("User.update() :: ERROR : ", error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Users.update() result?: ", result);
+                    this.globals.logger.debug("User.update() result?: ", result);
                     cb(null,result);
                 }
             });
@@ -266,14 +266,14 @@ class User {
     delete(id, cb){
         let sqlStr = 'DELETE FROM poppit_users WHERE id=' + this.dbescape(id);
 
-        this.globals.logger.debug("PoppitUsers.delete() sqlStr: ", sqlStr);
+        this.globals.logger.debug("User.delete() sqlStr: ", sqlStr);
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                this.globals.logger.error("PoppitUsers.delete() :: ERROR : ", error);
+                this.globals.logger.error("User.delete() :: ERROR : ", error);
                 cb({ error_type: "system", error: "A system error has occurred, please contact support" });
             } else {
-                this.globals.logger.debug("PoppitUsers.delete() result?: ", result);
+                this.globals.logger.debug("User.delete() result?: ", result);
                 cb(null, result);
             }
         });

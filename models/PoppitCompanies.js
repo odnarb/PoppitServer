@@ -19,7 +19,7 @@ class Company {
 
     find(opts,cb){
 
-        this.globals.logger.debug(`Companies.find() :: BEFORE opts initialized: `, opts);
+        this.globals.logger.debug(`Company.find() :: BEFORE opts initialized: `, opts);
 
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
@@ -33,7 +33,7 @@ class Company {
             };
         }
 
-        this.globals.logger.debug(`Companies.find() :: AFTER opts initialized: `, opts);
+        this.globals.logger.debug(`Company.find() :: AFTER opts initialized: `, opts);
 
         //need to initialize filter out opts.order.by
 
@@ -62,7 +62,7 @@ class Company {
             opts.offset = parseInt(opts.offset);
         }
 
-        this.globals.logger.debug(`Companies.find() :: AFTER opts validation: `, opts);
+        this.globals.logger.debug(`Company.find() :: AFTER opts validation: `, opts);
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -74,7 +74,7 @@ class Company {
             });
         }
 
-        this.globals.logger.debug(`Companies.find() :: colErrors: `, colErrors);
+        this.globals.logger.debug(`Company.find() :: colErrors: `, colErrors);
 
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
@@ -106,14 +106,14 @@ class Company {
             //add  these to the call
             sqlStr += `${totalCount}${totalCountWithFilter}`;
 
-            this.globals.logger.debug( `Companies.find() sqlStr: ${sqlStr}` );
+            this.globals.logger.debug( `Company.find() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
                     this.globals.logger.error("Company.find() :: ERROR : ", error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug( "Companies.find() result?: ", result);
+                    this.globals.logger.debug( "Company.find() result?: ", result);
                     cb(null,result);
                 }
             });
