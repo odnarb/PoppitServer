@@ -3,10 +3,10 @@
 let express = require('express');
 let router = express.Router();
 
-// user/login
+// appuser/login
 
 
-// // user/login
+// // appuser/login
 // router.post('/login', (req, res) =>{
 //     if( !req.body ){
 //         return res.status(400).json({reason: "no_params_sent"});
@@ -55,13 +55,13 @@ let UserModel = require('../models/PoppitUsers');
 
 module.exports = (globals) => {
     return router
-    // user/ (get all users)
+    // appuser/ (get all users)
     .get('/', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "GET /user (HTTP)";
+        let routeHeader = "GET /appuser (HTTP)";
 
         if( req.xhr == true ){
-            routeHeader = "GET /user (XHR)";
+            routeHeader = "GET /appuser (XHR)";
 
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN :: filtered user list` );
@@ -116,7 +116,7 @@ module.exports = (globals) => {
     // user/login
     .get('/login', (req, res, next) => {
 
-        globals.logger.info( "GET /user/login" );
+        globals.logger.info( "GET /appuser/login" );
 
         return res.render('pages/login', {
             data: {
@@ -128,18 +128,18 @@ module.exports = (globals) => {
     // user/login
     .post('/login', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /user/login :: globals? ", gres );
-        return res.json({ page: 'POST /user/login'});
+        globals.logger.info( "POST /appuser/login :: globals? ", gres );
+        return res.json({ page: 'POST /appuser/login'});
     })
     .post('/signup', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /user/signup :: globals? ", gres );
-        return res.json({ page: 'POST /user/signup'});
+        globals.logger.info( "POST /appuser/signup :: globals? ", gres );
+        return res.json({ page: 'POST /appuser/signup'});
     })
     //create user
     .post('/', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "POST /user";
+        let routeHeader = "POST /appuser";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -167,7 +167,7 @@ module.exports = (globals) => {
     // user/:id operations
     .get('/:id', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "GET /user/:id";
+        let routeHeader = "GET /appuser/:id";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -181,7 +181,7 @@ module.exports = (globals) => {
                     return next(err);
                 }
 
-                globals.logger.info(`GET /user/:id :: user.id: ${req.params.id}`, user);
+                globals.logger.info(`GET /appuser/:id :: user.id: ${req.params.id}`, user);
 
                 globals.logger.info( `${routeHeader} :: END` );
 
@@ -194,7 +194,7 @@ module.exports = (globals) => {
     })
     .put('/:id', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "PUT /user/:id ";
+        let routeHeader = "PUT /appuser/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -221,7 +221,7 @@ module.exports = (globals) => {
     })
     .delete('/:id', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "DELETE /user/:id ";
+        let routeHeader = "DELETE /appuser/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
