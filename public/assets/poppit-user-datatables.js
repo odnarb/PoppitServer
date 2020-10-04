@@ -86,7 +86,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the user
                     $.ajax({
                         method: "PUT",
-                        url: `/user/${user_id}`,
+                        url: `/appuser/${user_id}`,
                         data: user,
                         success: function(res) {
                             //reset form
@@ -146,7 +146,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the user
                     $.ajax({
                         method: "POST",
-                        url: `/user`,
+                        url: `/appuser`,
                         data: user,
                         success: function(res) {
                             //reset form
@@ -185,7 +185,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the user
                 $.ajax({
                     method: "DELETE",
-                    url: `/user/${user_id}`,
+                    url: `/appuser/${user_id}`,
                     success: function(res) {
                         console.log("user deleted!: ", res);
 
@@ -210,7 +210,7 @@ let KTDatatablesExtensionsKeytable = function() {
             order: [[ 7, "desc" ]],
 
             //request uri
-            ajax: "/user",
+            ajax: "/appuser",
 
             dataSrc: '',
 

@@ -138,8 +138,8 @@ app.use(session({
 let main = require('./routes/main.js')(globals);
 app.use('/', main);
 
-let user = require('./routes/user.js')(globals);
-app.use('/user', user);
+let appuser = require('./routes/appuser.js')(globals);
+app.use('/appuser', appuser);
 
 let company = require('./routes/company.js')(globals);
 app.use('/company', company);
