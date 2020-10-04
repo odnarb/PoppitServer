@@ -212,6 +212,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "actions" }
             ],
 
+            //TODO: after editing an object: the click handlers don't work
+
             columnDefs: [
                 //render time stamp
                 {
@@ -275,11 +277,12 @@ let KTDatatablesExtensionsKeytable = function() {
 
         let resetForm = function() {
             $('#form-company-name').val('');
-            $('#form-company-description').val('');
-            $('#form-company-address').val('');
-            $('#form-company-city').val('');
-            $('#form-company-state').val('');
-            $('#form-company-zip').val('');
+            $('#kt_object_add-edit_modal form input[name=name]').val('');
+            $('#kt_object_add-edit_modal form input[name=description]').val('');
+            $('#kt_object_add-edit_modal form input[name=address]').val('');
+            $('#kt_object_add-edit_modal form input[name=city]').val('');
+            $('#kt_object_add-edit_modal form input[name=state]').val('');
+            $('#kt_object_add-edit_modal form input[name=zip]').val('');
         };
 
         table.on( 'init', function(e, settings, json ) {

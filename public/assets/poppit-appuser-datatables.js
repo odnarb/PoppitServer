@@ -235,6 +235,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "actions" }
             ],
 
+            //TODO: after editing users: the click handlers don't work
             // --add disable/activate user quick button -- as a per-row toggle button
             // --add send forgotpassword email quick button
 
@@ -300,12 +301,13 @@ let KTDatatablesExtensionsKeytable = function() {
         };
 
         let resetForm = function() {
-            $('#form-user-name').val('');
-            $('#form-user-description').val('');
-            $('#form-user-address').val('');
-            $('#form-user-city').val('');
-            $('#form-user-state').val('');
-            $('#form-user-zip').val('');
+            $('#kt_object_add-edit_modal form input[name=first_name]').val('');
+            $('#kt_object_add-edit_modal form input[name=last_name]').val('');
+            $('#kt_object_add-edit_modal form input[name=email_address]').val('');
+            $('#kt_object_add-edit_modal form input[name=city]').val('');
+            $('#kt_object_add-edit_modal form input[name=state]').val('');
+            $('#kt_object_add-edit_modal form input[name=registration_type]').val('');
+            $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
         };
 
         table.on( 'init', function(e, settings, json ) {
