@@ -4,56 +4,66 @@ let KTDatatablesExtensionsKeytable = function() {
     // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
-    let initCompanyTable = function() {
+    let initCampaignTable = function() {
 
         let initTableHandlers = function() {
             // clear click handlers
-            $('.view-company').off();
-            $('.edit-company').off();
-            $('.add-company').off();
-            $('.remove-company').off();
+            $('.view-campaign').off();
+            $('.edit-campaign').off();
+            $('.add-campaign').off();
+            $('.remove-campaign').off();
             $('.submit-edit-add-form').off();
             $('.cancel-edit-add-form').off();
 
             //bind everything needed
-            $('.view-company').on('click', function(e) {
+            $('.view-campaign').on('click', function(e) {
                 e.preventDefault();
 
-                //get company object
-                let company_id = $(e.currentTarget).data('company-id');
-                let company = getRowData(company_id);
+                //get campaign object
+                let campaign_id = $(e.currentTarget).data('campaign-id');
+                let campaign = getRowData(campaign_id);
 
-                $('#kt_view_modal .object-field-name').html(company.name);
-                $('#kt_view_modal .object-field-description').html(company.description);
-                $('#kt_view_modal .object-field-address').html(company.address);
-                $('#kt_view_modal .object-field-city').html(company.city);
-                $('#kt_view_modal .object-field-state').html(company.state);
-                $('#kt_view_modal .object-field-zip').html(company.zip);
-                $('#kt_view_modal .object-field-created_at').html( formatDate(company.created_at) );
-                $('#kt_view_modal .object-field-updated_at').html( formatDate(company.updated_at) );
+                $('#kt_view_modal .object-field-company_id').html(campaign.company_id);
+                $('#kt_view_modal .object-field-name').html(campaign.name);
+                $('#kt_view_modal .object-field-category').html(campaign.category);
+                $('#kt_view_modal .object-field-description').html(campaign.description);
+                $('#kt_view_modal .object-field-game_id').html(campaign.game_id);
+                $('#kt_view_modal .object-field-data').html(campaign.data);
+                $('#kt_view_modal .object-field-date_start').html( formatDate(campaign.date_start) );
+                $('#kt_view_modal .object-field-date_end').html( formatDate(campaign.date_end) );
+                $('#kt_view_modal .object-field-created_at').html( formatDate(campaign.created_at) );
+                $('#kt_view_modal .object-field-updated_at').html( formatDate(campaign.updated_at) );
 
-                //load company information into modal and show it
-                $('#kt_view_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
+                //load campaign information into modal and show it
+                $('#kt_view_modal .view-object-header').html( `${campaign.name} (Campaign ID: ${campaign.id})`);
                 $('#kt_view_modal').modal('show');
             });
 
-            $('.edit-company').on('click', function(e) {
+            $('.edit-campaign').on('click', function(e) {
                 e.preventDefault();
 
-                //get company object
-                let company_id = $(e.currentTarget).data('company-id');
-                let company = getRowData(company_id);
+                //get campaign object
+                let campaign_id = $(e.currentTarget).data('campaign-id');
+                let campaign = getRowData(campaign_id);
 
                 //fill modal with content
-                $('#kt_object_add-edit_modal .view-object-header').html( `${company.name} (Company ID: ${company.id})`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `${campaign.name} (Campaign ID: ${campaign.id})`);
 
-                //fill form with content from company row
-                $('#kt_object_add-edit_modal form input[name=name]').val(company.name);
-                $('#kt_object_add-edit_modal form input[name=description]').val(company.description);
-                $('#kt_object_add-edit_modal form input[name=address]').val(company.address);
-                $('#kt_object_add-edit_modal form input[name=city]').val(company.city);
-                $('#kt_object_add-edit_modal form input[name=state]').val(company.state);
-                $('#kt_object_add-edit_modal form input[name=zip]').val(company.zip);
+                //fill form with content from campaign row
+                $('#kt_object_add-edit_modal form input[name=company_id]').val(campaign.company_id);
+                $('#kt_object_add-edit_modal form input[name=name]').val(campaign.name);
+                $('#kt_object_add-edit_modal form input[name=category]').val(campaign.category);
+                $('#kt_object_add-edit_modal form input[name=description]').val(campaign.description);
+                $('#kt_object_add-edit_modal form input[name=game_id]').val(campaign.game_id);
+                $('#kt_object_add-edit_modal form input[name=data]').val(campaign.data);
+                $('#kt_object_add-edit_modal form input[name=date_start]').val(campaign.date_start);
+                $('#kt_object_add-edit_modal form input[name=date_end]').val(campaign.date_end);
+
+                if( campaign.active === true ){
+                    $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
+                } else {
+                    $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+                }
 
                 //unbind any handlers
                 $('.submit-edit-add-form').off();
@@ -63,15 +73,15 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    let company = getFormData();
+                    let campaign = getFormData();
 
-                    console.log("company obj: ", company);
+                    console.log("campaign obj: ", campaign);
 
-                    //add the company
+                    //add the campaign
                     $.ajax({
                         method: "PUT",
-                        url: `/company/${company_id}`,
-                        data: $('.company-add-edit-form').serializeArray(),
+                        url: `/campaign/${campaign_id}`,
+                        data: $('.campaign-add-edit-form').serializeArray(),
                         success: function(res) {
                             //reset form
                             resetForm();
@@ -100,13 +110,13 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal').modal('show');
             });
 
-            $('.add-company').on('click', function(e) {
+            $('.add-campaign').on('click', function(e) {
                 e.preventDefault();
 
                 //make sure the form is empty
                 resetForm();
 
-                $('#kt_object_add-edit_modal .view-object-header').html( `Add New Company`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `Add New Campaign`);
                 $('#kt_object_add-edit_modal').modal('show');
 
                 //unbind any handlers
@@ -117,15 +127,15 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    let company = getFormData();
+                    let campaign = getFormData();
 
-                    console.log("new company obj: ", company);
+                    console.log("new campaign obj: ", campaign);
 
-                    //add the company
+                    //add the campaign
                     $.ajax({
                         method: "POST",
-                        url: `/company`,
-                        data: company,
+                        url: `/campaign`,
+                        data: campaign,
                         success: function(res) {
                             //reset form
                             resetForm();
@@ -152,20 +162,20 @@ let KTDatatablesExtensionsKeytable = function() {
                 });
             });
 
-            $('.remove-company').on('click', function(e) {
+            $('.remove-campaign').on('click', function(e) {
                 e.preventDefault();
 
-                let company_id = $(e.currentTarget).data('company-id');
-                let row_id = `company-${company_id}`;
+                let campaign_id = $(e.currentTarget).data('campaign-id');
+                let row_id = `campaign-${campaign_id}`;
 
-                console.log( `remove company id?: ${company_id}` );
+                console.log( `remove campaign id?: ${campaign_id}` );
 
-                //delete the company
+                //delete the campaign
                 $.ajax({
                     method: "DELETE",
-                    url: `/company/${company_id}`,
+                    url: `/campaign/${campaign_id}`,
                     success: function(res) {
-                        console.log("company deleted!: ", res);
+                        console.log("campaign deleted!: ", res);
 
                         //remove the row from the table
                         table.row(`#${row_id}`).remove().draw();
@@ -188,25 +198,27 @@ let KTDatatablesExtensionsKeytable = function() {
             order: [[ 7, "desc" ]],
 
             //request uri
-            ajax: "/company",
+            ajax: "/campaign",
 
-            //tell datatables that our structure is in obj.companies
+            //tell datatables that our structure is in obj.campaigns
             dataSrc: '',
 
             //give the row an id, for filling modals later
             rowId: function(row) {
-                  return `company-${row.id}`;
+                  return `campaign-${row.id}`;
             },
 
             //define the columns
             columns: [
                 { "data": "id" },
+                { "data": "company_id" },
                 { "data": "name" },
+                { "data": "category" },
                 { "data": "description" },
-                { "data": "address" },
-                { "data": "city" },
-                { "data": "state" },
-                { "data": "zip" },
+                { "data": "game_id" },
+                { "data": "date_start" },
+                { "data": "date_end" },
+                { "data": "active" },
                 { "data": "created_at" },
                 { "data": "updated_at" },
                 { "data": "actions" }
@@ -218,33 +230,33 @@ let KTDatatablesExtensionsKeytable = function() {
                 //render time stamp
                 {
                     targets: -3,
-                    render: function(data, type, company, meta) {
-                        return `${formatDate(company.created_at)}`;
+                    render: function(data, type, campaign, meta) {
+                        return `${formatDate(campaign.created_at)}`;
                     }
                 },
                 //render time stamp
                 {
                     targets: -2,
-                    render: function(data, type, company, meta) {
-                        return `${formatDate(company.updated_at)}`;
+                    render: function(data, type, campaign, meta) {
+                        return `${formatDate(campaign.updated_at)}`;
                     }
                 },
                 {
                     targets: -1,
                     title: 'Actions',
                     orderable: false,
-                    render: function(data, type, company, meta) {
+                    render: function(data, type, campaign, meta) {
                         return `
                         <span class="dropdown">
                             <a href="#" class="btn btn-sm btn-clean btn-icon btn-icon-md" data-toggle="dropdown" aria-expanded="true">
                               <i class="la la-ellipsis-h"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item edit-company" href="#" data-company-id=${company.id}><i class="la la-edit"></i> Edit Company</a>
-                                <a class="dropdown-item remove-company" href="#" data-company-id=${company.id}><i class="la la-remove"></i> Delete Company</a>
+                                <a class="dropdown-item edit-campaign" href="#" data-campaign-id=${campaign.id}><i class="la la-edit"></i> Edit Campaign</a>
+                                <a class="dropdown-item remove-campaign" href="#" data-campaign-id=${campaign.id}><i class="la la-remove"></i> Delete Campaign</a>
                             </div>
                         </span>
-                        <a href="#" class="btn btn-sm btn-clean btn-icon btn-icon-md view-company" title="View All Details" data-company-id=${company.id}>
+                        <a href="#" class="btn btn-sm btn-clean btn-icon btn-icon-md view-campaign" title="View All Details" data-campaign-id=${campaign.id}>
                           <i class="la la-eye"></i>
                         </a>`;
                     }
@@ -260,29 +272,32 @@ let KTDatatablesExtensionsKeytable = function() {
 
         let getRowData = function(id) {
             //drill in to get the row id from the event
-            let row_id = `company-${id}`;
+            let row_id = `campaign-${id}`;
             return table.row(`#${row_id}`).data();
         };
 
         let getFormData = function() {
-            let companyFormData = $('.company-add-edit-form').serializeArray();
+            let campaignFormData = $('.campaign-add-edit-form').serializeArray();
 
-            //loop through and prepare as a company object
-            let company = {};
-            companyFormData.forEach(function(item) {
-                company[item.name] = item.value;
+            //loop through and prepare as a campaign object
+            let campaign = {};
+            campaignFormData.forEach(function(item) {
+                campaign[item.name] = item.value;
             });
-            return company;
+            return campaign;
         };
 
         let resetForm = function() {
-            $('#kt_object_add-edit_modal .view-object-header').html( '' );
+            $('#kt_object_add-edit_modal .view-object-header').html('');
+            $('#kt_object_add-edit_modal form input[name=company_id]').val('');
             $('#kt_object_add-edit_modal form input[name=name]').val('');
+            $('#kt_object_add-edit_modal form input[name=category]').val('');
             $('#kt_object_add-edit_modal form input[name=description]').val('');
-            $('#kt_object_add-edit_modal form input[name=address]').val('');
-            $('#kt_object_add-edit_modal form input[name=city]').val('');
-            $('#kt_object_add-edit_modal form input[name=state]').val('');
-            $('#kt_object_add-edit_modal form input[name=zip]').val('');
+            $('#kt_object_add-edit_modal form input[name=game_id]').val('');
+            $('#kt_object_add-edit_modal form input[name=data]').val('');
+            $('#kt_object_add-edit_modal form input[name=date_start]').val('');
+            $('#kt_object_add-edit_modal form input[name=date_end]').val('');
+            $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
         };
 
         table.on( 'init', function(e, settings, json ) {
@@ -293,7 +308,7 @@ let KTDatatablesExtensionsKeytable = function() {
     return {
         //main function to initiate the module
         init: function() {
-            initCompanyTable();
+            initCampaignTable();
         }
     };
 
