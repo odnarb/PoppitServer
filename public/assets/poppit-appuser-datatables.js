@@ -55,7 +55,6 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=email_address]').val(user.email_address);
                 $('#kt_object_add-edit_modal form input[name=city]').val(user.city);
                 $('#kt_object_add-edit_modal form input[name=state]').val(user.state);
-
                 $('#kt_object_add-edit_modal form input[name=notifications]').val(user.notifications);
                 $('#kt_object_add-edit_modal form input[name=registration_type]').val(user.registration_type);
 
@@ -301,6 +300,7 @@ let KTDatatablesExtensionsKeytable = function() {
         };
 
         let resetForm = function() {
+            $('#kt_object_add-edit_modal .view-object-header').html( '' );
             $('#kt_object_add-edit_modal form input[name=first_name]').val('');
             $('#kt_object_add-edit_modal form input[name=last_name]').val('');
             $('#kt_object_add-edit_modal form input[name=email_address]').val('');

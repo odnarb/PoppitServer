@@ -294,6 +294,7 @@ let KTDatatablesExtensionsKeytable = function() {
         };
 
         let resetForm = function() {
+            $('#kt_object_add-edit_modal .view-object-header').html( '' );
             $('#kt_object_add-edit_modal form input[name=company_id]').val('');
             $('#kt_object_add-edit_modal form input[name=first_name]').val('');
             $('#kt_object_add-edit_modal form input[name=last_name]').val('');

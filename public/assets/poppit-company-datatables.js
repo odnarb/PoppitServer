@@ -276,7 +276,7 @@ let KTDatatablesExtensionsKeytable = function() {
         };
 
         let resetForm = function() {
-            $('#form-company-name').val('');
+            $('#kt_object_add-edit_modal .view-object-header').html( '' );
             $('#kt_object_add-edit_modal form input[name=name]').val('');
             $('#kt_object_add-edit_modal form input[name=description]').val('');
             $('#kt_object_add-edit_modal form input[name=address]').val('');
