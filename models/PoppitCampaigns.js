@@ -151,25 +151,25 @@ class Campaign {
         //START remove sensitive data
         //END remove sensitive data
 
-        Object.keys(user).filter(el => {
+        Object.keys(campaign).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
         });
 
         if( colErrors.length > 0 ){
-            cb({ error_type: "user", "error": colErrors });
+            cb({ error_type: "campaign", "error": colErrors });
         } else {
             //json to  col -> val
             let colsStr = "";
             let valsStr = "";
 
-            Object.keys( user ).map( (col) => {
+            Object.keys( campaign ).map( (col) => {
                 colsStr += `${this.dbescape(col)},`;
             });
 
-            Object.keys( user ).map( (col) => {
-                valsStr += `${this.dbescape(user[col])},`;
+            Object.keys( campaign ).map( (col) => {
+                valsStr += `${this.dbescape(campaign[col])},`;
             });
 
             //remove the last comma
