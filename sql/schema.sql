@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS `poppit_games`;
 DROP TABLE IF EXISTS `poppit_company_invoices`;
 DROP TABLE IF EXISTS `poppit_company_subscriptions`;
 DROP TABLE IF EXISTS `poppit_company_users`;
-DROP TABLE IF EXISTS `poppit_campaigns`;
+DROP TABLE IF EXISTS `poppit_company_campaigns`;
 DROP TABLE IF EXISTS `poppit_company_locations`;
 DROP TABLE IF EXISTS `poppit_roles`;
 DROP TABLE IF EXISTS `poppit_user_role`;
@@ -101,9 +101,9 @@ CREATE TABLE `poppit_company_users` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- poppit_campaigns
+-- poppit_company_campaigns
 -- json column is for branding information, links to images, etc?
-CREATE TABLE `poppit_campaigns` (
+CREATE TABLE `poppit_company_campaigns` (
     `id` BIGINT AUTO_INCREMENT,
     `company_id` BIGINT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
@@ -142,13 +142,16 @@ CREATE TABLE `poppit_company_locations` (
     `company_id` BIGINT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `address` VARCHAR(255) NOT NULL DEFAULT '',
     `city` VARCHAR(80) NOT NULL DEFAULT '',
     `state` VARCHAR(80) NOT NULL DEFAULT '',
     `zip` VARCHAR(5) NOT NULL DEFAULT '',
     `country_code` VARCHAR(2) NOT NULL DEFAULT '',
     `latitude` VARCHAR(30) NOT NULL DEFAULT '',
     `longitude` VARCHAR(30) NOT NULL DEFAULT '',
+    `altitude` VARCHAR(30) NOT NULL DEFAULT '',
     `polygon` JSON NULL,
+    `active` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),

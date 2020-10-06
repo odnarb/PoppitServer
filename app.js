@@ -150,6 +150,9 @@ app.use('/company', company);
 let campaign = require('./routes/campaign.js')(globals);
 app.use('/campaign', campaign);
 
+let location = require('./routes/location.js')(globals);
+app.use('/location', location);
+
 //handle 404's
 app.use( (req, res, next) => {
     globals.logger.info("ERROR 404 :: requested url: " + req.url );
