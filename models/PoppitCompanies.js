@@ -2,6 +2,10 @@
     DBAL for PoppitCompanies
 */
 
+const TABLE_NAME = "poppit_company_locations";
+const MODEL_NAME = "Location";
+const OBJECT_NAME = "location";
+
 const VALID_COLS = ["name","description","address","city","state","zip"];
 const VALID_FILTER_COLS = ["name","address","city","state","zip"];
 
@@ -19,7 +23,7 @@ class Company {
 
     find(opts,cb){
 
-        this.globals.logger.debug(`Company.find() :: BEFORE opts initialized: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: BEFORE opts initialized: `, opts);
 
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
@@ -33,7 +37,7 @@ class Company {
             };
         }
 
-        this.globals.logger.debug(`Company.find() :: AFTER opts initialized: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts initialized: `, opts);
 
         //need to initialize filter out opts.order.by
 
@@ -62,7 +66,7 @@ class Company {
             opts.offset = parseInt(opts.offset);
         }
 
-        this.globals.logger.debug(`Company.find() :: AFTER opts validation: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts validation: `, opts);
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -74,7 +78,7 @@ class Company {
             });
         }
 
-        this.globals.logger.debug(`Company.find() :: colErrors: `, colErrors);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: colErrors: `, colErrors);
 
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
@@ -89,14 +93,14 @@ class Company {
             });
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-            let sqlStr = `SELECT ${cols} FROM poppit_companies`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
-            let totalCount = `SELECT count(*) as totalCount FROM poppit_companies;`;
-            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_companies;`;
+            let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
+            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM ${TABLE_NAME};`;
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
-                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_companies WHERE ${whereStr};`;
+                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM ${TABLE_NAME} WHERE ${whereStr};`;
             }
 
             sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
@@ -106,14 +110,14 @@ class Company {
             //add  these to the call
             sqlStr += `${totalCount}${totalCountWithFilter}`;
 
-            this.globals.logger.debug( `Company.find() sqlStr: ${sqlStr}` );
+            this.globals.logger.debug( `${MODEL_NAME}.find() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Company.find() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug( "Company.find() result?: ", result);
+                    this.globals.logger.debug( `${MODEL_NAME}.find() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -126,25 +130,23 @@ class Company {
         } else {
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
 
-            let sqlStr = `SELECT ${cols} FROM poppit_companies where id=${this.dbescape(opts.id)};`;
+            this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Company.find() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Company.find() result?: ", result[0]);
+                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result[0]);
                     cb(null,result[0]);
                 }
             });
         }
     }
 
-    create(company, cb){
- 
-
-
+    create(obj, cb){
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
 
@@ -153,7 +155,7 @@ class Company {
         //START remove sensitive data
         //END remove sensitive data
 
-        Object.keys(user).filter(el => {
+        Object.keys(obj).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
@@ -166,12 +168,12 @@ class Company {
             let colsStr = "";
             let valsStr = "";
 
-            Object.keys( user ).map( (col) => {
+            Object.keys( obj ).map( (col) => {
                 colsStr += `${this.dbescape(col)},`;
             });
 
-            Object.keys( user ).map( (col) => {
-                valsStr += `${this.dbescape(user[col])},`;
+            Object.keys( obj ).map( (col) => {
+                valsStr += `${this.dbescape(obj[col])},`;
             });
 
             //remove the last comma
@@ -181,17 +183,17 @@ class Company {
             //remove quotes around columns
             colsStr = colsStr.replace(/\'/g, "");
 
-            let sqlStr = `INSERT INTO poppit_companies (${colsStr}) `;
+            let sqlStr = `INSERT INTO ${TABLE_NAME} (${colsStr}) `;
             sqlStr += `VALUES (${valsStr});`;
 
-            this.globals.logger.debug("Company.create() sqlStr: ", sqlStr);
+            this.globals.logger.debug(`${MODEL_NAME}.create() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Company.create() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Company.create() result?: ", result.insertId);
+                    this.globals.logger.debug(`${MODEL_NAME}.create() result?: `, result.insertId);
                     cb(null,result.insertId);
                 }
             });
@@ -199,11 +201,11 @@ class Company {
     }
 
     update(vals, cb){
-        let company = vals.company;
+        let obj = vals[OBJECT_NAME];
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
-        Object.keys(company).filter(el => {
+        Object.keys(obj).filter(el => {
             if( VALID_COLS.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
@@ -212,27 +214,27 @@ class Company {
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
-            company.updated_at = new Date();
+            obj.updated_at = new Date();
 
             //json to  col -> val
             let updateStr = "";
-            Object.keys( company ).map( (col) => {
-                updateStr += `${col}=${this.dbescape(company[col])},`;
+            Object.keys( obj ).map( (col) => {
+                updateStr += `${col}=${this.dbescape(obj[col])},`;
             });
             //remove the last comma
             updateStr = updateStr.slice(0,-1);
 
-            let sqlStr = `UPDATE poppit_companies SET ${updateStr} `;
+            let sqlStr = `UPDATE ${TABLE_NAME} SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
-            this.globals.logger.debug("Company.update() sqlStr: ", sqlStr);
+            this.globals.logger.debug(`${MODEL_NAME}.update() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Company.update() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.update() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Company.update() result?: ", result);
+                    this.globals.logger.debug(`${MODEL_NAME}.update() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -240,16 +242,16 @@ class Company {
     }
 
     delete(id, cb){
-        let sqlStr = 'DELETE FROM poppit_companies WHERE id=' + this.dbescape(id);
+        let sqlStr = `DELETE FROM ${TABLE_NAME} WHERE id=${this.dbescape(id)}`;
 
-        this.globals.logger.debug("Company.delete() sqlStr: ", sqlStr);
+        this.globals.logger.debug(`${MODEL_NAME}.delete() sqlStr: ${sqlStr}`);
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                this.globals.logger.error("Company.delete() :: ERROR : ", error);
+                this.globals.logger.error(`${MODEL_NAME}.delete() :: ERROR : `, error);
                 cb({ error_type: "system", error: "A system error has occurred, please contact support" });
             } else {
-                this.globals.logger.debug("Company.delete() result?: ", result);
+                this.globals.logger.debug(`${MODEL_NAME}.delete() result?: `, result);
                 cb(null, result);
             }
         });

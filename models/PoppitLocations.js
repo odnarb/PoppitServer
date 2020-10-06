@@ -130,8 +130,9 @@ class Location {
         } else {
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
+
+            this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
@@ -145,7 +146,7 @@ class Location {
         }
     }
 
-    create(dbobj, cb){
+    create(obj, cb){
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -155,7 +156,7 @@ class Location {
         //START remove sensitive data
         //END remove sensitive data
 
-        Object.keys(dbobj).filter(el => {
+        Object.keys(obj).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
@@ -168,12 +169,12 @@ class Location {
             let colsStr = "";
             let valsStr = "";
 
-            Object.keys( dbobj ).map( (col) => {
+            Object.keys( obj ).map( (col) => {
                 colsStr += `${this.dbescape(col)},`;
             });
 
-            Object.keys( dbobj ).map( (col) => {
-                valsStr += `${this.dbescape(dbobj[col])},`;
+            Object.keys( obj ).map( (col) => {
+                valsStr += `${this.dbescape(obj[col])},`;
             });
 
             //remove the last comma
@@ -201,11 +202,11 @@ class Location {
     }
 
     update(vals, cb){
-        let dbobj = vals[OBJECT_NAME];
+        let obj = vals[OBJECT_NAME];
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
-        Object.keys(dbobj).filter(el => {
+        Object.keys(obj).filter(el => {
             if( VALID_COLS.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
@@ -214,12 +215,12 @@ class Location {
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
-            dbobj.updated_at = new Date();
+            obj.updated_at = new Date();
 
             //json to  col -> val
             let updateStr = "";
-            Object.keys( dbobj ).map( (col) => {
-                updateStr += `${col}=${this.dbescape(dbobj[col])},`;
+            Object.keys( obj ).map( (col) => {
+                updateStr += `${col}=${this.dbescape(obj[col])},`;
             });
             //remove the last comma
             updateStr = updateStr.slice(0,-1);
@@ -242,7 +243,7 @@ class Location {
     }
 
     delete(id, cb){
-        let sqlStr = 'DELETE FROM ${TABLE_NAME} WHERE id=' + this.dbescape(id);
+        let sqlStr = `DELETE FROM ${TABLE_NAME} WHERE id=${this.dbescape(id)}`;
 
         this.globals.logger.debug(`${MODEL_NAME}.delete() sqlStr: ${sqlStr}`);
 

@@ -2,6 +2,10 @@
     DBAL for PoppitUsers
 */
 
+const TABLE_NAME = "poppit_users";
+const MODEL_NAME = "User";
+const OBJECT_NAME = "user";
+
 const VALID_COLS = ["first_name","last_name","email_address","password_hash","forgot_password_token","active","notifications","registration_type","city","state"];
 const VALID_FILTER_COLS = ["first_name","last_name","email_address","active","registration_type","city","state"];
 
@@ -19,7 +23,7 @@ class User {
 
     find(opts,cb){
 
-        this.globals.logger.debug(`User.find() :: BEFORE opts initialized: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: BEFORE opts initialized: `, opts);
 
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
@@ -33,7 +37,7 @@ class User {
             };
         }
 
-        this.globals.logger.debug(`User.find() :: AFTER opts initialized: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts initialized: `, opts);
 
         //need to initialize filter out opts.order.by
 
@@ -62,7 +66,7 @@ class User {
             opts.offset = parseInt(opts.offset);
         }
 
-        this.globals.logger.debug(`User.find() :: AFTER opts validation: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts validation: `, opts);
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -74,7 +78,7 @@ class User {
             });
         }
 
-        this.globals.logger.debug(`User.find() :: colErrors: `, colErrors);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: colErrors: `, colErrors);
 
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
@@ -89,14 +93,14 @@ class User {
             });
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-            let sqlStr = `SELECT ${cols} FROM poppit_users`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
-            let totalCount = `SELECT count(*) as totalCount FROM poppit_users;`;
-            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_users;`;
+            let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
+            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM ${TABLE_NAME};`;
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
-                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_users WHERE ${whereStr};`;
+                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM ${TABLE_NAME} WHERE ${whereStr};`;
             }
 
             sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
@@ -106,14 +110,14 @@ class User {
             //add  these to the call
             sqlStr += `${totalCount}${totalCountWithFilter}`;
 
-            this.globals.logger.debug( `User.find() sqlStr: ${sqlStr}` );
+            this.globals.logger.debug( `${MODEL_NAME}.find() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("User.find() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug( "User.find() result?: ", result);
+                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -126,23 +130,25 @@ class User {
         } else {
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-            let sqlStr = `SELECT ${cols} FROM poppit_users where id=${this.dbescape(opts.id)};`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
+
+            this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("User.find() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("User.find() result?: ", result[0]);
+                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result[0]);
                     cb(null,result[0]);
                 }
             });
         }
     }
 
-    create(user, cb){
+    create(obj, cb){
         //TODO: POP-168.. this poisons the notifications field
-        user.notifications = {};
+        obj.notifications = {};
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -166,11 +172,11 @@ class User {
         }
 
         //TODO: POP-168
-        delete user.notifications;
+        delete obj.notifications;
 
         //END remove sensitive data
 
-        Object.keys(user).filter(el => {
+        Object.keys(obj).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
@@ -183,12 +189,12 @@ class User {
             let colsStr = "";
             let valsStr = "";
 
-            Object.keys( user ).map( (col) => {
+            Object.keys( obj ).map( (col) => {
                 colsStr += `${this.dbescape(col)},`;
             });
 
-            Object.keys( user ).map( (col) => {
-                valsStr += `${this.dbescape(user[col])},`;
+            Object.keys( obj ).map( (col) => {
+                valsStr += `${this.dbescape(obj[col])},`;
             });
 
             //remove the last comma
@@ -198,17 +204,17 @@ class User {
             //remove quotes around columns
             colsStr = colsStr.replace(/\'/g, "");
 
-            let sqlStr = `INSERT INTO poppit_users (${colsStr}) `;
+            let sqlStr = `INSERT INTO ${TABLE_NAME} (${colsStr}) `;
             sqlStr += `VALUES (${valsStr});`;
 
-            this.globals.logger.debug("User.create() sqlStr: ", sqlStr);
+            this.globals.logger.debug(`${MODEL_NAME}.create() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("User.create() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("User.create() result?: ", result.insertId);
+                    this.globals.logger.debug(`${MODEL_NAME}.create() result?: `, result.insertId);
                     cb(null,result.insertId);
                 }
             });
@@ -216,11 +222,11 @@ class User {
     }
 
     update(vals, cb){
-        let user = vals.user;
+        let obj = vals[OBJECT_NAME];
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
-        Object.keys(user).filter(el => {
+        Object.keys(obj).filter(el => {
             if( VALID_COLS.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
@@ -229,34 +235,34 @@ class User {
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
-            user.updated_at = new Date();
+            obj.updated_at = new Date();
 
             //TODO, POP-168: save a legit object for notifications
                 //or, make it more generic
-            user.notifications = { type: "JSON" };
+            obj.notifications = { type: "JSON" };
 
             //json to  col -> val
             let updateStr = "";
-            Object.keys( user ).map( (col) => {
+            Object.keys( obj ).map( (col) => {
                 //TODO, POP-168: this poisons the query so JSON columns don't get written to
-                if( user[col].type !== "JSON" ) {
-                    updateStr += `${col}=${this.dbescape(user[col])},`;
+                if( obj[col].type !== "JSON" ) {
+                    updateStr += `${col}=${this.dbescape(obj[col])},`;
                 }
             });
             //remove the last comma
             updateStr = updateStr.slice(0,-1);
 
-            let sqlStr = `UPDATE poppit_users SET ${updateStr} `;
+            let sqlStr = `UPDATE ${TABLE_NAME} SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
-            this.globals.logger.debug("User.update() sqlStr: ", sqlStr);
+            this.globals.logger.debug(`${MODEL_NAME}.update() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("User.update() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.update() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("User.update() result?: ", result);
+                    this.globals.logger.debug(`${MODEL_NAME}.update() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -264,16 +270,16 @@ class User {
     }
 
     delete(id, cb){
-        let sqlStr = 'DELETE FROM poppit_users WHERE id=' + this.dbescape(id);
+        let sqlStr = `DELETE FROM ${TABLE_NAME} WHERE id=${this.dbescape(id)}`;
 
-        this.globals.logger.debug("User.delete() sqlStr: ", sqlStr);
+        this.globals.logger.debug(`${MODEL_NAME}.delete() sqlStr: ${sqlStr}`);
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                this.globals.logger.error("User.delete() :: ERROR : ", error);
+                this.globals.logger.error(`${MODEL_NAME}.delete() :: ERROR : `, error);
                 cb({ error_type: "system", error: "A system error has occurred, please contact support" });
             } else {
-                this.globals.logger.debug("User.delete() result?: ", result);
+                this.globals.logger.debug(`${MODEL_NAME}.delete() result?: `, result);
                 cb(null, result);
             }
         });

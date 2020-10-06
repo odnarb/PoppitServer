@@ -2,6 +2,10 @@
     DBAL for PoppitCampaigns
 */
 
+const TABLE_NAME = "poppit_company_campaigns";
+const MODEL_NAME = "Campaign";
+const OBJECT_NAME = "campaign";
+
 const VALID_COLS = ["company_id","name","category","description","game_id","data","date_start","date_end","active"];
 const VALID_FILTER_COLS = ["company_id","name","category","game_id","date_start","date_end","active"];
 
@@ -19,7 +23,7 @@ class Campaign {
 
     find(opts,cb){
 
-        this.globals.logger.debug(`Campaign.find() :: BEFORE opts initialized: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: BEFORE opts initialized: `, opts);
 
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
@@ -33,7 +37,7 @@ class Campaign {
             };
         }
 
-        this.globals.logger.debug(`Campaign.find() :: AFTER opts initialized: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts initialized: `, opts);
 
         //need to initialize filter out opts.order.by
 
@@ -62,7 +66,7 @@ class Campaign {
             opts.offset = parseInt(opts.offset);
         }
 
-        this.globals.logger.debug(`Campaign.find() :: AFTER opts validation: `, opts);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts validation: `, opts);
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -74,7 +78,7 @@ class Campaign {
             });
         }
 
-        this.globals.logger.debug(`Campaign.find() :: colErrors: `, colErrors);
+        this.globals.logger.debug(`${MODEL_NAME}.find() :: colErrors: `, colErrors);
 
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
@@ -89,14 +93,14 @@ class Campaign {
             });
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-            let sqlStr = `SELECT ${cols} FROM poppit_company_campaigns`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
-            let totalCount = `SELECT count(*) as totalCount FROM poppit_company_campaigns;`;
-            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_company_campaigns;`;
+            let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
+            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM ${TABLE_NAME};`;
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
-                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_company_campaigns WHERE ${whereStr};`;
+                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM ${TABLE_NAME} WHERE ${whereStr};`;
             }
 
             sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
@@ -106,14 +110,14 @@ class Campaign {
             //add  these to the call
             sqlStr += `${totalCount}${totalCountWithFilter}`;
 
-            this.globals.logger.debug( `Campaign.find() sqlStr: ${sqlStr}` );
+            this.globals.logger.debug( `${MODEL_NAME}.find() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Campaign.find() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug( "Campaign.find() result?: ", result);
+                    this.globals.logger.debug( `${MODEL_NAME}.find() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -126,22 +130,23 @@ class Campaign {
         } else {
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
 
-            let sqlStr = `SELECT ${cols} FROM poppit_company_campaigns where id=${this.dbescape(opts.id)};`;
+            this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Campaign.find() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Campaign.find() result?: ", result[0]);
+                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result[0]);
                     cb(null,result[0]);
                 }
             });
         }
     }
 
-    create(campaign, cb){
+    create(obj, cb){
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -151,25 +156,25 @@ class Campaign {
         //START remove sensitive data
         //END remove sensitive data
 
-        Object.keys(campaign).filter(el => {
+        Object.keys(obj).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
         });
 
         if( colErrors.length > 0 ){
-            cb({ error_type: "campaign", "error": colErrors });
+            cb({ error_type: "user", "error": colErrors });
         } else {
             //json to  col -> val
             let colsStr = "";
             let valsStr = "";
 
-            Object.keys( campaign ).map( (col) => {
+            Object.keys( obj ).map( (col) => {
                 colsStr += `${this.dbescape(col)},`;
             });
 
-            Object.keys( campaign ).map( (col) => {
-                valsStr += `${this.dbescape(campaign[col])},`;
+            Object.keys( obj ).map( (col) => {
+                valsStr += `${this.dbescape(obj[col])},`;
             });
 
             //remove the last comma
@@ -179,17 +184,17 @@ class Campaign {
             //remove quotes around columns
             colsStr = colsStr.replace(/\'/g, "");
 
-            let sqlStr = `INSERT INTO poppit_company_campaigns (${colsStr}) `;
+            let sqlStr = `INSERT INTO ${TABLE_NAME} (${colsStr}) `;
             sqlStr += `VALUES (${valsStr});`;
 
-            this.globals.logger.debug("Campaign.create() sqlStr: ", sqlStr);
+            this.globals.logger.debug(`${MODEL_NAME}.create() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Campaign.create() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Campaign.create() result?: ", result.insertId);
+                    this.globals.logger.debug(`${MODEL_NAME}.create() result?: `, result.insertId);
                     cb(null,result.insertId);
                 }
             });
@@ -197,11 +202,11 @@ class Campaign {
     }
 
     update(vals, cb){
-        let campaign = vals.campaign;
+        let obj = vals[OBJECT_NAME];
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
-        Object.keys(campaign).filter(el => {
+        Object.keys(obj).filter(el => {
             if( VALID_COLS.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
             }
@@ -210,27 +215,27 @@ class Campaign {
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
-            campaign.updated_at = new Date();
+            obj.updated_at = new Date();
 
             //json to  col -> val
             let updateStr = "";
-            Object.keys( campaign ).map( (col) => {
-                updateStr += `${col}=${this.dbescape(campaign[col])},`;
+            Object.keys( obj ).map( (col) => {
+                updateStr += `${col}=${this.dbescape(obj[col])},`;
             });
             //remove the last comma
             updateStr = updateStr.slice(0,-1);
 
-            let sqlStr = `UPDATE poppit_company_campaigns SET ${updateStr} `;
+            let sqlStr = `UPDATE ${TABLE_NAME} SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
-            this.globals.logger.debug("Campaign.update() sqlStr: ", sqlStr);
+            this.globals.logger.debug(`${MODEL_NAME}.update() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error("Campaign.update() :: ERROR : ", error);
+                    this.globals.logger.error(`${MODEL_NAME}.update() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug("Campaign.update() result?: ", result);
+                    this.globals.logger.debug(`${MODEL_NAME}.update() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -238,16 +243,16 @@ class Campaign {
     }
 
     delete(id, cb){
-        let sqlStr = 'DELETE FROM poppit_company_campaigns WHERE id=' + this.dbescape(id);
+        let sqlStr = `DELETE FROM ${TABLE_NAME} WHERE id=${this.dbescape(id)}`;
 
-        this.globals.logger.debug("Campaign.delete() sqlStr: ", sqlStr);
+        this.globals.logger.debug(`${MODEL_NAME}.delete() sqlStr: ${sqlStr}`);
 
         this.execSQL(this.db, sqlStr, (error, result) => {
             if (error) {
-                this.globals.logger.error("Campaign.delete() :: ERROR : ", error);
+                this.globals.logger.error(`${MODEL_NAME}.delete() :: ERROR : `, error);
                 cb({ error_type: "system", error: "A system error has occurred, please contact support" });
             } else {
-                this.globals.logger.debug("Campaign.delete() result?: ", result);
+                this.globals.logger.debug(`${MODEL_NAME}.delete() result?: `, result);
                 cb(null, result);
             }
         });
