@@ -89,14 +89,14 @@ class Campaign {
             });
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-            let sqlStr = `SELECT ${cols} FROM poppit_campaigns`;
+            let sqlStr = `SELECT ${cols} FROM poppit_company_campaigns`;
 
-            let totalCount = `SELECT count(*) as totalCount FROM poppit_campaigns;`;
-            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_campaigns;`;
+            let totalCount = `SELECT count(*) as totalCount FROM poppit_company_campaigns;`;
+            let totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_company_campaigns;`;
 
             if( whereStr !== "" ) {
                 sqlStr += ` WHERE ${whereStr}`;
-                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_campaigns WHERE ${whereStr};`;
+                totalCountWithFilter = `SELECT count(*) as totalCountWithFilter FROM poppit_company_campaigns WHERE ${whereStr};`;
             }
 
             sqlStr += ` ORDER BY ${opts.order.by} ${opts.order.direction}`;
@@ -127,7 +127,7 @@ class Campaign {
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
 
-            let sqlStr = `SELECT ${cols} FROM poppit_campaigns where id=${this.dbescape(opts.id)};`;
+            let sqlStr = `SELECT ${cols} FROM poppit_company_campaigns where id=${this.dbescape(opts.id)};`;
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
@@ -179,7 +179,7 @@ class Campaign {
             //remove quotes around columns
             colsStr = colsStr.replace(/\'/g, "");
 
-            let sqlStr = `INSERT INTO poppit_campaigns (${colsStr}) `;
+            let sqlStr = `INSERT INTO poppit_company_campaigns (${colsStr}) `;
             sqlStr += `VALUES (${valsStr});`;
 
             this.globals.logger.debug("Campaign.create() sqlStr: ", sqlStr);
@@ -220,7 +220,7 @@ class Campaign {
             //remove the last comma
             updateStr = updateStr.slice(0,-1);
 
-            let sqlStr = `UPDATE poppit_campaigns SET ${updateStr} `;
+            let sqlStr = `UPDATE poppit_company_campaigns SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
             this.globals.logger.debug("Campaign.update() sqlStr: ", sqlStr);
@@ -238,7 +238,7 @@ class Campaign {
     }
 
     delete(id, cb){
-        let sqlStr = 'DELETE FROM poppit_campaigns WHERE id=' + this.dbescape(id);
+        let sqlStr = 'DELETE FROM poppit_company_campaigns WHERE id=' + this.dbescape(id);
 
         this.globals.logger.debug("Campaign.delete() sqlStr: ", sqlStr);
 

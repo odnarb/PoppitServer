@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS `poppit_games`;
 DROP TABLE IF EXISTS `poppit_company_invoices`;
 DROP TABLE IF EXISTS `poppit_company_subscriptions`;
 DROP TABLE IF EXISTS `poppit_company_users`;
-DROP TABLE IF EXISTS `poppit_campaigns`;
+DROP TABLE IF EXISTS `poppit_company_campaigns`;
 DROP TABLE IF EXISTS `poppit_company_locations`;
 DROP TABLE IF EXISTS `poppit_roles`;
 DROP TABLE IF EXISTS `poppit_user_role`;
@@ -101,9 +101,9 @@ CREATE TABLE `poppit_company_users` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- poppit_campaigns
+-- poppit_company_campaigns
 -- json column is for branding information, links to images, etc?
-CREATE TABLE `poppit_campaigns` (
+CREATE TABLE `poppit_company_campaigns` (
     `id` BIGINT AUTO_INCREMENT,
     `company_id` BIGINT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
