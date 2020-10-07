@@ -4,7 +4,7 @@ let KTDatatablesExtensionsKeytable = function() {
     // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
-    let initCompanyTable = function() {
+    let initTable = function() {
 
         let initTableHandlers = function() {
             // clear click handlers
@@ -29,6 +29,9 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-city').html(company.city);
                 $('#kt_view_modal .object-field-state').html(company.state);
                 $('#kt_view_modal .object-field-zip').html(company.zip);
+                $('#kt_view_modal .object-field-country_code').html(company.zip);
+                $('#kt_view_modal .object-field-active').html(company.active);
+                $('#kt_view_modal .object-field-demo_acct').html(company.demo_acct);
                 $('#kt_view_modal .object-field-created_at').html( formatDate(company.created_at) );
                 $('#kt_view_modal .object-field-updated_at').html( formatDate(company.updated_at) );
 
@@ -54,6 +57,19 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=city]').val(company.city);
                 $('#kt_object_add-edit_modal form input[name=state]').val(company.state);
                 $('#kt_object_add-edit_modal form input[name=zip]').val(company.zip);
+                $('#kt_object_add-edit_modal form input[name=country_code]').val(company.country_code);
+
+                if( company.active === true ){
+                    $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
+                } else {
+                    $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+                }
+
+                if( company.demo_acct === true ){
+                    $('#kt_object_add-edit_modal form input[name=demo_acct]').prop('checked', true);
+                } else {
+                    $('#kt_object_add-edit_modal form input[name=demo_acct]').prop('checked', false);
+                }
 
                 //unbind any handlers
                 $('.submit-edit-add-form').off();
@@ -207,6 +223,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "city" },
                 { "data": "state" },
                 { "data": "zip" },
+                { "data": "country_code" },
                 { "data": "created_at" },
                 { "data": "updated_at" },
                 { "data": "actions" }
@@ -283,6 +300,9 @@ let KTDatatablesExtensionsKeytable = function() {
             $('#kt_object_add-edit_modal form input[name=city]').val('');
             $('#kt_object_add-edit_modal form input[name=state]').val('');
             $('#kt_object_add-edit_modal form input[name=zip]').val('');
+            $('#kt_object_add-edit_modal form input[name=country_code]').val('');
+            $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+            $('#kt_object_add-edit_modal form input[name=demo_acct]').prop('checked', false);
         };
 
         table.on( 'init', function(e, settings, json ) {
@@ -293,7 +313,7 @@ let KTDatatablesExtensionsKeytable = function() {
     return {
         //main function to initiate the module
         init: function() {
-            initCompanyTable();
+            initTable();
         }
     };
 

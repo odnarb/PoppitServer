@@ -28,6 +28,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-last_name').html(user.last_name);
                 $('#kt_view_modal .object-field-email_address').html(user.email_address);
                 $('#kt_view_modal .object-field-company_permissions').html(user.company_permissions);
+                $('#kt_view_modal .object-field-phone_number').html(user.phone_number);
+                $('#kt_view_modal .object-field-contact_type').html(user.contact_type);
                 $('#kt_view_modal .object-field-active').html(user.active);
                 $('#kt_view_modal .object-field-created_at').html( formatDate(company.created_at) );
                 $('#kt_view_modal .object-field-updated_at').html( formatDate(company.updated_at) );
@@ -53,6 +55,14 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=last_name]').val(user.last_name);
                 $('#kt_object_add-edit_modal form input[name=email_address]').val(user.email_address);
                 $('#kt_object_add-edit_modal form input[name=company_permissions]').val(user.company_permissions);
+                $('#kt_object_add-edit_modal form input[name=phone_number]').val(user.phone_number);
+                $('#kt_object_add-edit_modal form input[name=contact_type]').val(user.contact_type);
+
+                if( user.company_contact === true ){
+                    $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', true);
+                } else {
+                    $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', false);
+                }
 
                 if( user.active === true ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
@@ -222,6 +232,9 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "last_name" },
                 { "data": "email_address" },
                 { "data": "company_permissions" },
+                { "data": "phone_number" },
+                { "data": "company_contact" },
+                { "data": "company_contact" },
                 { "data": "active" },
                 { "data": "created_at" },
                 { "data": "updated_at" },
@@ -299,8 +312,11 @@ let KTDatatablesExtensionsKeytable = function() {
             $('#kt_object_add-edit_modal form input[name=first_name]').val('');
             $('#kt_object_add-edit_modal form input[name=last_name]').val('');
             $('#kt_object_add-edit_modal form input[name=email_address]').val('');
+            $('#kt_object_add-edit_modal form input[name=phone_number]').val('');
+            $('#kt_object_add-edit_modal form input[name=contact_type]').val('');
             $('#kt_object_add-edit_modal form input[name=company_permissions]').val('');
             $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+            $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', false);
         };
 
         table.on( 'init', function(e, settings, json ) {
