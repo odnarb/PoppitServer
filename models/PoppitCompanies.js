@@ -6,8 +6,8 @@ const TABLE_NAME = "poppit_company_locations";
 const MODEL_NAME = "Location";
 const OBJECT_NAME = "location";
 
-const VALID_COLS = ["name","description","address","city","state","zip"];
-const VALID_FILTER_COLS = ["name","address","city","state","zip"];
+const VALID_COLS = ["name","description","address","city","state","zip","country_code","demo_acct"];
+const VALID_FILTER_COLS = ["name","address","city","state","zip","country_code","demo_acct"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
