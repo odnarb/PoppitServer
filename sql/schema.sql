@@ -21,7 +21,7 @@ CREATE TABLE `poppit_users` (
     `id` BIGINT AUTO_INCREMENT,
     `first_name` VARCHAR(80) NOT NULL DEFAULT '',
     `last_name` VARCHAR(80) NOT NULL DEFAULT '',
-    `email_address` VARCHAR(255) NOT NULL DEFAULT '',
+    `email_address` VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
     `active` INT NOT NULL DEFAULT 0,
@@ -66,7 +66,7 @@ CREATE TABLE `poppit_companies` (
 -- poppit_company_invoices
 CREATE TABLE `poppit_company_invoices` (
     `id` BIGINT AUTO_INCREMENT,
-    `company_id` BIGINT NOT NULL,
+    `company_id` BIGINT NOT NULL DEFAULT 0,
     `amount` FLOAT NOT NULL DEFAULT 0,
     `num_locations` INT NOT NULL DEFAULT 0,
     `notes` VARCHAR(1000) NOT NULL DEFAULT '',
@@ -78,9 +78,9 @@ CREATE TABLE `poppit_company_invoices` (
 -- poppit_company_subscriptions
 CREATE TABLE `poppit_company_subscriptions` (
     `id` BIGINT AUTO_INCREMENT,
-    `company_id` BIGINT NOT NULL,
+    `company_id` BIGINT NOT NULL DEFAULT 0,
     `charge_frequency` INT NOT NULL DEFAULT 0,
-    `amount` FLOAT NOT NULL,
+    `amount` FLOAT NOT NULL DEFAULT 0,
     `subscription_start` DATETIME NOT NULL,
     `subscription_end` DATETIME NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
@@ -91,15 +91,15 @@ CREATE TABLE `poppit_company_subscriptions` (
 -- poppit_company_users
 CREATE TABLE `poppit_company_users` (
     `id` BIGINT AUTO_INCREMENT,
-    `company_id` BIGINT NOT NULL,
+    `company_id` BIGINT NOT NULL DEFAULT 0,
     `first_name` VARCHAR(80) NOT NULL DEFAULT '',
     `last_name` VARCHAR(80) NOT NULL DEFAULT '',
-    `email_address` VARCHAR(255) NOT NULL DEFAULT '',
+    `email_address` VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
     `phone_number` VARCHAR(80) NOT NULL DEFAULT '',
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
     `contact_type` VARCHAR(80) NOT NULL DEFAULT '',
-    `company_contact` INT NOT NULL,
+    `company_contact` INT NOT NULL DEFAULT 0,
     `active` INT NOT NULL DEFAULT 0,
     `company_permissions` JSON NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
@@ -111,7 +111,7 @@ CREATE TABLE `poppit_company_users` (
 -- json column is for branding information, links to images, etc?
 CREATE TABLE `poppit_company_campaigns` (
     `id` BIGINT AUTO_INCREMENT,
-    `company_id` BIGINT NOT NULL,
+    `company_id` BIGINT NOT NULL DEFAULT 0,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `category` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
@@ -122,7 +122,6 @@ CREATE TABLE `poppit_company_campaigns` (
     `active` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
@@ -160,7 +159,6 @@ CREATE TABLE `poppit_company_locations` (
     `active` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
@@ -210,17 +208,18 @@ CREATE TABLE `poppit_user_role` (
 */
 -- some hard-coded data
 
-INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_hash`,`active`) VALUES ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',1);
-INSERT INTO `poppit_users` (`first_name`,`last_name`,`email_address`,`password_hash`,`active`) VALUES ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
+
+INSERT INTO poppit_users (first_name,last_name,email_address,password_hash,active) VALUES ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',1);
+INSERT INTO poppit_users (first_name,last_name,email_address,password_hash,active) VALUES ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
 
 
-INSERT INTO `poppit_companies` (
-    `name`,
-    `description`,
-    `address`,
-    `city`,
-    `state`,
-    `zip`
+INSERT INTO poppit_companies (
+    name,
+    description,
+    address,
+    city,
+    state,
+    zip
 ) VALUES (
     'ACME 123',
     'first company ever!',
@@ -229,13 +228,13 @@ INSERT INTO `poppit_companies` (
     'AZ',
     '85737'
 );
-INSERT INTO `poppit_companies` (
-    `name`,
-    `description`,
-    `address`,
-    `city`,
-    `state`,
-    `zip`
+INSERT INTO poppit_companies (
+    name,
+    description,
+    address,
+    city,
+    state,
+    zip
 ) VALUES (
     'ACME 321',
     'second company ever!',
@@ -245,13 +244,13 @@ INSERT INTO `poppit_companies` (
     '12345'
 );
 
-INSERT INTO `poppit_companies` (
-    `name`,
-    `description`,
-    `address`,
-    `city`,
-    `state`,
-    `zip`
+INSERT INTO poppit_companies (
+    name,
+    description,
+    address,
+    city,
+    state,
+    zip
 ) VALUES (
     '7 Eleven',
     'home of the slurpee',
@@ -260,13 +259,13 @@ INSERT INTO `poppit_companies` (
     'AZ',
     '12345'
 );
-INSERT INTO `poppit_companies` (
-    `name`,
-    `description`,
-    `address`,
-    `city`,
-    `state`,
-    `zip`
+INSERT INTO poppit_companies (
+    name,
+    description,
+    address,
+    city,
+    state,
+    zip
 ) VALUES (
     'QuikTrip',
     'gas and food',
