@@ -2,7 +2,7 @@
     DBAL for PoppitCompanies
 */
 
-const TABLE_NAME = "poppit_company_locations";
+const TABLE_NAME = "poppit_companies";
 const MODEL_NAME = "Location";
 const OBJECT_NAME = "location";
 
