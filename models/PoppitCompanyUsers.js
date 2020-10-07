@@ -210,7 +210,10 @@ class CompanyUser {
             this.globals.logger.debug(`${MODEL_NAME}.create() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
-                if (error) {
+                if (error && error.toString().indexOf("ER_DUP_ENTRY") > -1 ) {
+                    this.globals.logger.error(`${MODEL_NAME}.create() :: DUPLICATE ENTRY ERROR : `, error);
+                    cb({ error_type: "user", error: "Email already exists" });
+                } else if (error) {
                     this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {

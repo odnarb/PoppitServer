@@ -149,7 +149,10 @@ module.exports = (globals) => {
             globals.logger.info(`${routeHeader} :: createParams: `, createParams );
 
             CompanyUser.create(createParams, (err, new_user_id) => {
-                if(err){
+                if(err && err.error_type == "user") {
+                    res.status(400);
+                    return next(err);
+                } else if(err) {
                     res.status(500);
                     return next(err);
                 }
