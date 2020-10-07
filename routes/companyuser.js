@@ -3,8 +3,8 @@
 let express = require('express');
 let router = express.Router();
 
-// companyuser/login
-
+const uuid = require('uuid');
+const bcrypt = require('bcrypt');
 
 // // companyuser/login
 // router.post('/login', (req, res) =>{
@@ -147,6 +147,12 @@ module.exports = (globals) => {
             let createParams = req.body;
 
             globals.logger.info(`${routeHeader} :: createParams: `, createParams );
+
+            //auto-generate a password for the user when created via the panel
+            const salt = bcrypt.genSaltSync(globals.salt_rounds);
+            const hash = bcrypt.hashSync(uuid.v4(), salt);
+
+            createParams.password_hash = hash;
 
             CompanyUser.create(createParams, (err, new_user_id) => {
                 if(err && err.error_type == "user") {
