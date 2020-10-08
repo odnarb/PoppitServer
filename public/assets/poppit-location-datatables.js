@@ -53,6 +53,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal .view-object-header').html( `${obj.name} (Location ID: ${obj.id})`);
 
                 //fill form with content from location row
+                $('#kt_object_add-edit_modal form input[name=company_id]').val(obj.company_id);
                 $('#kt_object_add-edit_modal form input[name=name]').val(obj.name);
                 $('#kt_object_add-edit_modal form input[name=description]').val(obj.description);
                 $('#kt_object_add-edit_modal form input[name=address]').val(obj.address);
@@ -312,6 +313,7 @@ let KTDatatablesExtensionsKeytable = function() {
 
         let resetForm = function() {
             $('#kt_object_add-edit_modal .view-object-header').html('');
+            $('#kt_object_add-edit_modal form input[name=company_id]').val('');
             $('#kt_object_add-edit_modal form input[name=name]').val('');
             $('#kt_object_add-edit_modal form input[name=description]').val('');
             $('#kt_object_add-edit_modal form input[name=address]').val('');
