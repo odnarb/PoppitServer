@@ -75,6 +75,12 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     let campaign = getFormData();
 
+                    if( campaign.active === "on" ) {
+                        campaign.active = 1;
+                    } else {
+                        campaign.active = 0;
+                    }
+
                     console.log("campaign obj: ", campaign);
 
                     //add the campaign
@@ -128,6 +134,12 @@ let KTDatatablesExtensionsKeytable = function() {
                     e.preventDefault();
 
                     let campaign = getFormData();
+
+                    if( campaign.active === "on" ) {
+                        campaign.active = 1;
+                    } else {
+                        campaign.active = 0;
+                    }
 
                     console.log("new campaign obj: ", campaign);
 
