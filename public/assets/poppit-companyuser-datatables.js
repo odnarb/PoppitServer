@@ -35,7 +35,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-updated_at').html( formatDate(company.updated_at) );
 
                 //load user information into modal and show it
-                $('#kt_view_modal .view-object-header').html( `${user.name} (Company User ID: ${user.id})`);
+                $('#kt_view_modal .view-object-header').html( `${user.first_name} ${user.last_name} (Company User ID: ${user.id})`);
                 $('#kt_view_modal').modal('show');
             });
 
@@ -47,7 +47,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 let user = getRowData(user_id);
 
                 //fill modal with content
-                $('#kt_object_add-edit_modal .view-object-header').html( `${user.name} (Company User ID: ${user.id})`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `${user.first_name} ${user.last_name} (Company User ID: ${user.id})`);
 
                 //fill form with content from user row
                 $('#kt_object_add-edit_modal form input[name=company_id]').val(user.company_id);
