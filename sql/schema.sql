@@ -115,11 +115,11 @@ CREATE TABLE `poppit_company_campaigns` (
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `category` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    `game_id` INT NOT NULL,
+    `game_id` INT NOT NULL DEFAULT 0,
     `data` JSON NULL,
     `date_start` DATETIME NOT NULL DEFAULT NOW(),
     `date_end` DATETIME NOT NULL DEFAULT NOW(),
-    `active` INT NOT NULL,
+    `active` INT NOT NULL DEFAULT 0,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
@@ -133,7 +133,7 @@ CREATE TABLE `poppit_games` (
     `images` JSON NULL,
     `url` VARCHAR(2000) NOT NULL DEFAULT '',
     `data` JSON NULL,
-    `is_live` INT NOT NULL,
+    `is_live` INT NOT NULL DEFAULT 0,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
@@ -156,7 +156,7 @@ CREATE TABLE `poppit_company_locations` (
     `longitude` VARCHAR(30) NOT NULL DEFAULT '',
     `altitude` VARCHAR(30) NOT NULL DEFAULT '',
     `polygon` JSON NULL,
-    `active` INT NOT NULL,
+    `active` INT NOT NULL DEFAULT 0,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
