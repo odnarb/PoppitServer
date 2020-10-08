@@ -3,8 +3,8 @@
 */
 
 const TABLE_NAME = "poppit_companies";
-const MODEL_NAME = "Location";
-const OBJECT_NAME = "location";
+const MODEL_NAME = "Company";
+const OBJECT_NAME = "company";
 
 const VALID_COLS = ["name","description","address","city","state","zip","country_code","demo_acct"];
 const VALID_FILTER_COLS = ["name","address","city","state","zip","country_code","demo_acct"];

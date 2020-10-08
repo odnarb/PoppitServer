@@ -147,6 +147,8 @@ class Campaign {
     }
 
     create(obj, cb){
+        //TODO: POP-168.. this poisons the data field
+        obj.data = {};
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
@@ -154,6 +156,15 @@ class Campaign {
         let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
 
         //START remove sensitive data
+        //TODO: POP-168x
+        let search_index = local_valid_cols.indexOf("data");
+        if (search_index > -1) {
+            local_valid_cols.splice(search_index, 1);
+        }
+
+        //TODO: POP-168
+        delete obj.data;
+
         //END remove sensitive data
 
         Object.keys(obj).filter(el => {

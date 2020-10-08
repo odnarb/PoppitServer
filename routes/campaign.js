@@ -80,6 +80,10 @@ module.exports = (globals) => {
 
             globals.logger.info(`${routeHeader} :: createParams: `, createParams );
 
+            //format dates properly
+            createParams.date_start = new Date(createParams.date_start);
+            createParams.date_end = new Date(createParams.date_end);
+
             Campaign.create(createParams, (err, new_campaign_id) => {
                 if(err){
                     res.status(500);
@@ -133,7 +137,13 @@ module.exports = (globals) => {
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
 
-            let updateParams = { id: parseInt(req.params.id), campaign: req.body };
+            let campaign = req.body;
+
+            //format dates properly
+            campaign.date_start = new Date(campaign.date_start);
+            campaign.date_end = new Date(campaign.date_end);
+
+            let updateParams = { id: parseInt(req.params.id), campaign: campaign };
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
 
