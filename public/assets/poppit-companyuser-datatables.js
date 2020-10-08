@@ -31,8 +31,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-phone_number').html(user.phone_number);
                 $('#kt_view_modal .object-field-contact_type').html(user.contact_type);
                 $('#kt_view_modal .object-field-active').html(user.active);
-                $('#kt_view_modal .object-field-created_at').html( formatDate(company.created_at) );
-                $('#kt_view_modal .object-field-updated_at').html( formatDate(company.updated_at) );
+                $('#kt_view_modal .object-field-created_at').html( formatDate(user.created_at) );
+                $('#kt_view_modal .object-field-updated_at').html( formatDate(user.updated_at) );
 
                 //load user information into modal and show it
                 $('#kt_view_modal .view-object-header').html( `${user.first_name} ${user.last_name} (Company User ID: ${user.id})`);
