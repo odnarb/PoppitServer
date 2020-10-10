@@ -296,14 +296,14 @@ let KTDatatablesExtensionsKeytable = function() {
         };
 
         let getFormData = function() {
-            let userFormData = $('.user-add-edit-form').serializeArray();
+            let formDataObj = $('.user-add-edit-form').serializeArray();
 
             //loop through and prepare as a user object
-            let user = {};
-            userFormData.forEach(function(item) {
-                user[item.name] = item.value;
+            let obj = {};
+            formDataObj.forEach(function(item) {
+                obj[item.name] = item.value;
             });
-            return user;
+            return obj;
         };
 
         let resetForm = function() {

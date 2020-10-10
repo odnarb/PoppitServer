@@ -73,21 +73,21 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    let campaign = getFormData();
+                    let obj = getFormData();
 
-                    if( campaign.active === "on" ) {
-                        campaign.active = 1;
+                    if( obj.active === "on" ) {
+                        obj.active = 1;
                     } else {
-                        campaign.active = 0;
+                        obj.active = 0;
                     }
 
-                    console.log("campaign obj: ", campaign);
+                    console.log("campaign obj: ", obj);
 
                     //add the campaign
                     $.ajax({
                         method: "PUT",
                         url: `/campaign/${campaign_id}`,
-                        data: $('.campaign-add-edit-form').serializeArray(),
+                        data: obj,
                         success: function(res) {
                             //reset form
                             resetForm();
@@ -301,14 +301,14 @@ let KTDatatablesExtensionsKeytable = function() {
         };
 
         let getFormData = function() {
-            let campaignFormData = $('.campaign-add-edit-form').serializeArray();
+            let formDataObj = $('.campaign-add-edit-form').serializeArray();
 
             //loop through and prepare as a campaign object
-            let campaign = {};
-            campaignFormData.forEach(function(item) {
-                campaign[item.name] = item.value;
+            let obj = {};
+            formDataObj.forEach(function(item) {
+                obj[item.name] = item.value;
             });
-            return campaign;
+            return obj;
         };
 
         let resetForm = function() {
