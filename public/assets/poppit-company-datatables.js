@@ -102,7 +102,9 @@ let KTDatatablesExtensionsKeytable = function() {
                             $('#kt_object_add-edit_modal').modal('hide');
 
                             //refresh the data
-                            table.ajax.reload();
+                            table.ajax.reload(function() {
+                                initTableHandlers();
+                            });
                         },
                         error: function(e) {
                             console.error(e);
@@ -139,15 +141,21 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    let company = getFormData();
+                    let obj = getFormData();
 
-                    console.log("new company obj: ", company);
+                    if( obj.active === "on" ) {
+                        obj.active = 1;
+                    } else {
+                        obj.active = 0;
+                    }
+
+                    console.log("new company obj: ", obj);
 
                     //add the company
                     $.ajax({
                         method: "POST",
                         url: `/company`,
-                        data: company,
+                        data: obj,
                         success: function(res) {
                             //reset form
                             resetForm();
@@ -234,8 +242,6 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "updated_at" },
                 { "data": "actions" }
             ],
-
-            //TODO: after editing an object: the click handlers don't work
 
             columnDefs: [
                 //render time stamp

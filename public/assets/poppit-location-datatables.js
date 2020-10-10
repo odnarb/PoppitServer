@@ -101,7 +101,9 @@ let KTDatatablesExtensionsKeytable = function() {
                             $('#kt_object_add-edit_modal').modal('hide');
 
                             //refresh the data
-                            table.ajax.reload();
+                            table.ajax.reload(function() {
+                                initTableHandlers();
+                            });
                         },
                         error: function(e) {
                             console.error(e);
@@ -151,10 +153,6 @@ let KTDatatablesExtensionsKeytable = function() {
                         obj.latitude = lat;
                         obj.longitude = long;
                     }
-
-                    console.log("BEFORE ADD");
-                    console.log("Lat: ", lat);
-                    console.log("Long: ", long);
 
                     if( obj.active === "on" ) {
                         obj.active = 1;
@@ -261,8 +259,6 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "updated_at" },
                 { "data": "actions" }
             ],
-
-            //TODO: after editing an object: the click handlers don't work
 
             columnDefs: [
                 {

@@ -72,21 +72,21 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    let user = getFormData();
+                    let obj = getFormData();
 
-                    if( user.active === "on" ) {
-                        user.active = 1;
+                    if( obj.active === "on" ) {
+                        obj.active = 1;
                     } else {
-                        user.active = 0;
+                        obj.active = 0;
                     }
 
-                    console.log("save [EDIT to] user obj: ", user);
+                    console.log("save [EDIT to] user obj: ", obj);
 
                     //add the user
                     $.ajax({
                         method: "PUT",
                         url: `/appuser/${user_id}`,
-                        data: user,
+                        data: obj,
                         success: function(res) {
                             //reset form
                             resetForm();
@@ -95,7 +95,9 @@ let KTDatatablesExtensionsKeytable = function() {
                             $('#kt_object_add-edit_modal').modal('hide');
 
                             //refresh the data
-                            table.ajax.reload();
+                            table.ajax.reload(function() {
+                                initTableHandlers();
+                            });
                         },
                         error: function(e) {
                             console.error(e);
@@ -132,21 +134,21 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    let user = getFormData();
+                    let obj = getFormData();
 
-                    if( user.active === "on" ) {
-                        user.active = 1;
+                    if( obj.active === "on" ) {
+                        obj.active = 1;
                     } else {
-                        user.active = 0;
+                        obj.active = 0;
                     }
 
-                    console.log("new user obj: ", user);
+                    console.log("new user obj: ", obj);
 
                     //add the user
                     $.ajax({
                         method: "POST",
                         url: `/appuser`,
-                        data: user,
+                        data: obj,
                         success: function(res) {
                             //reset form
                             resetForm();
