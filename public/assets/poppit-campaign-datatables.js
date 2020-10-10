@@ -56,8 +56,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=description]').val(campaign.description);
                 $('#kt_object_add-edit_modal form input[name=game_id]').val(campaign.game_id);
                 $('#kt_object_add-edit_modal form input[name=data]').val(campaign.data);
-                $('#kt_object_add-edit_modal form input[name=date_start]').val(campaign.date_start);
-                $('#kt_object_add-edit_modal form input[name=date_end]').val(campaign.date_end);
+                $('#kt_object_add-edit_modal form input[name=date_start]').val( formatDate(campaign.date_start) );
+                $('#kt_object_add-edit_modal form input[name=date_end]').val( formatDate(campaign.date_end) );
 
                 if( campaign.active === true ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
@@ -239,6 +239,18 @@ let KTDatatablesExtensionsKeytable = function() {
             //TODO: after editing an object: the click handlers don't work
 
             columnDefs: [
+                {
+                    targets: -6,
+                    render: function(data, type, campaign, meta) {
+                        return `${formatDate(campaign.date_start)}`;
+                    }
+                },
+                {
+                    targets: -5,
+                    render: function(data, type, campaign, meta) {
+                        return `${formatDate(campaign.date_end)}`;
+                    }
+                },
                 //render time stamp
                 {
                     targets: -3,
