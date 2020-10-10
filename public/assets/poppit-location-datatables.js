@@ -129,7 +129,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //make sure the form is empty
                 resetForm();
 
-                $('#kt_object_add-edit_modal .view-object-header').html( `Add New Company`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `Add New Location`);
                 $('#kt_object_add-edit_modal').modal('show');
 
                 //unbind any handlers
@@ -219,7 +219,7 @@ let KTDatatablesExtensionsKeytable = function() {
             //request uri
             ajax: "/location",
 
-            //tell datatables that our structure is in obj.companies
+            //tell datatables that our structure is in obj
             dataSrc: '',
 
             //give the row an id, for filling modals later
