@@ -23,6 +23,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 let row_id = $(e.currentTarget).data('location-id');
                 let obj = getRowData(row_id);
 
+console.log("VIEW location: ", obj);
+
                 $('#kt_view_modal .object-field-company_id').html(obj.company_id);
                 $('#kt_view_modal .object-field-name').html(obj.name);
                 $('#kt_view_modal .object-field-description').html(obj.description);
@@ -31,7 +33,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-state').html(obj.state);
                 $('#kt_view_modal .object-field-zip').html(obj.zip);
                 $('#kt_view_modal .object-field-country_code').html(obj.country_code);
-                $('#kt_view_modal .object-field-coords').html(`\[ Lat: ${obj.latitude} - Long: ${obj.longitude} - Alt: ${obj.altitude}\]`);
+                $('#kt_view_modal .object-field-coords').html(`\[ ${obj.latitude} / ${obj.longitude} \]`);
                 $('#kt_view_modal .object-field-polygon').html(obj.polygon);
                 $('#kt_view_modal .object-field-active').html(obj.active);
                 $('#kt_view_modal .object-field-created_at').html( formatDate(obj.created_at) );
@@ -49,6 +51,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 let row_id = $(e.currentTarget).data('location-id');
                 let obj = getRowData(row_id);
 
+console.log("EDIT location: ", obj);
+
                 //fill modal with content
                 $('#kt_object_add-edit_modal .view-object-header').html( `${obj.name} (Location ID: ${obj.id})`);
 
@@ -61,16 +65,31 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=state]').val(obj.state);
                 $('#kt_object_add-edit_modal form input[name=zip]').val(obj.zip);
                 $('#kt_object_add-edit_modal form input[name=country_code]').val(obj.country_code);
+
                 $('#kt_object_add-edit_modal form input[name=latitude]').val(obj.latitude);
                 $('#kt_object_add-edit_modal form input[name=longitude]').val(obj.longitude);
-                $('#kt_object_add-edit_modal form input[name=altitude]').val(obj.altitude);
                 $('#kt_object_add-edit_modal form input[name=polygon]').val(obj.polygon);
+                $('#kt_object_add-edit_modal form input[name=altitude]').val(obj.altitude);
 
-                if( obj.active === true ){
+                if( obj.active === 1 ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
                 }
+
+console.log("Current lat/lng: ", obj.latitude, obj.longitude);
+
+                if( !obj.latitude || !obj.longitude ){
+                    $('.latlong-coords-error').show();
+                    $('.latlong-coords').hide();
+                } else {
+                    $('.latlong-coords-error').hide();
+                    $('.latlong-coords').show();
+                }
+
+                $('.latlong-coords .latitude-value').html(obj.latitude);
+                $('.latlong-coords .longitude-value').html(obj.longitude);
+
 
                 //unbind any handlers
                 $('.submit-edit-add-form').off();
@@ -88,13 +107,13 @@ let KTDatatablesExtensionsKeytable = function() {
                         obj.active = 0;
                     }
 
-                    console.log("before PUT :: obj: ", obj);
+                    console.log("UPDATE LOCATION: ", obj);
 
                     //add the location
                     $.ajax({
                         method: "PUT",
                         url: `/location/${row_id}`,
-                        data: $('.location-add-edit-form').serializeArray(),
+                        data: obj,
                         success: function(res) {
                             //reset form
                             resetForm();
@@ -103,7 +122,9 @@ let KTDatatablesExtensionsKeytable = function() {
                             $('#kt_object_add-edit_modal').modal('hide');
 
                             //refresh the data
-                            table.ajax.reload();
+                            table.ajax.reload(function() {
+                                initTableHandlers();
+                            });
                         },
                         error: function(e) {
                             console.error(e);
@@ -118,6 +139,9 @@ let KTDatatablesExtensionsKeytable = function() {
                     $('#kt_object_add-edit_modal').modal('hide');
                     resetForm();
                 });
+
+                //init the maps handler
+                KTGoogleMaps.init();
 
                 //show the modal
                 $('#kt_object_add-edit_modal').modal('show');
@@ -140,7 +164,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
-                    let obj = getFormData();
+                    var obj = getFormData();
 
                     if( obj.active === "on" ) {
                         obj.active = 1;
@@ -148,7 +172,7 @@ let KTDatatablesExtensionsKeytable = function() {
                         obj.active = 0;
                     }
 
-                    console.log("new obj: ", obj);
+                    console.log("ADD LOCATION: ", obj);
 
                     //add the location
                     $.ajax({
@@ -248,22 +272,11 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "actions" }
             ],
 
-            //TODO: after editing an object: the click handlers don't work
-
             columnDefs: [
-                //render time stamp
                 {
-                    targets: -3,
-                    render: function(data, type, obj, meta) {
-                        return `${formatDate(obj.created_at)}`;
-                    }
-                },
-                //render time stamp
-                {
-                    targets: -2,
-                    render: function(data, type, obj, meta) {
-                        return `${formatDate(obj.updated_at)}`;
-                    }
+                    "targets": [ 3,9,10,11,12,14,15 ],
+                    "visible": false,
+                    "searchable": false
                 },
                 {
                     targets: -1,
@@ -326,6 +339,17 @@ let KTDatatablesExtensionsKeytable = function() {
             $('#kt_object_add-edit_modal form input[name=altitude]').val('');
             $('#kt_object_add-edit_modal form input[name=polygon]').val('');
             $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+
+            //reset the coords shown
+            $('.latlong-coords .latitude-value').html(0);
+            $('.latlong-coords .longitude-value').html(0);
+
+            //hide errors or values shown
+            $('.latlong-coords-error').hide();
+            $('.latlong-coords').hide();
+
+            //hide the map
+            $("#location-geocode-map").hide();
         };
 
         table.on( 'init', function(e, settings, json ) {

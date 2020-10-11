@@ -1,49 +1,45 @@
 "use strict";
 
 // Class definition
-var KTGoogleMapsDemo = function() {
+var KTGoogleMaps = function() {
 
-    // Private functions
-    var enablePolygonDrawing = function() {
-        var map = new GMaps({
-            div: '#location-polygon-map',
-            lat: -12.043333,
-            lng: -77.028333
-        });
+    function drawCircle(point, radius, dir) {
+      var d2r = Math.PI / 180;   // degrees to radians
+      var r2d = 180 / Math.PI;   // radians to degrees
+      var earthsradius = 3963; // 3963 is the radius of the earth in miles
 
-        var path = [
-            [-12.040397656836609, -77.03373871559225],
-            [-12.040248585302038, -77.03993927003302],
-            [-12.050047116528843, -77.02448169303511],
-            [-12.044804866577001, -77.02154422636042]
-        ];
+      var points = 32;
 
-        var polygon = map.drawPolygon({
-            paths: path,
-            strokeColor: '#BBD8E9',
-            strokeOpacity: 1,
-            strokeWeight: 3,
-            fillColor: '#BBD8E9',
-            fillOpacity: 0.6
-        });
+      // find the raidus in lat/lon
+      var rlat = (radius / earthsradius) * r2d;
+      var rlng = rlat / Math.cos(point.lat() * d2r);
+
+      var extp = new Array();
+      if (dir==1) {
+         var start=0;
+         var end=points+1; // one extra here makes sure we connect the path
+      } else {
+         var start=points+1;
+         var end=0;
+      }
+      for (var i=start; (dir==1 ? i < end : i > end); i=i+dir) {
+         var theta = Math.PI * (i / (points/2));
+         var ey = point.lng() + (rlng * Math.cos(theta)); // center a + radius x * cos(theta)
+         var ex = point.lat() + (rlat * Math.sin(theta)); // center b + radius y * sin(theta)
+         extp.push(new google.maps.LatLng(ex, ey));
+      }
+      return extp;
     }
 
-    var enableGeocoding = function() {
-        // var map = new GMaps({
-        //     div: '#kt_gmap_8',
-        //     lat: -12.043333,
-        //     lng: -77.028333
-        // });
+    //set the lat/lng as the lat/long that was entered
+    var coords = {
+        lat: 0,
+        lng: 0
+    };
 
-        var handleAction = function() {
-            var text = $.trim($('#kt_gmap_8_address').val());
-
+    var initMap = function() {
+        var bindMapHandlers = function() {
             //gather all information for a proper geocode request
-            //address
-            //city
-            //state
-            //zip
-            //country_code
             let address = $('#kt_object_add-edit_modal form input[name=address]').val();
             let city = $('#kt_object_add-edit_modal form input[name=city]').val();
             let state = $('#kt_object_add-edit_modal form input[name=state]').val();
@@ -51,12 +47,16 @@ var KTGoogleMapsDemo = function() {
             let country_code = $('#kt_object_add-edit_modal form input[name=country_code]').val();
 
             if( address !== '' && city !== '' && state !== '' ) {
-                let complete_address = `${address},${city},${state} ${zip} ${country_code}`;
+                let complete_address = `${address},${city},${state}`;
+                if( zip != '' ){
+                    complete_address += ` ${zip}`
+                }
+                if( country_code != '' ){
+                    complete_address += ` ${country_code}`
+                }
 
-                console.log("GEOCODE THIS: ", complete_address);
-
-                $('.latlong-coords-error').addClass('kt-hidden');
-                $('.latlong-coords').addClass('kt-hidden');
+                $('.latlong-coords-error').hide();
+                $('.latlong-coords').hide();
 
                 GMaps.geocode({
                     address: complete_address,
@@ -64,50 +64,71 @@ var KTGoogleMapsDemo = function() {
                         if (status == 'OK') {
                             var latlng = results[0].geometry.location;
 
-                            console.log("GEOCODE SUCCESS: ", latlng)
+                            coords.lat = latlng.lat();
+                            coords.lng = latlng.lng();
+
+                            //geocoding options
+                            $('#location-geocode-map').slideDown();
+                            var map = new GMaps({
+                                div: '#location-geocode-map',
+                                lat: coords.lat,
+                                lng: coords.lng
+                            });
+                            map.addMarker(coords);
+
+                            var latlng = new google.maps.LatLng(coords.lat,coords.lng);
+
+                            //draw a small circle
+                            var paths = drawCircle(latlng, 0.035, 1);
+
+                            //set paths to a hidden field on the UI
+                            $('.polygon-paths').html(paths.toString())
 
                             //don't bother with the map, just drop the coords into the lat/lng
-                            // $('.latlong-coords').html(`(${latlng.lat()},${latlng.lng()})`)
-                            $('.latlong-coords .latitude-value').html(latlng.lat());
-                            $('.latlong-coords .longitude-value').html(latlng.lng());
+                            $('.latlong-coords .latitude-value').html(coords.lat);
+                            $('.latlong-coords .longitude-value').html(coords.lng);
 
-                            $('.latlong-coords-error').addClass('kt-hidden');
-                            $('.latlong-coords').removeClass('kt-hidden');
+                            $('#kt_object_add-edit_modal form input[name=latitude]').val(coords.lat);
+                            $('#kt_object_add-edit_modal form input[name=longitude]').val(coords.lng);
+                            $('#kt_object_add-edit_modal form input[name=polygon]').val(JSON.stringify({ polygon: paths.toString() }));
 
-                            // $('#kt_object_add-edit_modal form input[name=latitude]').val(latlng.lat());
-                            // $('#kt_object_add-edit_modal form input[name=longitude]').val(latlng.lng());
+                            $('.latlong-coords-error').hide();
+                            $('.latlong-coords').show();
 
-                            // map.setCenter(latlng.lat(), latlng.lng());
-                            // map.addMarker({
-                            //     lat: latlng.lat(),
-                            //     lng: latlng.lng()
-                            // });
-                            // KTUtil.scrollTo('kt_gmap_8');
+                            var circle = map.drawPolygon({
+                                zoom: 20,
+                                paths: paths,
+                                strokeColor: '#432070',
+                                strokeOpacity: 0.6,
+                                strokeWeight: 2,
+                                fillColor: '#432070',
+                                fillOpacity: 0.3
+                            });
                         }
                     }
                 });
             } else {
-                $('.latlong-coords').addClass('kt-hidden');
-                $('.latlong-coords-error').removeClass('kt-hidden');
+                $('.latlong-coords').hide();
+                $('.latlong-coords-error').show();
             }
         }
 
+        $('#geocode-address').off('click');
+
         $('#geocode-address').click(function(e) {
             e.preventDefault();
-            console.log("GEOCODE CAUGHT");
-            handleAction();
+            bindMapHandlers();
         });
     }
 
     return {
         // public functions
         init: function() {
-            // enablePolygonDrawing();
-            enableGeocoding();
+            initMap()
         }
     };
 }();
 
 jQuery(document).ready(function() {
-    KTGoogleMapsDemo.init();
+    KTGoogleMaps.init();
 });

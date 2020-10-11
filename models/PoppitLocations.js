@@ -147,26 +147,47 @@ class Location {
     }
 
     create(obj, cb){
-        //TODO: POP-168.. this poisons the polygon field
-        obj.polygon = {};
 
-        //need more resilience: send back which columns are invalid?
-        let colErrors = [];
+        this.globals.logger.debug(`${MODEL_NAME}.create() polygon JSON parsed: ${obj.polygon}`);
+
+        // //TODO: POP-168.. this poisons the polygon field
+        // obj.polygon = {};
 
         let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
 
         //START remove sensitive data
         //TODO: POP-168x
-        let search_index = local_valid_cols.indexOf("polygon");
-        if (search_index > -1) {
-            local_valid_cols.splice(search_index, 1);
+        // let search_index = local_valid_cols.indexOf("polygon");
+        // if (search_index > -1) {
+        //     local_valid_cols.splice(search_index, 1);
+        // }
+
+        // //TODO: POP-168
+        if( obj.polygon ){
+            try {
+                let tmp = obj.polygon;
+
+                //if the parse is successful, we can move on to save the stringified content.
+                JSON.parse(tmp);
+
+                obj.polygon = tmp;
+
+                this.globals.logger.debug(`${MODEL_NAME}.create() polygon JSON parsed: `, obj.polygon);
+
+            } catch(e) {
+                this.globals.logger.debug(`${MODEL_NAME}.create() polygon JSON malformed: `, obj);
+                delete obj.polygon;
+            }
+        } else {
+            obj.polygon = '{}';
         }
-
-        //TODO: POP-168
-        delete obj.polygon;
-
         //END remove sensitive data
 
+        //default altitude
+        obj.altitude = 1;
+
+        //need more resilience: send back which columns are invalid?
+        let colErrors = [];
         Object.keys(obj).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
                 colErrors.push({ "invalid_col": el });
@@ -215,6 +236,44 @@ class Location {
     update(vals, cb){
         let obj = vals[OBJECT_NAME];
 
+        this.globals.logger.debug(`${MODEL_NAME}.update() polygon JSON raw: ${obj.polygon}`);
+
+        // //TODO: POP-168.. this poisons the polygon field
+        // obj.polygon = {};
+
+        let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
+
+        //START remove sensitive data
+        //TODO: POP-168x
+        // let search_index = local_valid_cols.indexOf("polygon");
+        // if (search_index > -1) {
+        //     local_valid_cols.splice(search_index, 1);
+        // }
+
+        // //TODO: POP-168
+        if( obj.polygon ){
+            try {
+                let tmp = obj.polygon;
+
+                //if the parse is successful, we can move on to save the stringified content.
+                JSON.parse(tmp);
+
+                obj.polygon = tmp;
+
+                this.globals.logger.debug(`${MODEL_NAME}.update() polygon JSON parsed: `, obj.polygon);
+
+            } catch(e) {
+                this.globals.logger.debug(`${MODEL_NAME}.update() polygon JSON malformed: `, obj);
+                delete obj.polygon;
+            }
+        } else {
+            obj.polygon = '{}';
+        }
+        //END remove sensitive data
+
+        //default altitude
+        obj.altitude = 1;
+
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
         Object.keys(obj).filter(el => {
@@ -227,6 +286,9 @@ class Location {
             cb({ error_type: "user", "error": colErrors });
         } else {
             obj.updated_at = new Date();
+
+            //default altitude
+            obj.altitude = 1;
 
             //json to  col -> val
             let updateStr = "";
