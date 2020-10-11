@@ -3,64 +3,42 @@
 // Class definition
 var KTGoogleMaps = function() {
 
-    // Private functions
+    function drawCircle(point, radius, dir) {
+      var d2r = Math.PI / 180;   // degrees to radians
+      var r2d = 180 / Math.PI;   // radians to degrees
+      var earthsradius = 3963; // 3963 is the radius of the earth in miles
 
+      var points = 32;
+
+      // find the raidus in lat/lon
+      var rlat = (radius / earthsradius) * r2d;
+      var rlng = rlat / Math.cos(point.lat() * d2r);
+
+      var extp = new Array();
+      if (dir==1) {
+         var start=0;
+         var end=points+1; // one extra here makes sure we connect the path
+      } else {
+         var start=points+1;
+         var end=0;
+      }
+      for (var i=start; (dir==1 ? i < end : i > end); i=i+dir) {
+         var theta = Math.PI * (i / (points/2));
+         var ey = point.lng() + (rlng * Math.cos(theta)); // center a + radius x * cos(theta)
+         var ex = point.lat() + (rlat * Math.sin(theta)); // center b + radius y * sin(theta)
+         extp.push(new google.maps.LatLng(ex, ey));
+      }
+      return extp;
+    }
 
     //set the lat/lng as the lat/long that was entered
     var coords = {
         lat: 0,
         lng: 0
     };
-    var enablePolygonDrawing = function() {
-        var map = new GMaps({
-            div: '#location-polygon-map',
-            lat: coords.lat,
-            lng: coords.lng
-        });
 
-        var drawingManager = new google.maps.drawing.DrawingManager({
-        drawingMode: google.maps.drawing.OverlayType.CIRCLE,
-        drawingControl: true,
-        drawingControlOptions: {
-            drawingModes: [
-                google.maps.drawing.OverlayType.CIRCLE
-            ]
-        },
-        circleOptions: {
-            fillColor: '#ffff00',
-            fillOpacity: 1,
-            strokeWeight: 5,
-            clickable: false,
-            editable: true,
-            zIndex: 1
-        }
-        });
-        drawingManager.setMap(map);
-
-
-
-        //add a button to clear the polygon and reset
-
-        //only get the path after user completes a shape
-        // var path = [
-        //     [-12.040397656836609, -77.03373871559225],
-        //     [-12.040248585302038, -77.03993927003302],
-        //     [-12.050047116528843, -77.02448169303511],
-        //     [-12.044804866577001, -77.02154422636042]
-        // ];
-
-        // var polygon = map.drawPolygon({
-        //     paths: path,
-        //     strokeColor: '#BBD8E9',
-        //     strokeOpacity: 1,
-        //     strokeWeight: 3,
-        //     fillColor: '#BBD8E9',
-        //     fillOpacity: 0.6
-        // });
-    }
-
-    var enableGeocoding = function() {
-        var handleGeocode = function() {
+    var initMap = function() {
+        var bindMapHandlers = function() {
             //gather all information for a proper geocode request
             let address = $('#kt_object_add-edit_modal form input[name=address]').val();
             let city = $('#kt_object_add-edit_modal form input[name=city]').val();
@@ -92,7 +70,6 @@ var KTGoogleMaps = function() {
                             console.log("GEOCODE SUCCESS: ", coords)
 
                             //don't bother with the map, just drop the coords into the lat/lng
-                            // $('.latlong-coords').html(`(${latlng.lat()},${latlng.lng()})`)
                             $('.latlong-coords .latitude-value').html(coords.lat);
                             $('.latlong-coords .longitude-value').html(coords.lng);
 
@@ -108,14 +85,25 @@ var KTGoogleMaps = function() {
                             });
                             map.addMarker(coords);
 
-                            //polygon options
-                            $('.polygon-group').slideDown();
-                            enablePolygonDrawing();
+                            var latlng = new google.maps.LatLng(coords.lat,coords.lng);
+                            let paths = drawCircle(latlng, 0.035, 1);
+
+                            //set paths to a hidden field on the UI
+                            $('.polygon-paths').html(paths.toString())
+
+                            var circle = map.drawPolygon({
+                                zoom: 20,
+                                paths: paths,
+                                strokeColor: '#432070',
+                                strokeOpacity: 0.6,
+                                strokeWeight: 2,
+                                fillColor: '#432070',
+                                fillOpacity: 0.3
+                            });
                         }
                     }
                 });
             } else {
-                // $('.polygon-group').slideUp();
                 $('.latlong-coords').addClass('kt-hidden');
                 $('.latlong-coords-error').removeClass('kt-hidden');
             }
@@ -125,14 +113,14 @@ var KTGoogleMaps = function() {
 
         $('#geocode-address').click(function(e) {
             e.preventDefault();
-            handleGeocode();
+            bindMapHandlers();
         });
     }
 
     return {
         // public functions
         init: function() {
-            enableGeocoding();
+            initMap()
         }
     };
 }();

@@ -63,8 +63,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=country_code]').val(obj.country_code);
                 $('#kt_object_add-edit_modal .latlong-coords .latitude-value').html(obj.lat);
                 $('#kt_object_add-edit_modal .latlong-coords .longitude-value').html(obj.lng);
+                $('#kt_object_add-edit_modal .latlong-coords .polygon-paths').val(obj.polygon);
                 $('#kt_object_add-edit_modal form input[name=altitude]').val(obj.altitude);
-                $('#kt_object_add-edit_modal form input[name=polygon]').val(obj.polygon);
 
                 if( obj.active === 1 ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
@@ -87,6 +87,8 @@ let KTDatatablesExtensionsKeytable = function() {
                     } else {
                         obj.active = 0;
                     }
+
+                    console.log("UPDATE LOCATION: ", obj);
 
                     //add the location
                     $.ajax({
@@ -160,7 +162,7 @@ let KTDatatablesExtensionsKeytable = function() {
                         obj.active = 0;
                     }
 
-                    console.log("new obj: ", obj);
+                    console.log("ADD LOCATION: ", obj);
 
                     //add the location
                     $.ajax({
