@@ -130,11 +130,11 @@ app.use(session({
     secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
     name: '_poppit',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
         secure: false,
-              // d *  h *  m *  s * ms
-        maxAge: 60 * 60 * 1000
+              // m *  s * ms
+        maxAge:  5 * 60 * 1000
     },
     store: new redisStore(redis_config)
 }));
