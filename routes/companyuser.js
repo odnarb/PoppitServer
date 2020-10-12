@@ -6,52 +6,9 @@ let router = express.Router();
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 
-// // companyuser/login
-// router.post('/login', (req, res) =>{
-//     if( !req.body ){
-//         return res.status(400).json({reason: "no_params_sent"});
-//     } else if (!req.body.email){
-//         return res.status(400).json({ reason: "no_email" });
-//     } else if (!req.body.password){
-//         return res.status(400).json({ reason: "no_password" });
-//     }
-
-//     let userEmail = { email: req.body.email };
-//     CompanyUser.find(userEmail, (err,user) => {
-//         if(err){
-//             globals.logger.info( "DB CompanyUser.find() error: ", err);
-//             return res.status(500).json({reason: "server_error"});
-//         }
-
-//         //user not found at all
-//         if ( user == undefined ){
-//             return res.status(400).json({reason: "no_user"});
-//         }
-
-//         if( bcrypt.compareSync(req.body.password, user.password_hash) ){
-
-//             //only check if the passwords match
-//             //user has not been activated
-//             if( user.active == 0 ){
-//                 return res.status(400).json({reason: "not_active"});
-//             }
-
-//             req.session.regenerate( (err) => {
-//                 globals.logger.info( "CompanyUser logged IN" );
-//                 req.session.isLoggedIn = true;
-//                 req.session.user = user;
-//                 if( req.body.remember && req.body.remember == "on" ){
-//                     req.session.cookie.maxAge = COOKIE_MAX_AGE;
-//                 }
-//                 return res.send({ result: user });
-//             });
-//         } else {
-//             return res.status(400).json({reason: "no_user"});
-//         }
-//     })
-// });
-
 let CompanyUserModel = require('../models/PoppitCompanyUsers');
+
+const COOKIE_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
 
 module.exports = (globals) => {
     return router
@@ -115,21 +72,112 @@ module.exports = (globals) => {
     })
     // companyuser/login
     .get('/login', (req, res, next) => {
+        let CompanyUser = new CompanyUserModel( globals );
+        let routeHeader = "GET /companyuser/login";
 
-        globals.logger.info( "GET /companyuser/login" );
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
 
-        return res.render('pages/login', {
-            data: {
-                pageTitle: process.env.APP_NAME + ' | Login'
-            },
-            layout: 'login_layout'
-        });
+        try {
+
+            globals.logger.debug( `${routeHeader} :: DONE`);
+
+            return res.render('pages/login', {
+                data: {
+                    pageTitle: process.env.APP_NAME + ' | Login'
+                },
+                layout: 'login_layout'
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
     })
     // companyuser/login
     .post('/login', (req, res, next) => {
-        let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /companyuser/login :: globals? ", gres );
-        return res.json({ page: 'POST /companyuser/login'});
+
+        let CompanyUser = new CompanyUserModel( globals );
+        let routeHeader = "POST /companyuser";
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+            if( !req.body ){
+                return res.status(400).json({reason: "no_params_sent"});
+            } else if (!req.body.email){
+                return res.status(400).json({ reason: "no_email" });
+            } else if (!req.body.password){
+                return res.status(400).json({ reason: "no_password" });
+            }
+
+            let userEmail = { email_address: req.body.email };
+            CompanyUser.findOne(userEmail, (err,user) => {
+                if(err){
+                    globals.logger.info( "DB CompanyUser.find() error: ", err);
+                    return res.status(500).json({reason: "server_error"});
+                }
+
+                //user not found at all
+                if ( user == undefined ){
+                    return res.status(400).json({reason: "incorrect_username"});
+                }
+
+                if( bcrypt.compareSync(req.body.password, user.password_hash) ){
+
+                    //only check if the passwords match
+                    //user has not been activated
+                    if( user.active == 0 ){
+                        return res.status(400).json({reason: "not_active"});
+                    }
+
+                    if( bcrypt.compareSync(req.body.password, user.password_hash) ){
+
+                        globals.logger.info( `CompanyUser.id=${user.id} logged IN` );
+
+                        //remove the password_hash field before being saved to the session
+                        delete user.password_hash;
+                        delete user.forgot_password_token;
+
+                        //save the session to redis store
+                        req.session.isLoggedIn = true;
+                        req.session.user = user;
+                        if( req.body.remember && req.body.remember == "on" ){
+                            req.session.cookie.maxAge = COOKIE_MAX_AGE;
+                        }
+
+                        return res.json({ success: true });
+                    } else {
+                        return res.status(400).json({reason: "no_user"});
+                    }
+                }
+            });
+
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // companyuser/logout
+    .get('/logout', (req, res, next) => {
+        let CompanyUser = new CompanyUserModel( globals );
+        let routeHeader = "GET /companyuser/logout";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+            if( req.session && req.session.isLoggedIn ){
+                //delete the session
+                req.session.destroy()
+
+                return res.redirect('/companyuser/login');
+            } else {
+                return res.redirect('/');
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
     })
     .post('/signup', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;

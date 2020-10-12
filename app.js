@@ -23,6 +23,7 @@ const
     bcrypt = require('bcrypt'),
     favicon = require('serve-favicon'),
     path = require('path'),
+    uuid = require('uuid'),
     expressLayouts = require('express-ejs-layouts');
 
 const app = express();
@@ -36,6 +37,10 @@ dotenv.config();
 const redis = require('redis');
 let redisStore = require('connect-redis')(session);
 let redisClient = redis.createClient();
+
+redisClient.on('error', (err) => {
+  console.log('Redis error: ', err);
+});
 
 //////////////////////////////////////////////////////////////////
 // MYSQL CONFIG
@@ -77,9 +82,6 @@ connection.connect( (err) => {
 //////////////////////////////////////////////////////////////////
 //Setup router configuration
 
-//apply our router function to ALL methods defined in router
-let policyFilter = require('./policies/main.js')(globals);
-app.use(policyFilter, router);
 
 ////////////////////////////////////////////
 ////    EXPRESS MIDDLEWARE & OPTIONS    ////
@@ -103,7 +105,6 @@ app.use( (req,res,next) => {
     next();
 });
 
-
 //where are the static assets?
 app.use(express.static('public'));
 
@@ -123,13 +124,24 @@ let redis_config = {
 
 //setup session
 app.use(session({
+    genid: (req) => {
+        return uuid.v4();
+    },
     secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
     name: '_poppit',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    cookie: {
+        secure: false,
+              // d *  h *  m *  s * ms
+        maxAge: 60 * 60 * 1000
+    },
     store: new redisStore(redis_config)
 }));
+
+//apply our router function to ALL methods defined in router
+let policyFilter = require('./policies/main.js')(globals);
+app.use(policyFilter);
 
 ////////////////////////////////////////////////////////
 // APP ROUTER
@@ -162,6 +174,9 @@ app.use( (req, res, next) => {
 //error handler
 let errorHandler = require('./policies/errorHandler.js')(globals);
 app.use(errorHandler);
+
+//apply the router
+app.use(router);
 
 //////////////////////////////////////////////////////////////////
 // START EXPRESS SERVER

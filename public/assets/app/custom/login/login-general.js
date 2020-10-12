@@ -93,12 +93,17 @@ var KTLoginGeneral = function() {
             btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
 
             form.ajaxSubmit({
-                url: '/user/login',
+                url: '/companyuser/login',
                 dataType : 'json', // data type
                 data : form.serialize(),
                 success: function(response, status, xhr, $form) {
                     btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
-                    showErrorMsg(form, 'danger', 'Incorrect username or password. Please try again.');
+
+                    if( response.success === true ){
+                        window.location = "/";
+                    } else {
+                        showErrorMsg(form, 'danger', 'Incorrect username or password. Please try again.');
+                    }
                 }
             });
         });
