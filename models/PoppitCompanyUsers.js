@@ -125,21 +125,21 @@ class CompanyUser {
     }
 
     findOne(opts,cb){
-        if( !opts.id ){
-            cb({ error_type: "user", error: "id must be passed in" });
+        if( !opts.email_address ){
+            cb({ error_type: "user", error: "email_address must be passed in" });
         } else {
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where email_address=${this.dbescape(opts.email_address)};`;
 
             this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
+                    this.globals.logger.error(`${MODEL_NAME}.findOne() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result[0]);
+                    this.globals.logger.debug(`${MODEL_NAME}.findOne() result?: `, result[0]);
                     cb(null,result[0]);
                 }
             });

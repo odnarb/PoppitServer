@@ -19,10 +19,13 @@ const
     moment = require('moment'),
     session = require('express-session'),
     bodyParser = require('body-parser'),
+    cookieParser = require('cookie-parser'),
+    csrf = require('csurf'),
     events = require('events'),
     bcrypt = require('bcrypt'),
     favicon = require('serve-favicon'),
     path = require('path'),
+    uuid = require('uuid'),
     expressLayouts = require('express-ejs-layouts');
 
 const app = express();
@@ -32,10 +35,19 @@ const router = express.Router();
 //load env vars from .env file
 dotenv.config();
 
+//csrf options
+const csrfMiddleware = csrf({
+    cookie: true
+});
+
 //setup redis
 const redis = require('redis');
 let redisStore = require('connect-redis')(session);
 let redisClient = redis.createClient();
+
+redisClient.on('error', (err) => {
+    console.log('Redis error: ', err);
+});
 
 //////////////////////////////////////////////////////////////////
 // MYSQL CONFIG
@@ -77,10 +89,6 @@ connection.connect( (err) => {
 //////////////////////////////////////////////////////////////////
 //Setup router configuration
 
-//apply our router function to ALL methods defined in router
-let policyFilter = require('./policies/main.js')(globals);
-app.use(policyFilter, router);
-
 ////////////////////////////////////////////
 ////    EXPRESS MIDDLEWARE & OPTIONS    ////
 ////////////////////////////////////////////
@@ -96,14 +104,6 @@ app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('layout', './layout.ejs');
 
-//set some local variables to boot, so routes and views can access
-app.use( (req,res,next) => {
-    req.app.locals.title = `POPPIT GAMES | `;
-    req.app.locals.url = req.url;
-    next();
-});
-
-
 //where are the static assets?
 app.use(express.static('public'));
 
@@ -114,6 +114,9 @@ app.use(favicon(path.join(__dirname, 'public', 'assets', 'favicon.png')))
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
+app.use(cookieParser());
+app.use(csrfMiddleware);
+
 let redis_config = {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
@@ -123,13 +126,32 @@ let redis_config = {
 
 //setup session
 app.use(session({
+    genid: (req) => {
+        return uuid.v4();
+    },
     secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
     name: '_poppit',
     resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false },
+    saveUninitialized: true,
+    cookie: {
+        secure: false,
+              // m *  s * ms
+        maxAge:  5 * 60 * 1000
+    },
     store: new redisStore(redis_config)
 }));
+
+//apply our router function to ALL methods defined in router
+let policyFilter = require('./policies/main.js')(globals);
+app.use(policyFilter);
+
+//set some local variables to boot, so routes and views can access
+app.use( (req,res,next) => {
+    req.app.locals.title = `POPPIT GAMES | `;
+    req.app.locals.url = req.url;
+    req.app.locals._csrf = req.csrfToken();
+    next();
+});
 
 ////////////////////////////////////////////////////////
 // APP ROUTER
@@ -162,6 +184,9 @@ app.use( (req, res, next) => {
 //error handler
 let errorHandler = require('./policies/errorHandler.js')(globals);
 app.use(errorHandler);
+
+//apply the router
+app.use(router);
 
 //////////////////////////////////////////////////////////////////
 // START EXPRESS SERVER

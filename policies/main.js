@@ -1,27 +1,29 @@
 module.exports = (globals) => {
     return (req, res, next) => {
-        // const allowedMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS'];
+        const allowedMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS'];
 
-        // // globals.logger.info("main policy :: METHOD: ", req.method);
+        // globals.logger.info("main policy :: METHOD: ", req.method);
 
-        // if (!allowedMethods.includes(req.method)) {
-        //     return res.sendStatus(404);
-        // }
+        if (!allowedMethods.includes(req.method)) {
+            return res.sendStatus(404);
+        }
 
-        // if ( !req.session ) {
-        //     req.session = {};
-        // }
+        //if assets, allow through
+        let assetRequest = req.url.indexOf('/assets') === 0;
 
-        // // check session... show login or show dashboard
-        // if( req.url == '/' && !req.session.isLoggedIn ) {
-        //     globals.logger.debug( "User NOT logged in..routing to login page" );
-        //     return res.redirect('/user/login');
-        // }
+        if( assetRequest ) {
+            next();
 
-        // if( req.url == '/user/login' && req.session.isLoggedIn ) {
-        //     globals.logger.debug( "User logged in..routing to dashboard" );
-        //     return res.redirect('/');
-        // }
-        next();
+        // check session... show login or show dashboard
+        } else if( req.url !== '/companyuser/login' && req.session.isLoggedIn ){
+            next();
+
+        // user needs to login
+        } else if( req.url !== '/companyuser/login' && req.session.isLoggedIn === undefined || req.session.isLoggedIn === false ) {
+            return res.redirect('/companyuser/login');
+        // user is logging in
+        } else {
+            next();
+        }
     };
 };
