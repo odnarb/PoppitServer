@@ -19,6 +19,8 @@ const
     moment = require('moment'),
     session = require('express-session'),
     bodyParser = require('body-parser'),
+    cookieParser = require('cookie-parser'),
+    csrf = require('csurf'),
     events = require('events'),
     bcrypt = require('bcrypt'),
     favicon = require('serve-favicon'),
@@ -33,13 +35,18 @@ const router = express.Router();
 //load env vars from .env file
 dotenv.config();
 
+//csrf options
+const csrfMiddleware = csrf({
+    cookie: true
+});
+
 //setup redis
 const redis = require('redis');
 let redisStore = require('connect-redis')(session);
 let redisClient = redis.createClient();
 
 redisClient.on('error', (err) => {
-  console.log('Redis error: ', err);
+    console.log('Redis error: ', err);
 });
 
 //////////////////////////////////////////////////////////////////
@@ -82,7 +89,6 @@ connection.connect( (err) => {
 //////////////////////////////////////////////////////////////////
 //Setup router configuration
 
-
 ////////////////////////////////////////////
 ////    EXPRESS MIDDLEWARE & OPTIONS    ////
 ////////////////////////////////////////////
@@ -98,13 +104,6 @@ app.use(expressLayouts);
 app.set('view engine', 'ejs');
 app.set('layout', './layout.ejs');
 
-//set some local variables to boot, so routes and views can access
-app.use( (req,res,next) => {
-    req.app.locals.title = `POPPIT GAMES | `;
-    req.app.locals.url = req.url;
-    next();
-});
-
 //where are the static assets?
 app.use(express.static('public'));
 
@@ -114,6 +113,9 @@ app.use(favicon(path.join(__dirname, 'public', 'assets', 'favicon.png')))
 //Don't need to do parsing just yet..
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+app.use(cookieParser());
+app.use(csrfMiddleware);
 
 let redis_config = {
     host: process.env.REDIS_HOST,
@@ -142,6 +144,14 @@ app.use(session({
 //apply our router function to ALL methods defined in router
 let policyFilter = require('./policies/main.js')(globals);
 app.use(policyFilter);
+
+//set some local variables to boot, so routes and views can access
+app.use( (req,res,next) => {
+    req.app.locals.title = `POPPIT GAMES | `;
+    req.app.locals.url = req.url;
+    req.app.locals._csrf = req.csrfToken();
+    next();
+});
 
 ////////////////////////////////////////////////////////
 // APP ROUTER
