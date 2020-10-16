@@ -23,8 +23,6 @@ let KTDatatablesExtensionsKeytable = function() {
                 let row_id = $(e.currentTarget).data('location-id');
                 let obj = getRowData(row_id);
 
-console.log("VIEW location: ", obj);
-
                 $('#kt_view_modal .object-field-company_id').html(obj.company_id);
                 $('#kt_view_modal .object-field-name').html(obj.name);
                 $('#kt_view_modal .object-field-description').html(obj.description);

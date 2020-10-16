@@ -6,12 +6,27 @@ const TABLE_NAME = "poppit_company_users";
 const MODEL_NAME = "CompanyUser";
 const OBJECT_NAME = "user";
 
-const VALID_COLS = ["company_id","first_name","last_name","email_address","phone_number","password_hash","forgot_password_token","active","company_permissions","company_contact","contact_type"];
-const VALID_FILTER_COLS = ["first_name","last_name","email_address","phone_number","active","registration_type","city","state","company_contact","contact_type"];
+const VALID_COLS_MASS = ["company_id","first_name","last_name","email_address","phone_number","active","company_role","company_contact"];
+const VALID_COLS = ["company_id","first_name","last_name","email_address","phone_number","password_hash","forgot_password_token","active","company_role","company_contact"];
+const VALID_FILTER_COLS = ["first_name","last_name","email_address","phone_number","active","registration_type","city","state","company_contact"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
+
+let mapRoleLookup = (role_text) => {
+    let res = -1
+    if (role_text === "none") {
+        res = 0;
+    } else if (role_text === "admin") {
+        res = 1;
+    } else if (role_text === "technical") {
+        res = 2;
+    } else if (role_text === "marketing") {
+        res = 3;
+    }
+    return res;
+};
 
 class CompanyUser {
     constructor(globals) {
@@ -92,7 +107,7 @@ class CompanyUser {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = `${IDENTITY_COL},${VALID_COLS_MASS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
             let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
@@ -147,9 +162,6 @@ class CompanyUser {
     }
 
     create(obj, cb){
-        //TODO: POP-168.. this poisons the company_permissions field
-        obj.company_permissions = {};
-
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
 
@@ -161,15 +173,12 @@ class CompanyUser {
         if (search_index > -1) {
             local_valid_cols.splice(search_index, 1);
         }
-        search_index = local_valid_cols.indexOf("company_permissions");
-        if (search_index > -1) {
-            local_valid_cols.splice(search_index, 1);
-        }
-
-        //TODO: POP-168
-        delete obj.company_permissions;
-
         //END remove sensitive data
+
+        //get the company role
+        if( mapRoleLookup(obj.company_role) == -1 ){
+            colErrors.push({ "invalid_value": "company_role" });
+        }
 
         Object.keys(obj).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
@@ -180,6 +189,10 @@ class CompanyUser {
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
+
+            let tmp_company_role = mapRoleLookup(obj.company_role);
+            obj.company_role = tmp_company_role;
+
             //json to  col -> val
             let colsStr = "";
             let valsStr = "";
@@ -230,14 +243,18 @@ class CompanyUser {
             }
         });
 
+        //get the company role
+        if( mapRoleLookup(obj.company_role) == -1 ){
+            colErrors.push({ "invalid_value": "company_role" });
+        }
+
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
             obj.updated_at = new Date();
 
-            //TODO, POP-168: save a legit object for company_permissions
-                //or, make it more generic
-            obj.company_permissions = { type: "JSON" };
+            let tmp_company_role = mapRoleLookup(obj.company_role);
+            obj.company_role = tmp_company_role;
 
             //json to  col -> val
             let updateStr = "";

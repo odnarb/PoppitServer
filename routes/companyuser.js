@@ -37,7 +37,23 @@ module.exports = (globals) => {
                 if( params._ !== undefined ) delete params._;
 
                 //get users
-                CompanyUser.find(req.query, (err, users) => {
+                CompanyUser.find(req.query, (err, dbresult) => {
+
+                    let users = dbresult[0];
+                    for(let i=0; i < users.length;i++) {
+                        let user = users[i];
+                        let res = "none";
+                        if (user.company_role === 1) {
+                            res = "admin"
+                        } else if (user.company_role === 2) {
+                            res = "technical";
+                        } else if (user.company_role === 3) {
+                            res = "marketing";
+                        }
+                        user.company_role = res;
+                        users[i] = user;
+                    }
+
                     globals.logger.debug( `${routeHeader} :: DB CB: `, err);
 
                     if(err && err.error_type === "system"){
@@ -51,9 +67,9 @@ module.exports = (globals) => {
                     }
                     globals.logger.debug( `${routeHeader} :: DONE`);
                     return res.json({
-                        aaData: users[0],
-                        iTotalRecords: users[1].totalCount,
-                        iTotalDisplayRecords: users[2].totalCountWithFilter
+                        aaData: users,
+                        iTotalRecords: dbresult[1].totalCount,
+                        iTotalDisplayRecords: dbresult[2].totalCountWithFilter
                     });
                 });
             } catch( err ) {
@@ -208,6 +224,7 @@ module.exports = (globals) => {
             const hash = bcrypt.hashSync(uuid.v4(), salt);
 
             createParams.password_hash = hash;
+            delete createParams._csrf;
 
             CompanyUser.create(createParams, (err, new_user_id) => {
                 if(err && err.error_type == "user") {
@@ -265,6 +282,8 @@ module.exports = (globals) => {
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
 
+            let user = req.body;
+            delete user._csrf;
             let updateParams = { id: parseInt(req.params.id), user: req.body };
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
