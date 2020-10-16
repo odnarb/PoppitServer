@@ -187,7 +187,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the campaign
                 $.ajax({
                     method: "DELETE",
-                    url: `/campaign/${campaign_id}`,
+                    url: `/campaign/${campaign_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("campaign deleted!: ", res);
 

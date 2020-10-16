@@ -237,6 +237,51 @@ module.exports = (globals) => {
 
                 globals.logger.info( `${routeHeader} :: CompanyUser created: ${new_user_id}` );
 
+                /*
+                //now send some emails
+                globals.logger.info( `${routeHeader} :: Send registration email...` );
+
+                let regEmail = globals.admin_registration_email({ user: createParams })
+
+                //send regristration email
+                let email = {
+                    to: createParams.email_address,
+                    from: `${process.env.ADMIN_EMAIL}`,
+                    subject: `[${process.env.APP_NAME}] New User Registered`,
+                    html: regEmail.html,
+                    text: regEmail.text
+                }
+
+                globals.sendEmail(email, (err,emailRes) => {
+                    if(err){
+                        next(err);
+                    } else {
+                        globals.logger.info( `${routeHeader} :: Email sent to new user: ${createParams.email_address}` );
+                    }
+                });
+
+                let regUserEmail = globals.user_registration_email({
+                    user: createParams,
+                    token: uuid.v4()
+                });
+
+                email = {
+                    to: createParams.email_address,
+                    from: `${process.env.ADMIN_EMAIL}`,
+                    subject: `[${process.env.APP_NAME}] Registration Confirm`,
+                    html: regUserEmail.html,
+                    text: regUserEmail.text
+                }
+
+                globals.sendEmail(email, (err,emailRes) => {
+                    if(err){
+                        next(err);
+                    } else {
+                        globals.logger.info( `${routeHeader} :: Admin email sent for new registration:` );
+                    }
+                });
+                */
+
                 globals.logger.info( `${routeHeader} :: END` );
                 return res.json({ success: true, user_id: new_user_id });
             });

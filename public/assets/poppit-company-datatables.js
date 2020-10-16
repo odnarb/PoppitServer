@@ -193,7 +193,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the company
                 $.ajax({
                     method: "DELETE",
-                    url: `/company/${company_id}`,
+                    url: `/company/${company_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("company deleted!: ", res);
 

@@ -186,7 +186,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the user
                 $.ajax({
                     method: "DELETE",
-                    url: `/appuser/${user_id}`,
+                    url: `/appuser/${user_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("user deleted!: ", res);
 

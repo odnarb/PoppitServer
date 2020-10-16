@@ -120,8 +120,8 @@ app.use(csrfMiddleware);
 let redis_config = {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
-    client: redisClient,
-    ttl: process.env.REDIS_TTL
+    client: redisClient
+    // ttl: process.env.REDIS_TTL
 };
 
 //setup session
@@ -147,7 +147,7 @@ app.use(policyFilter);
 
 //set some local variables to boot, so routes and views can access
 app.use( (req,res,next) => {
-    req.app.locals.title = `POPPIT GAMES | `;
+    req.app.locals.title = `${process.env.APP_NAME} | `;
     req.app.locals.url = req.url;
     req.app.locals._csrf = req.csrfToken();
     next();
@@ -199,5 +199,5 @@ eventEmitter.on('mysqlReady', () => {
     // Start Server
     let port = args.port || 7777;
     app.listen(port);
-    globals.logger.info(`Poppit Server is LIVE on port ${port}`);
+    globals.logger.info(`${process.env.APP_NAME} Server is LIVE on port ${port}`);
 });

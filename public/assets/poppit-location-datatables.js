@@ -214,7 +214,7 @@ console.log("Current lat/lng: ", obj.latitude, obj.longitude);
                 //delete the location
                 $.ajax({
                     method: "DELETE",
-                    url: `/location/${location_id}`,
+                    url: `/location/${location_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("location deleted!: ", res);
 
