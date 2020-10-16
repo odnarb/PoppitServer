@@ -29,7 +29,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-email_address').html(user.email_address);
                 $('#kt_view_modal .object-field-company_permissions').html(user.company_permissions);
                 $('#kt_view_modal .object-field-phone_number').html(user.phone_number);
-                $('#kt_view_modal .object-field-contact_type').html(user.contact_type);
+                $('#kt_view_modal .object-field-company_role').html(user.company_role);
+                $('#kt_view_modal .object-field-company_contact').html(user.company_contact);
                 $('#kt_view_modal .object-field-active').html(user.active);
                 $('#kt_view_modal .object-field-created_at').html( formatDate(user.created_at) );
                 $('#kt_view_modal .object-field-updated_at').html( formatDate(user.updated_at) );
@@ -42,9 +43,14 @@ let KTDatatablesExtensionsKeytable = function() {
             $('.edit-user').on('click', function(e) {
                 e.preventDefault();
 
+                //make sure the form is empty
+                resetForm();
+
                 //get user object
                 let user_id = $(e.currentTarget).data('user-id');
                 let user = getRowData(user_id);
+
+                console.log("edit user: ", user);
 
                 //fill modal with content
                 $('#kt_object_add-edit_modal .view-object-header').html( `${user.first_name} ${user.last_name} (Company User ID: ${user.id})`);
@@ -54,19 +60,20 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=first_name]').val(user.first_name);
                 $('#kt_object_add-edit_modal form input[name=last_name]').val(user.last_name);
                 $('#kt_object_add-edit_modal form input[name=email_address]').val(user.email_address);
-                $('#kt_object_add-edit_modal form input[name=company_permissions]').val(user.company_permissions);
+                $(`#kt_object_add-edit_modal form option[value="${user.company_role}"]`).prop('selected', true);
                 $('#kt_object_add-edit_modal form input[name=phone_number]').val(user.phone_number);
-                $('#kt_object_add-edit_modal form input[name=contact_type]').val(user.contact_type);
 
-                if( user.company_contact === true ){
+                if( user.company_contact === 1 ){
                     $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', false);
                 }
 
-                if( user.active === true ){
+                if( user.active === 1 ){
+                    console.log("user is ACTIVE")
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
                 } else {
+                    console.log("user is INACTIVE")
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
                 }
 
@@ -85,6 +92,11 @@ let KTDatatablesExtensionsKeytable = function() {
                     } else {
                         obj.active = 0;
                     }
+                    if(obj.company_contact == "on"){
+                        obj.company_contact = 1;
+                    } else {
+                        obj.company_contact = 0;
+                    }
 
                     console.log("save [EDIT to] user obj: ", obj);
 
@@ -94,9 +106,6 @@ let KTDatatablesExtensionsKeytable = function() {
                         url: `/companyuser/${user_id}`,
                         data: obj,
                         success: function(res) {
-                            //reset form
-                            resetForm();
-
                             //hide this, re-fetch and redraw table
                             $('#kt_object_add-edit_modal').modal('hide');
 
@@ -116,7 +125,6 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     //close and reset form
                     $('#kt_object_add-edit_modal').modal('hide');
-                    resetForm();
                 });
 
                 //show the modal
@@ -147,6 +155,11 @@ let KTDatatablesExtensionsKeytable = function() {
                     } else {
                         obj.active = 0;
                     }
+                    if(obj.company_contact == "on"){
+                        obj.company_contact = 1;
+                    } else {
+                        obj.company_contact = 0;
+                    }
 
                     console.log("new user obj: ", obj);
 
@@ -156,9 +169,6 @@ let KTDatatablesExtensionsKeytable = function() {
                         url: `/companyuser`,
                         data: obj,
                         success: function(res) {
-                            //reset form
-                            resetForm();
-
                             //hide this, re-fetch and redraw table
                             $('#kt_object_add-edit_modal').modal('hide');
 
@@ -177,7 +187,6 @@ let KTDatatablesExtensionsKeytable = function() {
                     e.preventDefault();
 
                     $('#kt_object_add-edit_modal').modal('hide');
-                    resetForm();
                 });
             });
 
@@ -233,9 +242,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "first_name" },
                 { "data": "last_name" },
                 { "data": "email_address" },
-                { "data": "company_permissions" },
                 { "data": "phone_number" },
-                { "data": "company_contact" },
+                { "data": "company_role" },
                 { "data": "company_contact" },
                 { "data": "active" },
                 { "data": "created_at" },
@@ -247,6 +255,11 @@ let KTDatatablesExtensionsKeytable = function() {
             // --add send forgotpassword email quick button
 
             columnDefs: [
+                {
+                    "targets": [ 5,6,7 ],
+                    "visible": false,
+                    "searchable": false
+                },
                 //render time stamp
                 {
                     targets: -3,
@@ -314,10 +327,11 @@ let KTDatatablesExtensionsKeytable = function() {
             $('#kt_object_add-edit_modal form input[name=last_name]').val('');
             $('#kt_object_add-edit_modal form input[name=email_address]').val('');
             $('#kt_object_add-edit_modal form input[name=phone_number]').val('');
-            $('#kt_object_add-edit_modal form input[name=contact_type]').val('');
-            $('#kt_object_add-edit_modal form input[name=company_permissions]').val('');
-            $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+            $('#kt_object_add-edit_modal form input[name=company_role]').val('');
             $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', false);
+            $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
+            $(`#kt_object_add-edit_modal form option[value="none"]`).prop('selected', true);
+
         };
 
         table.on( 'init', function(e, settings, json ) {

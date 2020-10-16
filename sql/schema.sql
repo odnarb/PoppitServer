@@ -98,10 +98,9 @@ CREATE TABLE `poppit_company_users` (
     `phone_number` VARCHAR(80) NOT NULL DEFAULT '',
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
-    `contact_type` VARCHAR(80) NOT NULL DEFAULT '',
+    `company_role` INT NOT NULL DEFAULT 0,
     `company_contact` INT NOT NULL DEFAULT 0,
     `active` INT NOT NULL DEFAULT 0,
-    `company_permissions` JSON NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
@@ -162,17 +161,31 @@ CREATE TABLE `poppit_company_locations` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
-/*
 -- poppit_roles
 CREATE TABLE `poppit_roles` (
     `id` BIGINT AUTO_INCREMENT,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    `admin_only` INT NOT NULL,
     `internal_only` INT NOT NULL,
+    `admin` INT NOT NULL,
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
+/*
+-- poppit_user_role
+CREATE TABLE `poppit_user_role` (
+    `id` BIGINT AUTO_INCREMENT,
+    `user_id` BIGINT NOT NULL,
+    `role_id` BIGINT NOT NULL,
+    `company_id` BIGINT NOT NULL,
+    `name` VARCHAR(80) NOT NULL DEFAULT '',
+    `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
 
 -- poppit_policies
 CREATE TABLE `poppit_policies` (
@@ -192,85 +205,35 @@ CREATE TABLE `poppit_roles_policies` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- poppit_user_role
-CREATE TABLE `poppit_user_role` (
-    `id` BIGINT AUTO_INCREMENT,
-    `user_id` BIGINT NOT NULL,
-    `role_id` BIGINT NOT NULL,
-    `company_id` BIGINT NOT NULL,
-    `name` VARCHAR(80) NOT NULL DEFAULT '',
-    `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    FOREIGN KEY (`user_id`) REFERENCES poppit_users (`id`),
-    FOREIGN KEY (`role_id`) REFERENCES poppit_roles (`id`),
-    FOREIGN KEY (`company_id`) REFERENCES poppit_companies (`id`),
-    PRIMARY KEY (`id`)
-)  ENGINE=INNODB;
+INSERT INTO
+    poppit_roles (name, description, internal_only, admin)
+VALUES
+    ('none','No company access or permissions',0,0),
+    ('admin','Company admin users',0,0),
+    ('technical','Company technical users',0,0),
+    ('marketing','Company marketing users',0,0);
+
 */
 -- some hard-coded data
 
 
-INSERT INTO poppit_users (first_name,last_name,email_address,password_hash,active) VALUES ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',1);
-INSERT INTO poppit_users (first_name,last_name,email_address,password_hash,active) VALUES ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
+INSERT INTO
+    poppit_users (first_name,last_name,email_address,password_hash,active)
+VALUES
+    ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',1),
+    ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
 
 
-INSERT INTO poppit_companies (
-    name,
-    description,
-    address,
-    city,
-    state,
-    zip
-) VALUES (
-    'ACME 123',
-    'first company ever!',
-    '123 Nowhere Dr.',
-    'Tucson',
-    'AZ',
-    '85737'
-);
-INSERT INTO poppit_companies (
-    name,
-    description,
-    address,
-    city,
-    state,
-    zip
-) VALUES (
-    'ACME 321',
-    'second company ever!',
-    '321 Nowhere Dr.',
-    'Phoenix',
-    'AZ',
-    '12345'
-);
+INSERT INTO
+    poppit_companies (name,description,address,city,state,zip)
+VALUES
+    ('ACME 123','first company ever!','123 Nowhere Dr.','Tucson','AZ','85737'),
+    ('ACME 321','second company ever!','321 Nowhere Dr.','Phoenix','AZ','12345'),
+    ('7 Eleven','home of the slurpee','321 Nowhere Dr.','Phoenix','AZ','12345'),
+    ('QuikTrip','gas and food','321 Nowhere Dr.','Phoenix','AZ','12345');
 
-INSERT INTO poppit_companies (
-    name,
-    description,
-    address,
-    city,
-    state,
-    zip
-) VALUES (
-    '7 Eleven',
-    'home of the slurpee',
-    '321 Nowhere Dr.',
-    'Phoenix',
-    'AZ',
-    '12345'
-);
-INSERT INTO poppit_companies (
-    name,
-    description,
-    address,
-    city,
-    state,
-    zip
-) VALUES (
-    'QuikTrip',
-    'gas and food',
-    '321 Nowhere Dr.',
-    'Phoenix',
-    'AZ',
-    '12345'
-);
+INSERT INTO
+    poppit_company_users (company_id,first_name,last_name,email_address,phone_number,password_hash,company_role,company_contact,active)
+VALUES
+    (1,'Brandon','Chambers','bran.cham@gmail.com','(123) 123-1234','$2b$10$r4nCvcCKWnioJ4Qm2DlWauErLW6vSeSRvOJLHR5s2NRyrPHl8rkAG',1,1,1),
+    (2,'John','Smith','test@gmail.com','(999) 598-7777','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',2,1,1);

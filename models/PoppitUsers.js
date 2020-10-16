@@ -6,7 +6,7 @@ const TABLE_NAME = "poppit_users";
 const MODEL_NAME = "User";
 const OBJECT_NAME = "user";
 
-const VALID_COLS = ["first_name","last_name","email_address","password_hash","forgot_password_token","active","notifications","registration_type","city","state"];
+const VALID_COLS = ["first_name","last_name","email_address","active","notifications","registration_type","city","state"];
 const VALID_FILTER_COLS = ["first_name","last_name","email_address","active","registration_type","city","state"];
 
 const IDENTITY_COL = "id";
@@ -129,7 +129,7 @@ class User {
             cb({ error_type: "user", error: "id must be passed in" });
         } else {
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},password_hash,forgot_password_token,${CREATED_AT_COL},${UPDATED_AT_COL}`;
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
 
             this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );

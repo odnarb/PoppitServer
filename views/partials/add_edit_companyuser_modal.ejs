@@ -47,29 +47,23 @@
                                                 </div>
 
                                                 <div class="form-group row">
-                                                    <label for="company_permissions" class="col-2 col-form-label">Company Permissions</label>
+                                                    <label for="company_role" class="col-2 col-form-label">Company Role</label>
                                                     <div class="col-10">
-                                                        <input name="company_permissions" disabled class="form-control" type="text" value="">
+                                                        <select name="company_role" class="custom-select form-control">
+                                                            <option>Select a contact type...</option>
+                                                            <option value="none">None</option>
+                                                            <option value="admin">Admin</option>
+                                                            <option value="technical">Technical</option>
+                                                            <option value="marketing">Marketing</option>
+                                                        </select>
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group">
-                                                    <label for="contact_type" class="col-2 col-form-label">Contact Type</label>
-                                                    <div></div>
-                                                    <select name="contact_type" class="custom-select form-control">
-                                                        <option>Select a contact type...</option>
-                                                        <option selected value="none">None</option>
-                                                        <option value="admin">Admin</option>
-                                                        <option value="technical">Technical</option>
-                                                        <option value="marketing">Marketing</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="form-group row">
                                                     <label for="company_contact" class="col-2 col-form-label">Company Contact</label>
                                                     <span class="kt-switch">
                                                         <label>
-                                                            <input name="company_contact" type="checkbox" checked="checked" />
+                                                            <input name="company_contact" type="checkbox" />
                                                             <span></span>
                                                         </label>
                                                     </span>
@@ -79,7 +73,7 @@
                                                     <label for="active" class="col-2 col-form-label">Active</label>
                                                     <span class="kt-switch">
                                                         <label>
-                                                            <input name="active" type="checkbox" checked="checked" />
+                                                            <input name="active" type="checkbox" />
                                                             <span></span>
                                                         </label>
                                                     </span>
