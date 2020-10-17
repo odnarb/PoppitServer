@@ -223,7 +223,12 @@ module.exports = (globals) => {
             const salt = bcrypt.genSaltSync(globals.salt_rounds);
             const hash = bcrypt.hashSync(uuid.v4(), salt);
 
+            //save the password hash
             createParams.password_hash = hash;
+
+            //create a token for first login
+            createParams.invite_token = uuid.v4()
+
             delete createParams._csrf;
 
             CompanyUser.create(createParams, (err, new_user_id) => {
@@ -260,10 +265,7 @@ module.exports = (globals) => {
                     }
                 });
 
-                let regUserEmail = globals.user_registration_email({
-                    user: createParams,
-                    token: uuid.v4()
-                });
+                let regUserEmail = globals.user_registration_email({ user: createParams });
 
                 email = {
                     to: createParams.email_address,
@@ -290,15 +292,55 @@ module.exports = (globals) => {
             return next(err);
         }
     })
+     // companyuser/confirm/:id/:token
+    .get('/confirm/:id/:token', (req, res, next) => {
+        let CompanyUser = new CompanyUserModel( globals );
+        let routeHeader = "GET /confirm/:id/:token";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+
+            globals.logger.debug( `${routeHeader} :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+            let tokenParams = {
+                id: parseInt(req.params.id),
+                token: req.params.token
+            };
+
+            CompanyUser.confirmRegistration(tokenParams, (err, dbres) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                if(dbres.changedRows > 0){
+                    globals.logger.debug( `${routeHeader} :: SUCCESS :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+                    //success
+                    return res.redirect('/companyuser/changepassword');
+                } else {
+                    globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+                    //invalid request
+                    res.status(400);
+                    return next(err);
+                }
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
     // companyuser/:id operations
     .get('/:id', (req, res, next) => {
         let CompanyUser = new CompanyUserModel( globals );
         let routeHeader = "GET /companyuser/:id";
 
         try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
+            globals.logger.debug( `${routeHeader} :: BEGIN` );
 
-            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
+            globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
 
             //get user
             CompanyUser.findOne({ id: parseInt(req.params.id) }, (err, user) => {
@@ -307,9 +349,9 @@ module.exports = (globals) => {
                     return next(err);
                 }
 
-                globals.logger.info(`GET /companyuser/:id :: user.id: ${req.params.id}`, user);
+                globals.logger.debug(`GET /companyuser/:id :: user.id: ${req.params.id}`, user);
 
-                globals.logger.info( `${routeHeader} :: END` );
+                globals.logger.debug( `${routeHeader} :: END` );
 
                 return res.json(user);
             });

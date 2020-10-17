@@ -7,7 +7,7 @@ const MODEL_NAME = "CompanyUser";
 const OBJECT_NAME = "user";
 
 const VALID_COLS_MASS = ["company_id","first_name","last_name","email_address","phone_number","active","company_role","company_contact"];
-const VALID_COLS = ["company_id","first_name","last_name","email_address","phone_number","password_hash","forgot_password_token","active","company_role","company_contact"];
+const VALID_COLS = ["company_id","first_name","last_name","email_address","phone_number","password_hash","invite_token","forgot_password_token","active","company_role","company_contact"];
 const VALID_FILTER_COLS = ["first_name","last_name","email_address","phone_number","active","registration_type","city","state","company_contact"];
 
 const IDENTITY_COL = "id";
@@ -230,6 +230,27 @@ class CompanyUser {
                 }
             });
         }
+    }
+
+    confirmRegistration(obj, cb){
+
+        let updateStr = `UPDATE ${TABLE_NAME} SET invite_token='', active=1 `;
+        updateStr += `where id = ${this.dbescape(obj.id)} AND invite_token = ${this.dbescape(obj.token)};`;
+
+        this.globals.logger.debug(`${MODEL_NAME}.update() updateStr: ${updateStr}`);
+
+        this.execSQL(this.db, updateStr, (error, result) => {
+            if (error) {
+                this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
+                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+            // } else if ( results.) {
+            //     this.globals.logger.error(`${MODEL_NAME}.create() :: DUPLICATE ENTRY ERROR : `, error);
+            //     cb({ error_type: "user", error: "Email already exists" });
+            } else {
+                this.globals.logger.debug(`${MODEL_NAME}.create() result?: `, result);
+                cb(null,result);
+            }
+        });
     }
 
     update(vals, cb){
