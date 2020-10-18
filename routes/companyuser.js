@@ -116,7 +116,7 @@ module.exports = (globals) => {
     .post('/login', (req, res, next) => {
 
         let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "POST /companyuser";
+        let routeHeader = "POST /companyuser/login";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN`);
@@ -207,7 +207,7 @@ module.exports = (globals) => {
         globals.logger.info( "POST /companyuser/signup :: globals? ", gres );
         return res.json({ page: 'POST /companyuser/signup'});
     })
-    //create user
+    // create user
     .post('/', (req, res, next) => {
         let CompanyUser = new CompanyUserModel( globals );
         let routeHeader = "POST /companyuser";
@@ -292,10 +292,119 @@ module.exports = (globals) => {
             return next(err);
         }
     })
+     // companyuser/newpassword
+    .get('/newpassword', (req, res, next) => {
+        let CompanyUser = new CompanyUserModel( globals );
+        let routeHeader = "GET /companyuser/newpassword";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+            globals.logger.debug( `${routeHeader} :: id:: ${req.session.user.id} :: needsNewpassword :: ${req.session.needsNewpassword}`);
+
+            if(!req.session.needsNewpassword){
+
+                globals.logger.debug( `${routeHeader} :: Does not need new password :: END`);
+
+                return res.redirect('/companyuser/login');
+            } else {
+                globals.logger.debug( `${routeHeader} :: Show change password form :: END`);
+
+                return res.render('pages/login', {
+                    data: {
+                        pageTitle: process.env.APP_NAME + ' | New Password',
+                        showForm: "newpassword"
+                    },
+                    layout: 'login_layout'
+                });
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+     // companyuser/newpassword
+    .post('/newpassword', (req, res, next) => {
+        let CompanyUser = new CompanyUserModel( globals );
+        let routeHeader = "POST /companyuser/newpassword";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+            let validNewpassword = (req.session.user && req.session.user.id && req.session.needsNewpassword);
+
+            //check password1 and password2
+            let pw1 = req.body.password1;
+            let pw2 = req.body.password2;
+
+            globals.logger.debug( `${routeHeader} :: validNewpassword :: ${validNewpassword}`);
+
+            globals.logger.debug( `${routeHeader} :: pw1 :: ${pw1} :: pw2 :: ${pw2}`);
+
+            let invalidPws = (pw1 !== pw2 && pw1 !== '' && pw2 !== '');
+
+            if(!validNewpassword) {
+                res.status(400);
+                next();
+                // return next();
+            } else if (invalidPws) {
+                return res.json({ success: false })
+            } else {
+                 globals.logger.debug( `${routeHeader} :: generating pw hash...`);
+
+                //auto-generate a password for the user when created via the panel
+                const salt = bcrypt.genSaltSync(globals.salt_rounds);
+                const hash = bcrypt.hashSync(pw1, salt);
+
+                //save the password hash
+                let updateParams = {
+                    id: req.session.user.id,
+                    user: {
+                        password_hash: hash
+                    }
+                };
+
+                delete req.session.needsNewpassword;
+
+                 globals.logger.debug( `${routeHeader} :: before user update`, updateParams);
+
+                CompanyUser.update(updateParams, (err, dbres) => {
+                    if(err){
+                        res.status(500);
+                        return next(err);
+                    }
+
+                    if( dbres[0].changedRows > 0 ){
+                        let user = dbres[1];
+
+                        globals.logger.debug( `${routeHeader} :: user ::`, user);
+
+                        //save the session to redis store
+                        req.session.regenerate( (err) => {
+                            req.session.isLoggedIn = true;
+                            req.session.user = user;
+
+                            return res.json({ success: true });
+                            // return res.redirect('/');
+                        });
+                    } else {
+                        globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+                        //invalid request
+                        res.status(400);
+                        return res.json({ success: false })
+                    }
+                });
+            } //endif validNewpassword
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
      // companyuser/confirm/:id/:token
     .get('/confirm/:id/:token', (req, res, next) => {
         let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /confirm/:id/:token";
+        let routeHeader = "GET /companyuser/confirm/:id/:token";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -309,16 +418,32 @@ module.exports = (globals) => {
             };
 
             CompanyUser.confirmRegistration(tokenParams, (err, dbres) => {
+                globals.logger.debug( `${routeHeader} :: Back from db`);
+
                 if(err){
                     res.status(500);
                     return next(err);
                 }
 
-                if(dbres.changedRows > 0){
+                if(dbres[0].changedRows > 0){
                     globals.logger.debug( `${routeHeader} :: SUCCESS :: id:: ${req.params.id} :: token :: ${req.params.token}`);
 
+                    let user = dbres[1];
+
+                    globals.logger.debug( `${routeHeader} :: user :: ${user}`);
+
+                    delete user.password_hash;
+                    delete user.forgot_password_token;
+                    delete user.invite_token;
+
+                    req.session.user = user;
+                    req.session.needsNewpassword = true;
+                    req.session.isLoggedIn = false;
+
+                    globals.logger.debug( `${routeHeader} :: SESSION SET :: ${req.session}`);
+
                     //success
-                    return res.redirect('/companyuser/changepassword');
+                    return res.redirect('/companyuser/newpassword');
                 } else {
                     globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
 
@@ -375,11 +500,14 @@ module.exports = (globals) => {
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
 
-            CompanyUser.update(updateParams, (err, user) => {
+            CompanyUser.update(updateParams, (err, dbres) => {
                 if(err){
                     res.status(500);
                     return next(err);
                 }
+
+                let user = dbres[2][0];
+                globals.logger.debug( `${routeHeader} :: user ::`, user);
 
                 globals.logger.info( routeHeader  + " :: END" );
                 return res.json({ success: true, user: user });

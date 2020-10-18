@@ -19,6 +19,15 @@ var KTLoginGeneral = function() {
     }
 
     // Private Functions
+    var displayNewPasswordForm = function() {
+        login.removeClass('kt-login--forgot');
+        login.removeClass('kt-login--signin');
+        login.removeClass('kt-login--signup');
+
+        login.addClass('kt-login--newpassword');
+        KTUtil.animateClass(login.find('.kt-login__newpassword')[0], 'flipInX animated');
+    }
+
     var displaySignUpForm = function() {
         login.removeClass('kt-login--forgot');
         login.removeClass('kt-login--signin');
@@ -68,11 +77,54 @@ var KTLoginGeneral = function() {
         });
     }
 
+    var handleNewPasswordFormSubmit = function() {
+        $('#kt_login_newpassword_submit').click(function(e) {
+            e.preventDefault();
+            var btn = $(this);
+            var form = $(this).closest('form');
+
+            form.validate({
+                rules: {
+                    password1: {
+                        required: true
+                    },
+                    password2: {
+                        required: true
+                    }
+                }
+            });
+
+            if (!form.valid()) {
+                return;
+            }
+
+            btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
+
+            form.ajaxSubmit({
+                url: '/companyuser/newpassword',
+                dataType : 'json', // data type
+                data : form.serialize(),
+                success: function(response, status, xhr, $form) {
+                    btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
+                    if( response.success === true ){
+                        window.location = "/";
+                    } else {
+                        showErrorMsg(form, 'danger', 'Passwords do not match or are empty. Please try again.');
+                    }
+                },
+                error: function(){
+                    window.location = "/companyuser/login";
+                }
+            });
+        });
+    }
+
     var handleSignInFormSubmit = function() {
         $('#kt_login_signin_submit').click(function(e) {
             e.preventDefault();
             var btn = $(this);
-            var form = $(this).closest('form');           
+            var form = $(this).closest('form');
 
             form.validate({
                 rules: {
@@ -211,6 +263,7 @@ var KTLoginGeneral = function() {
             handleSignInFormSubmit();
             handleSignUpFormSubmit();
             handleForgotFormSubmit();
+            handleNewPasswordFormSubmit();
         }
     };
 }();
