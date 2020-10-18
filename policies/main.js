@@ -2,6 +2,9 @@ module.exports = (globals) => {
     return (req, res, next) => {
         const allowedMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS'];
 
+        // const allowUrls = [
+        // ];
+
         // globals.logger.info("main policy :: METHOD: ", req.method);
 
         if (!allowedMethods.includes(req.method)) {
@@ -9,9 +12,14 @@ module.exports = (globals) => {
         }
 
         //if assets, allow through
-        let assetRequest = req.url.indexOf('/assets') === 0;
+        let allowRequest = (
+            req.url.indexOf('/assets') > -1 ||
+            req.url.indexOf('/companyuser/confirm') > -1 ||
+            req.url === '/companyuser/logout' ||
+            req.url === '/companyuser/newpassword'
+        );
 
-        if( assetRequest ) {
+        if( allowRequest ) {
             next();
 
         // check session... show login or show dashboard

@@ -237,17 +237,29 @@ class CompanyUser {
         let updateStr = `UPDATE ${TABLE_NAME} SET invite_token='', active=1 `;
         updateStr += `where id = ${this.dbescape(obj.id)} AND invite_token = ${this.dbescape(obj.token)};`;
 
-        this.globals.logger.debug(`${MODEL_NAME}.update() updateStr: ${updateStr}`);
+        let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+        let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(obj.id)};`;
+
+        updateStr += `${updateStr}${sqlStr}`;
+
+        this.globals.logger.debug(`${MODEL_NAME}.confirmRegistration() updateStr: ${updateStr}`);
 
         this.execSQL(this.db, updateStr, (error, result) => {
             if (error) {
-                this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
+                this.globals.logger.error(`${MODEL_NAME}.confirmRegistration() :: ERROR : `, error);
                 cb({ error_type: "system", error: "A system error has occurred, please contact support" });
-            // } else if ( results.) {
-            //     this.globals.logger.error(`${MODEL_NAME}.create() :: DUPLICATE ENTRY ERROR : `, error);
-            //     cb({ error_type: "user", error: "Email already exists" });
             } else {
-                this.globals.logger.debug(`${MODEL_NAME}.create() result?: `, result);
+                this.globals.logger.debug(`${MODEL_NAME}.confirmRegistration() result?: `, result);
+                this.globals.logger.debug(`${MODEL_NAME}.confirmRegistration() result[2]?: `, result[2]);
+
+                let user = result[2];
+
+                delete user.password_hash;
+                delete user.forgot_password_token;
+                delete user.invite_token;
+
+                result[2] = user;
+
                 cb(null,result);
             }
         });
@@ -291,14 +303,32 @@ class CompanyUser {
             let sqlStr = `UPDATE ${TABLE_NAME} SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
-            this.globals.logger.debug(`${MODEL_NAME}.update() sqlStr: ${sqlStr}`);
+            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let userSqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(obj.id)};`;
 
-            this.execSQL(this.db, sqlStr, (error, result) => {
+            let finalSqlStr = `${sqlStr}${userSqlStr}`;
+
+            this.globals.logger.debug(`${MODEL_NAME}.update() finalSqlStr: ${finalSqlStr}`);
+
+            this.globals.logger.debug(`${MODEL_NAME}.update() finalSqlStr: ${finalSqlStr}`);
+
+            this.execSQL(this.db, finalSqlStr, (error, result) => {
                 if (error) {
                     this.globals.logger.error(`${MODEL_NAME}.update() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
                     this.globals.logger.debug(`${MODEL_NAME}.update() result?: `, result);
+
+                    this.globals.logger.debug(`${MODEL_NAME}.update() result[2]?: `, result[2]);
+
+                    let user = result[2];
+
+                    delete user.password_hash;
+                    delete user.forgot_password_token;
+                    delete user.invite_token;
+
+                    result[2] = user;
+
                     cb(null,result);
                 }
             });
