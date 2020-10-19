@@ -7,12 +7,12 @@ module.exports = (globals) => {
                 const util = require('util');
                 return res.status(res.statusCode).json({ status_code: error.status, status: "error", err_msg: error });
             } else {
-                let errPage = globals.errorPages[error.status];
+                let errPage = globals.errorPages[error.status||res.statusCode];
                 if ( errPage === undefined ) {
                     errPage = 'generalError';
                 }
                 let errPageStr = 'errors/'+errPage+'.ejs';
-                return res.status(error.status).render(errPageStr);
+                return res.status(error.status||res.statusCode).render(errPageStr);
             }
         }
         next();

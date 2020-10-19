@@ -150,6 +150,9 @@ app.use( (req,res,next) => {
     req.app.locals.title = `${process.env.APP_NAME} | `;
     req.app.locals.url = req.url;
     req.app.locals._csrf = req.csrfToken();
+    if( req.session.isLoggedIn ){
+        res.locals.user = req.session.user;
+    }
     next();
 });
 

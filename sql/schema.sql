@@ -99,6 +99,7 @@ CREATE TABLE `poppit_company_users` (
     `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `invite_token` VARCHAR(255) NOT NULL DEFAULT '',
     `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
+    `admin` INT NOT NULL DEFAULT 0,
     `company_role` INT NOT NULL DEFAULT 0,
     `company_contact` INT NOT NULL DEFAULT 0,
     `active` INT NOT NULL DEFAULT 0,
