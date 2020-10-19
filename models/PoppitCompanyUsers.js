@@ -6,8 +6,8 @@ const TABLE_NAME = "poppit_company_users";
 const MODEL_NAME = "CompanyUser";
 const OBJECT_NAME = "user";
 
-const VALID_COLS_MASS = ["company_id","first_name","last_name","email_address","phone_number","active","company_role","company_contact"];
-const VALID_COLS = ["company_id","first_name","last_name","email_address","phone_number","password_hash","invite_token","forgot_password_token","active","company_role","company_contact"];
+const VALID_COLS_MASS = ["company_id","first_name","last_name","email_address","phone_number","active","admin","company_role","company_contact"];
+const VALID_COLS = ["company_id","first_name","last_name","email_address","phone_number","password_hash","invite_token","forgot_password_token","active","admin","company_role","company_contact"];
 const VALID_FILTER_COLS = ["first_name","last_name","email_address","phone_number","active","registration_type","city","state","company_contact"];
 
 const IDENTITY_COL = "id";

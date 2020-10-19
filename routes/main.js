@@ -9,7 +9,7 @@ module.exports = (globals) => {
         .get('/', (req, res) => {
             return res.render('pages/dashboard',{
                 data: {
-                    pageTitle: process.env.APP_NAME + ' | Dashboard'
+                    pageTitle: `${process.env.APP_NAME} | Dashboard`
                 }
             });
         });

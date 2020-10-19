@@ -8,6 +8,52 @@ let CompanyModel = require('../models/PoppitCompanies');
 module.exports = (globals) => {
     return router
     // /company (get all companies)
+    .get('/setcontext/:id', (req, res, next) => {
+        let Company = new CompanyModel( globals );
+        let routeHeader = "GET /setcontext/:id";
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN` );
+
+            globals.logger.debug( `${routeHeader} :: company id: ${req.params.id}` );
+
+            globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
+
+            if(req.session.user.admin === 1){
+                globals.logger.debug( `${routeHeader} :: BEFORE Company.findOne() :: company id: ${req.params.id}` );
+
+                Company.findOne({ id: parseInt(req.params.id) }, (err, dbRes) => {
+                    if(err){
+                        res.status(500);
+                        return next(err);
+                    }
+
+                    globals.logger.debug( `${routeHeader} :: AFTER Company.findOne() :: dbRes:`, dbRes);
+
+                    globals.logger.debug( `${routeHeader} :: AFTER Company.findOne() :: req.session:`, req.session);
+
+                    let context_res = { success: false }
+                    if( dbRes !== undefined ){
+                        globals.logger.debug( `${routeHeader} :: NEW req.session.company_context:`, req.session.company_context);
+
+                        req.session.company_context = dbRes;
+                        context_res.company = dbRes;
+                        context_res.success = true;
+                    }
+                    globals.logger.debug( `${routeHeader} :: END` );
+
+                    return res.json(context_res);
+                });
+            } else {
+                globals.logger.debug( `${routeHeader} :: user :: ${req.session.user.id} ${req.session.user.email_address} :: NOT admin for company context :: company id: ${req.params.id}` );
+
+                return res.redirect('/');
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
     .get('/', (req, res, next) => {
         let Company = new CompanyModel( globals );
         let routeHeader = "GET /company (HTTP)";
