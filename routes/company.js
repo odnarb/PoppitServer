@@ -7,10 +7,10 @@ let CompanyModel = require('../models/PoppitCompanies');
 
 module.exports = (globals) => {
     return router
-    // /company (get all companies)
+    // /company/setcontext/:id
     .get('/setcontext/:id', (req, res, next) => {
         let Company = new CompanyModel( globals );
-        let routeHeader = "GET /setcontext/:id";
+        let routeHeader = "GET /company/setcontext/:id";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN` );
@@ -34,9 +34,10 @@ module.exports = (globals) => {
 
                     let context_res = { success: false }
                     if( dbRes !== undefined ){
+                        req.session.company_context = dbRes;
+
                         globals.logger.debug( `${routeHeader} :: NEW req.session.company_context:`, req.session.company_context);
 
-                        req.session.company_context = dbRes;
                         context_res.company = dbRes;
                         context_res.success = true;
                     }
@@ -54,6 +55,7 @@ module.exports = (globals) => {
             return next(err);
         }
     })
+    // /company (get all companies)
     .get('/', (req, res, next) => {
         let Company = new CompanyModel( globals );
         let routeHeader = "GET /company (HTTP)";

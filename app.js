@@ -153,6 +153,16 @@ app.use( (req,res,next) => {
     if( req.session.isLoggedIn ){
         res.locals.user = req.session.user;
     }
+    if( req.session.company_context && req.session.company_context.id > 0 ){
+        res.locals.company_context = req.session.company_context;
+    } else {
+        res.locals.company_context = undefined;
+    }
+    if( req.session.companyuser_context && req.session.companyuser_context.id > 0 ){
+        res.locals.companyuser_context = req.session.companyuser_context;
+    } else {
+        res.locals.companyuser_context = undefined;
+    }
     next();
 });
 

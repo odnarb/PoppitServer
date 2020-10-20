@@ -16,6 +16,54 @@ const COOKIE_MIN_AGE =  60 * 60 * 1000;
 
 module.exports = (globals) => {
     return router
+    // /setcontext/:id
+    .get('/setcontext/:id', (req, res, next) => {
+        let CompanyUser = new CompanyUserModel( globals );
+        let routeHeader = "GET /companyuser/setcontext/:id";
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN` );
+
+            globals.logger.debug( `${routeHeader} :: company id: ${req.params.id}` );
+
+            globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
+
+            if(req.session.user.admin === 1){
+                globals.logger.debug( `${routeHeader} :: BEFORE CompanyUser.findOne() :: company id: ${req.params.id}` );
+
+                CompanyUser.findOne({ email_address: req.params.id }, (err, dbRes) => {
+                    if(err){
+                        res.status(500);
+                        return next(err);
+                    }
+
+                    globals.logger.debug( `${routeHeader} :: AFTER CompanyUser.findOne() :: dbRes:`, dbRes);
+
+                    globals.logger.debug( `${routeHeader} :: AFTER CompanyUser.findOne() :: req.session:`, req.session);
+
+                    let context_res = { success: false }
+                    if( dbRes !== undefined ){
+                        req.session.companyuser_context = dbRes;
+
+                        globals.logger.debug( `${routeHeader} :: NEW req.session.companyuser_context:`, req.session.companyuser_context);
+
+                        context_res.company = dbRes;
+                        context_res.success = true;
+                    }
+                    globals.logger.debug( `${routeHeader} :: END` );
+
+                    return res.json(context_res);
+                });
+            } else {
+                globals.logger.debug( `${routeHeader} :: user :: ${req.session.user.id} ${req.session.user.email_address} :: NOT admin for company context :: company id: ${req.params.id}` );
+
+                return res.redirect('/');
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
     // companyuser/ (get all users)
     .get('/', (req, res, next) => {
         let CompanyUser = new CompanyUserModel( globals );
