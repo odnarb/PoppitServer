@@ -58,7 +58,7 @@ module.exports = (globals) => {
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
                 return res.render('pages/location',{
-                    pageTitle: `${process.env.APP_NAME} | Search Locations`
+                    pageTitle: "Search Locations"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);

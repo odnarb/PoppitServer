@@ -8,9 +8,7 @@ module.exports = (globals) => {
         //This is the actual request we look for
         .get('/', (req, res) => {
             return res.render('pages/dashboard',{
-                data: {
-                    pageTitle: `${process.env.APP_NAME} | Dashboard`
-                }
+                pageTitle: "Dashboard"
             });
         });
 };

@@ -130,7 +130,7 @@ module.exports = (globals) => {
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
                 return res.render('pages/companyuser',{
-                    pageTitle: `${process.env.APP_NAME} | Search Company Users`
+                    pageTitle: "Search Company Users"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -150,9 +150,8 @@ module.exports = (globals) => {
             globals.logger.debug( `${routeHeader} :: DONE`);
 
             return res.render('pages/login', {
-                data: {
-                    pageTitle: process.env.APP_NAME + ' | Login'
-                },
+                pageTitle: "Login",
+                showForm: "login",
                 layout: 'login_layout'
             });
         } catch( err ) {
@@ -359,10 +358,8 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: Show change password form :: END`);
 
                 return res.render('pages/login', {
-                    data: {
-                        pageTitle: process.env.APP_NAME + ' | New Password',
-                        showForm: "newpassword"
-                    },
+                    pageTitle: "New Password",
+                    showForm: "newpassword",
                     layout: 'login_layout'
                 });
             }

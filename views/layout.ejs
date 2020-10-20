@@ -4,7 +4,7 @@
     <!-- begin::Head -->
     <head>
         <meta charset="utf-8" />
-        <title>Metronic | Dashboard</title>
+        <title><%- appName %> | <% if ( error_status !== '' ) { %>Error <%- error_status %><% } else { %><%- pageTitle %><% } %></title>
         <meta name="description" content="Updates and statistics">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -20,8 +20,11 @@
                 }
             });
         </script>
-
         <!--end::Fonts -->
+
+        <% if( error_status ) { %>
+            <link href="../../assets/app/custom/error/error-v1.default.css" rel="stylesheet" type="text/css" />
+        <% } %>
 
         <!--begin::Page Vendors Styles(used by this page) -->
         <link href="/assets/vendors/custom/fullcalendar/fullcalendar.bundle.css" rel="stylesheet" type="text/css" />

@@ -60,7 +60,7 @@ module.exports = (globals) => {
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
                 return res.render('pages/campaign',{
-                    pageTitle: `${process.env.APP_NAME} | Search Campaigns`
+                    pageTitle: "Search Campaigns"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
