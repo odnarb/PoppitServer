@@ -6,17 +6,29 @@
                         <!-- begin:: Header Topbar -->
                         <div class="kt-header__topbar">
 
-                            <div class="input-group company-context" style="padding: 10px;">
-                                <div class="set-company-context">
+                        <% if( user.admin === 1 ){ %>
+                            <div class="company-context" style="padding: 10px;">
+                                <div class="set-company-context"<% if(company_context !== undefined) { %> style="display:none;"<% } %>>
                                     <input type="text" placeholder="Company ID" name="company_id" autocomplete="off">
                                     <button id="company_context_submit" class="btn btn-brand btn-pill">Change Company</button>
                                 </div>
-                                <div class="show-company-context" style="display:none;">
-                                    Current Company: <span class="show-company-context-details" style="margin-right: 10px;"></span>
+                                <div class="show-company-context"<% if(company_context === undefined) { %> style="display:none;"<% } %>>
+                                    Current Company: <span class="show-company-context-details" style="margin-right: 10px;"><% if(company_context !== undefined) { %><%- company_context.name %> (id:<%- company_context.id %>)<% } %></span>
                                     <button id="company_context_reset" class="btn btn-brand btn-pill">Reset</button>
                                 </div>
                             </div>
 
+                            <div class="companyuser-context" style="padding: 10px;">
+                                <div class="set-companyuser-context"<% if(companyuser_context !== undefined) { %> style="display:none;"<% } %>>
+                                    <input type="text" placeholder="User Email Address" name="companyuser__id" autocomplete="off">
+                                    <button id="companyuser_context_submit" class="btn btn-brand btn-pill">Change User</button>
+                                </div>
+                                <div class="show-companyuser-context"<% if(companyuser_context === undefined) { %> style="display:none;"<% } %>>
+                                    Current User: <span class="show-companyuser-context-details" style="margin-right: 10px;"><% if(companyuser_context !== undefined) { %><%- companyuser_context.last_name %>, <%- companyuser_context.first_name %> (id:<%- companyuser_context.id %>)<% } %></span>
+                                    <button id="companyuser_context_reset" class="btn btn-brand btn-pill">Logout of User Context</button>
+                                </div>
+                            </div>
+                        <% } %>
                             <!--begin: Search -->
                             <div class="kt-header__topbar-item kt-header__topbar-item--search dropdown" id="kt_quick_search_toggle">
                                 <div class="kt-header__topbar-wrapper" data-toggle="dropdown" data-offset="10px,0px">

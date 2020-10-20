@@ -235,7 +235,7 @@ VALUES
     ('QuikTrip','gas and food','321 Nowhere Dr.','Phoenix','AZ','12345');
 
 INSERT INTO
-    poppit_company_users (company_id,first_name,last_name,email_address,phone_number,password_hash,company_role,company_contact,active)
+    poppit_company_users (company_id,first_name,last_name,email_address,phone_number,password_hash,company_role,company_contact,active,admin)
 VALUES
-    (1,'Brandon','Chambers','bran.cham@gmail.com','(123) 123-1234','$2b$10$r4nCvcCKWnioJ4Qm2DlWauErLW6vSeSRvOJLHR5s2NRyrPHl8rkAG',1,1,1),
-    (2,'John','Smith','test@gmail.com','(999) 598-7777','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',2,1,1);
+    (1,'Brandon','Chambers','bran.cham@gmail.com','(123) 123-1234','$2b$10$r4nCvcCKWnioJ4Qm2DlWauErLW6vSeSRvOJLHR5s2NRyrPHl8rkAG',1,1,1,1),
+    (2,'John','Smith','test@gmail.com','(999) 598-7777','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',2,1,1,0);
