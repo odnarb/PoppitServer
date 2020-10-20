@@ -105,7 +105,7 @@ module.exports = (globals) => {
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
                 return res.render('pages/appuser',{
-                    pageTitle: `${process.env.APP_NAME} | Search App Users`
+                    pageTitle: "Search App Users"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -119,9 +119,7 @@ module.exports = (globals) => {
         globals.logger.info( "GET /appuser/login" );
 
         return res.render('pages/login', {
-            data: {
-                pageTitle: process.env.APP_NAME + ' | Login'
-            },
+            pageTitle: "Login",
             layout: 'login_layout'
         });
     })

@@ -109,7 +109,7 @@ module.exports = (globals) => {
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
                 return res.render('pages/company',{
-                    pageTitle: `${process.env.APP_NAME} | Search Companies`
+                    pageTitle: "Search Companies"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);

@@ -147,9 +147,13 @@ app.use(policyFilter);
 
 //set some local variables to boot, so routes and views can access
 app.use( (req,res,next) => {
-    req.app.locals.title = `${process.env.APP_NAME} | `;
+    req.app.locals.appName = process.env.APP_NAME;
     req.app.locals.url = req.url;
     req.app.locals._csrf = req.csrfToken();
+
+    if( res.locals.error_status == undefined ){
+        res.locals.error_status = ''
+    }
     if( req.session.isLoggedIn ){
         res.locals.user = req.session.user;
     }
@@ -191,7 +195,10 @@ app.use('/location', location);
 //handle 404's
 app.use( (req, res, next) => {
     globals.logger.info("ERROR 404 :: requested url: " + req.url );
-    res.status(404).render('errors/404.ejs');
+    res.status(404).render('errors/404.ejs', {
+        pageTitle: "404 Error",
+        error_status: res.statusCode
+    });
 });
 
 //error handler
