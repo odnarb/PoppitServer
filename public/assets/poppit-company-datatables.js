@@ -247,6 +247,11 @@ let KTDatatablesExtensionsKeytable = function() {
             ],
 
             columnDefs: [
+                {
+                    "targets": [ 2, 7, 11 ],
+                    "visible": false,
+                    "searchable": false
+                },
                 //render time stamp
                 {
                     targets: -3,
@@ -265,6 +270,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     targets: -1,
                     title: 'Actions',
                     orderable: false,
+                    searchable: false,
                     render: function(data, type, company, meta) {
                         return `
                         <span class="dropdown">

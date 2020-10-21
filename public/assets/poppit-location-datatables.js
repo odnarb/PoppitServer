@@ -280,6 +280,7 @@ console.log("Current lat/lng: ", obj.latitude, obj.longitude);
                     targets: -1,
                     title: 'Actions',
                     orderable: false,
+                    searchable: false,
                     render: function(data, type, obj, meta) {
                         return `
                         <span class="dropdown">

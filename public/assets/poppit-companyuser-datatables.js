@@ -278,6 +278,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     targets: -1,
                     title: 'Actions',
                     orderable: false,
+                    searchable: false,
                     render: function(data, type, user, meta) {
                         return `
                         <span class="dropdown">
