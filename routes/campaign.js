@@ -84,6 +84,8 @@ module.exports = (globals) => {
             createParams.date_start = new Date(createParams.date_start);
             createParams.date_end = new Date(createParams.date_end);
 
+            delete createParams._csrf;
+
             Campaign.create(createParams, (err, new_campaign_id) => {
                 if(err){
                     res.status(500);
@@ -142,6 +144,8 @@ module.exports = (globals) => {
             //format dates properly
             campaign.date_start = new Date(campaign.date_start);
             campaign.date_end = new Date(campaign.date_end);
+
+            delete campaign._csrf;
 
             let updateParams = { id: parseInt(req.params.id), campaign: campaign };
 

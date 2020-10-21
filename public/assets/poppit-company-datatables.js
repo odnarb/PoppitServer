@@ -87,6 +87,12 @@ let KTDatatablesExtensionsKeytable = function() {
                         obj.active = 0;
                     }
 
+                    if( obj.demo_acct === "on" ) {
+                        obj.demo_acct = 1;
+                    } else {
+                        obj.demo_acct = 0;
+                    }
+
                     console.log("company obj: ", obj);
 
                     //add the company

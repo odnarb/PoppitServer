@@ -152,6 +152,8 @@ module.exports = (globals) => {
 
             createParams.password_hash = hash;
 
+            delete createParams._csrf;
+
             User.create(createParams, (err, new_user_id) => {
                 if(err && err.error_type == "user") {
                     res.status(400);
@@ -208,7 +210,9 @@ module.exports = (globals) => {
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
 
-            let updateParams = { id: parseInt(req.params.id), user: req.body };
+            let user = req.body 
+            delete user._csrf;
+            let updateParams = { id: parseInt(req.params.id), user: user };
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
 

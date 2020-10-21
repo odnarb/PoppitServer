@@ -76,6 +76,8 @@ module.exports = (globals) => {
 
             let createParams = req.body;
 
+            delete createParams._csrf;
+
             globals.logger.info(`${routeHeader} :: createParams: `, createParams );
 
             Location.create(createParams, (err, new_location_id) => {

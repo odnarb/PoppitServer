@@ -129,6 +129,8 @@ module.exports = (globals) => {
 
             globals.logger.info(`${routeHeader} :: createParams: `, createParams );
 
+            delete createParams._csrf;
+
             Company.create(createParams, (err, new_company_id) => {
                 if(err){
                     res.status(500);
@@ -182,7 +184,9 @@ module.exports = (globals) => {
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
 
-            let updateParams = { id: parseInt(req.params.id), company: req.body };
+            let company = req.body;
+            delete company._csrf;
+            let updateParams = { id: parseInt(req.params.id), company: company };
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
 
