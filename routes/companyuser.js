@@ -179,28 +179,21 @@ module.exports = (globals) => {
             let userEmail = { email_address: req.body.email };
             CompanyUser.findOne(userEmail, (err,user) => {
                 if(err){
-                    globals.logger.info( "DB CompanyUser.find() error: ", err);
+                    globals.logger.debug( `${routeHeader} :: DB CompanyUser.find() error: `, err);
                     return res.status(500).json({reason: "server_error"});
                 }
 
-                globals.logger.debug( `${routeHeader} :: after get user: `, user);
-
                 //user not found at all
                 if ( user == undefined ){
-                    globals.logger.debug( `${routeHeader} :: after get user, incorrect_username: `, user);
-
+                    globals.logger.debug( `${routeHeader} :: user not found, login denied: `, req.body.email);
                     return res.status(403).json({reason: "no_user"});
                 }
 
-                globals.logger.debug( `${routeHeader} :: bcrypt: `, req.body.password, user.password_hash);
-
                 if( bcrypt.compareSync(req.body.password, user.password_hash) ){
-
-                    globals.logger.debug( `${routeHeader} :: bcrypt match!`);
-
                     //only check if the passwords match
                     //user has not been activated
                     if( user.active == 0 ){
+                        globals.logger.debug( `${routeHeader} :: user inactive, login denied: `, req.body.email);
                         return res.status(403).json({reason: "no_user"});
                     }
 
@@ -219,11 +212,12 @@ module.exports = (globals) => {
                         } else {
                             req.session.cookie.maxAge = COOKIE_MIN_AGE;
                         }
+                        globals.logger.info( `${routeHeader} :: CompanyUser.id=${user.id} logged IN` );
+
                         return res.json({ success: true });
                     });
                 } else {
-                    globals.logger.debug( `${routeHeader} :: bad pw: `, user);
-
+                    globals.logger.debug( `${routeHeader} :: bad pw, login denied: `, req.body.email);
                     return res.status(403).json({reason: "no_user"});
                 }
             });
