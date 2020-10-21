@@ -183,41 +183,48 @@ module.exports = (globals) => {
                     return res.status(500).json({reason: "server_error"});
                 }
 
+                globals.logger.debug( `${routeHeader} :: after get user: `, user);
+
                 //user not found at all
                 if ( user == undefined ){
-                    return res.status(400).json({reason: "incorrect_username"});
+                    globals.logger.debug( `${routeHeader} :: after get user, incorrect_username: `, user);
+
+                    return res.status(403).json({reason: "no_user"});
                 }
 
+                globals.logger.debug( `${routeHeader} :: bcrypt: `, req.body.password, user.password_hash);
+
                 if( bcrypt.compareSync(req.body.password, user.password_hash) ){
+
+                    globals.logger.debug( `${routeHeader} :: bcrypt match!`);
 
                     //only check if the passwords match
                     //user has not been activated
                     if( user.active == 0 ){
-                        return res.status(400).json({reason: "not_active"});
+                        return res.status(403).json({reason: "no_user"});
                     }
 
-                    if( bcrypt.compareSync(req.body.password, user.password_hash) ){
+                    globals.logger.info( `CompanyUser.id=${user.id} logged IN` );
 
-                        globals.logger.info( `CompanyUser.id=${user.id} logged IN` );
+                    //remove the password_hash field before being saved to the session
+                    delete user.password_hash;
+                    delete user.forgot_password_token;
 
-                        //remove the password_hash field before being saved to the session
-                        delete user.password_hash;
-                        delete user.forgot_password_token;
+                    //save the session to redis store
+                    req.session.regenerate( (err) => {
+                        req.session.isLoggedIn = true;
+                        req.session.user = user;
+                        if( req.body.remember && req.body.remember == "on" ){
+                            req.session.cookie.maxAge = COOKIE_MAX_AGE;
+                        } else {
+                            req.session.cookie.maxAge = COOKIE_MIN_AGE;
+                        }
+                        return res.json({ success: true });
+                    });
+                } else {
+                    globals.logger.debug( `${routeHeader} :: bad pw: `, user);
 
-                        //save the session to redis store
-                        req.session.regenerate( (err) => {
-                            req.session.isLoggedIn = true;
-                            req.session.user = user;
-                            if( req.body.remember && req.body.remember == "on" ){
-                                req.session.cookie.maxAge = COOKIE_MAX_AGE;
-                            } else {
-                                req.session.cookie.maxAge = COOKIE_MIN_AGE;
-                            }
-                            return res.json({ success: true });
-                        });
-                    } else {
-                        return res.status(400).json({reason: "no_user"});
-                    }
+                    return res.status(403).json({reason: "no_user"});
                 }
             });
 
