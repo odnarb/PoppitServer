@@ -228,6 +228,7 @@ let KTDatatablesExtensionsKeytable = function() {
                   return `company-${row.id}`;
             },
 
+
             //define the columns
             columns: [
                 { "data": "id" },
@@ -238,6 +239,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "state" },
                 { "data": "zip" },
                 { "data": "country_code" },
+                { "data": "active" },
+                { "data": "demo_acct" },
                 { "data": "created_at" },
                 { "data": "updated_at" },
                 { "data": "actions" }
