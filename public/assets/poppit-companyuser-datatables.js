@@ -4,7 +4,11 @@ let KTDatatablesExtensionsKeytable = function() {
     // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
-    let initCompanyUserTable = function() {
+    let checkToggle = function(val){
+        return val === "on" || val === 1 || val === true;
+    };
+
+    let initTable = function() {
 
         let initTableHandlers = function() {
             // clear click handlers
@@ -63,17 +67,15 @@ let KTDatatablesExtensionsKeytable = function() {
                 $(`#kt_object_add-edit_modal form option[value="${user.company_role}"]`).prop('selected', true);
                 $('#kt_object_add-edit_modal form input[name=phone_number]').val(user.phone_number);
 
-                if( user.company_contact === 1 ){
+                if( checkToggle(user.company_contact) ){
                     $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', false);
                 }
 
-                if( user.active === 1 ){
-                    console.log("user is ACTIVE")
+                if( checkToggle(user.active) ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
                 } else {
-                    console.log("user is INACTIVE")
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
                 }
 
@@ -85,20 +87,57 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            company_id: {
+                                required: true,
+                                maxlength: 32,
+                                digits: true
+                            },
+                            first_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            last_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            email_address: {
+                                required: true,
+                                email: true,
+                                maxlength: 255
+                            },
+                            phone_number: {
+                                required: true,
+                                phoneUS: true
+                            },
+                            company_role: {
+                                required: true
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
                     }
-                    if(obj.company_contact == "on"){
+                    if( checkToggle(obj.company_contact) ){
                         obj.company_contact = 1;
                     } else {
                         obj.company_contact = 0;
                     }
 
-                    console.log("save [EDIT to] user obj: ", obj);
+                    btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
 
                     //add the user
                     $.ajax({
@@ -106,6 +145,8 @@ let KTDatatablesExtensionsKeytable = function() {
                         url: `/companyuser/${user_id}`,
                         data: obj,
                         success: function(res) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             //hide this, re-fetch and redraw table
                             $('#kt_object_add-edit_modal').modal('hide');
 
@@ -115,6 +156,8 @@ let KTDatatablesExtensionsKeytable = function() {
                             });
                         },
                         error: function(e) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             console.error(e);
                         }
                     });
@@ -148,14 +191,51 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            company_id: {
+                                required: true,
+                                maxlength: 32,
+                                digits: true
+                            },
+                            first_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            last_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            email_address: {
+                                required: true,
+                                email: true,
+                                maxlength: 255
+                            },
+                            phone_number: {
+                                required: true,
+                                phoneUS: true
+                            },
+                            company_role: {
+                                required: true
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
                     }
-                    if(obj.company_contact == "on"){
+                    if( checkToggle(obj.company_contact) ){
                         obj.company_contact = 1;
                     } else {
                         obj.company_contact = 0;
@@ -163,12 +243,16 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     console.log("new user obj: ", obj);
 
+                    btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
+
                     //add the user
                     $.ajax({
                         method: "POST",
                         url: `/companyuser`,
                         data: obj,
                         success: function(res) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             //hide this, re-fetch and redraw table
                             $('#kt_object_add-edit_modal').modal('hide');
 
@@ -178,6 +262,8 @@ let KTDatatablesExtensionsKeytable = function() {
                             });
                         },
                         error: function(e) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             console.error(e);
                         }
                     });
@@ -343,7 +429,7 @@ let KTDatatablesExtensionsKeytable = function() {
     return {
         //main function to initiate the module
         init: function() {
-            initCompanyUserTable();
+            initTable();
         }
     };
 

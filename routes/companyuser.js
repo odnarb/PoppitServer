@@ -552,7 +552,7 @@ module.exports = (globals) => {
                     return next(err);
                 }
 
-                let user = dbres[2][0];
+                let user = dbres[1];
                 globals.logger.debug( `${routeHeader} :: user ::`, user);
 
                 globals.logger.info( routeHeader  + " :: END" );

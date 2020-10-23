@@ -153,9 +153,6 @@ let KTDatatablesExtensionsKeytable = function() {
                         success: function(res) {
                             btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
 
-                            //reset form
-                            resetForm();
-
                             //hide this, re-fetch and redraw table
                             $('#kt_object_add-edit_modal').modal('hide');
 
