@@ -23,8 +23,6 @@ let initChangeCompanyContext = function(){
                 method: "GET",
                 url: `/company/setcontext/${company_id}?_csrf=${window._csrf}`,
                 success: function(res) {
-                    console.log("Company context res: ", res)
-
                     if(res.success === true) {
                         $('.show-company-context-details').html(`${res.company.name} (id:${res.company.id})`);
                         $('.set-company-context').hide();
@@ -35,7 +33,6 @@ let initChangeCompanyContext = function(){
                     }
                 },
                 error: function(e) {
-                    console.error("ERROR SETTING COMPANY CONTEXT: ",e);
                     $('.set-company-context').show();
                     $('.show-company-context').hide();
                     $('.set-company-context input').addClass('is-invalid');
@@ -84,7 +81,6 @@ let initChangeUserContext = function(){
                     }
                 },
                 error: function(e) {
-                    console.error("ERROR SETTING USER CONTEXT: ",e);
                     $('.set-companyuser-context').show();
                     $('.show-companyuser-context').hide();
                     $('.set-companyuser-context input').addClass('is-invalid');
