@@ -4,6 +4,10 @@ let KTDatatablesExtensionsKeytable = function() {
     // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
+    let checkToggle = function(val){
+        return val === "on" || val === 1 || val === true;
+    };
+
     let initCampaignTable = function() {
 
         let initTableHandlers = function() {
@@ -59,7 +63,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=date_start]').val( formatDate(campaign.date_start) );
                 $('#kt_object_add-edit_modal form input[name=date_end]').val( formatDate(campaign.date_end) );
 
-                if( campaign.active === true ){
+                if( checkToggle(campaign.active) ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
@@ -73,9 +77,50 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            company_id: {
+                                required: true,
+                                maxlength: 32,
+                                digits: true
+                            },
+                            name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            category: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            description: {
+                                required: false,
+                                maxlength: 1000
+                            },
+                            game_id: {
+                                required: true,
+                                digits: true
+                            },
+                            date_start: {
+                                required: true,
+                                date: true
+                            },
+                            date_end: {
+                                required: true,
+                                date: true
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ){
                         obj.active = 1;
                     } else {
                         obj.active = 0;
@@ -135,9 +180,50 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            company_id: {
+                                required: true,
+                                maxlength: 32,
+                                digits: true
+                            },
+                            name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            category: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            description: {
+                                required: false,
+                                maxlength: 1000
+                            },
+                            game_id: {
+                                required: true,
+                                digits: true
+                            },
+                            date_start: {
+                                required: true,
+                                date: true
+                            },
+                            date_end: {
+                                required: true,
+                                date: true
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
@@ -341,4 +427,17 @@ let KTDatatablesExtensionsKeytable = function() {
 
 jQuery(document).ready(function() {
     KTDatatablesExtensionsKeytable.init();
+    $('#date_start_picker').datetimepicker({
+        pickerPosition: 'bottom-left',
+        todayHighlight: true,
+        autoclose: true,
+        format: 'mm/dd/yyyy hh:ii'
+    });
+
+    $('#date_end_picker').datetimepicker({
+        pickerPosition: 'bottom-left',
+        todayHighlight: true,
+        autoclose: true,
+        format: 'mm/dd/yyyy hh:ii'
+    });
 });

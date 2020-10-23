@@ -111,7 +111,7 @@ let KTDatatablesExtensionsKeytable = function() {
                             },
                             zip: {
                                 required: true,
-                                digits: true,
+                                number: true,
                                 maxlength: 5,
                                 minlength: 5
                             },
