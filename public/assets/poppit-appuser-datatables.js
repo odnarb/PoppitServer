@@ -4,7 +4,11 @@ let KTDatatablesExtensionsKeytable = function() {
     // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
-    let initAppUserTable = function() {
+    let checkToggle = function(val){
+        return val === "on" || val === 1 || val === true;
+    };
+
+    let initTable = function() {
 
         let initTableHandlers = function() {
             // clear click handlers
@@ -56,9 +60,11 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=city]').val(user.city);
                 $('#kt_object_add-edit_modal form input[name=state]').val(user.state);
                 $('#kt_object_add-edit_modal form input[name=notifications]').val(user.notifications);
-                $('#kt_object_add-edit_modal form input[name=registration_type]').val(user.registration_type);
+                // $('#kt_object_add-edit_modal form input[name=registration_type]').val(user.registration_type);
+                $(`#kt_object_add-edit_modal form option[value="${user.registration_type}"]`).prop('selected', true);
 
-                if( user.active === true ){
+
+                if( checkToggle(user.active) ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
@@ -72,9 +78,45 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            first_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            last_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            email_address: {
+                                required: true,
+                                email: true,
+                                maxlength: 255
+                            },
+                            registration_type: {
+                               required: true
+                            },
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2
+                            },
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
@@ -134,9 +176,45 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            first_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            last_name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            email_address: {
+                                required: true,
+                                email: true,
+                                maxlength: 255
+                            },
+                            registration_type: {
+                               required: true
+                            },
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2
+                            },
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
@@ -236,11 +314,12 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "actions" }
             ],
 
-            //TODO: after editing users: the click handlers don't work
-            // --add disable/activate user quick button -- as a per-row toggle button
-            // --add send forgotpassword email quick button
-
             columnDefs: [
+                {
+                    targets: 6,
+                    visible: false,
+                    searchable: false
+                },
                 //render time stamp
                 {
                     targets: -3,
@@ -321,7 +400,7 @@ let KTDatatablesExtensionsKeytable = function() {
     return {
         //main function to initiate the module
         init: function() {
-            initAppUserTable();
+            initTable();
         }
     };
 

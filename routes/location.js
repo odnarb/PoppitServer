@@ -133,7 +133,11 @@ module.exports = (globals) => {
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
 
-            let updateParams = { id: parseInt(req.params.id), location: req.body };
+            let location = req.body;
+
+            delete location._csrf;
+
+            let updateParams = { id: parseInt(req.params.id), location: location };
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
 

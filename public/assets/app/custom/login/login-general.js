@@ -139,6 +139,7 @@ var KTLoginGeneral = function() {
             });
 
             if (!form.valid()) {
+                showErrorMsg(form, 'danger', 'Missing username, password or both. Please try again.');
                 return;
             }
 
@@ -154,7 +155,16 @@ var KTLoginGeneral = function() {
                     if( response.success === true ){
                         window.location = "/";
                     } else {
+                        showErrorMsg(form, 'danger', 'A problem has occurred please contact support.');
+                    }
+                },
+                error: function( res, textStatus, errorThrown ) {
+                    btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
+                    if( res.responseJSON.reason == "no_user" ){
                         showErrorMsg(form, 'danger', 'Incorrect username or password. Please try again.');
+                    } else {
+                        showErrorMsg(form, 'danger', 'A problem has occurred please contact support.');
                     }
                 }
             });

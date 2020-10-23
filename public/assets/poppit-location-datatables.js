@@ -4,6 +4,10 @@ let KTDatatablesExtensionsKeytable = function() {
     // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
+    let checkToggle = function(val){
+        return val === "on" || val === 1 || val === true;
+    };
+
     let initTable = function() {
 
         let initTableHandlers = function() {
@@ -49,7 +53,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 let row_id = $(e.currentTarget).data('location-id');
                 let obj = getRowData(row_id);
 
-console.log("EDIT location: ", obj);
+                console.log("EDIT location: ", obj);
 
                 //fill modal with content
                 $('#kt_object_add-edit_modal .view-object-header').html( `${obj.name} (Location ID: ${obj.id})`);
@@ -69,13 +73,13 @@ console.log("EDIT location: ", obj);
                 $('#kt_object_add-edit_modal form input[name=polygon]').val(obj.polygon);
                 $('#kt_object_add-edit_modal form input[name=altitude]').val(obj.altitude);
 
-                if( obj.active === 1 ){
+                if( checkToggle(obj.active) ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
                 }
 
-console.log("Current lat/lng: ", obj.latitude, obj.longitude);
+                console.log("Current lat/lng: ", obj.latitude, obj.longitude);
 
                 if( !obj.latitude || !obj.longitude ){
                     $('.latlong-coords-error').show();
@@ -97,9 +101,58 @@ console.log("Current lat/lng: ", obj.latitude, obj.longitude);
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            company_id: {
+                                required: true,
+                                maxlength: 32,
+                                digits: true
+                            },
+                            name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            description: {
+                                required: false,
+                                maxlength: 1000
+                            },
+                            address: {
+                                required: true,
+                                maxlength: 255
+                            },
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            },
+                            zip: {
+                                required: true,
+                                number: true,
+                                maxlength: 5,
+                                minlength: 5
+                            },
+                            country_code: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ){
                         obj.active = 1;
                     } else {
                         obj.active = 0;
@@ -162,9 +215,58 @@ console.log("Current lat/lng: ", obj.latitude, obj.longitude);
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            company_id: {
+                                required: true,
+                                maxlength: 32,
+                                digits: true
+                            },
+                            name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            description: {
+                                required: false,
+                                maxlength: 1000
+                            },
+                            address: {
+                                required: true,
+                                maxlength: 255
+                            },
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            },
+                            zip: {
+                                required: true,
+                                number: true,
+                                maxlength: 5,
+                                minlength: 5
+                            },
+                            country_code: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     var obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
