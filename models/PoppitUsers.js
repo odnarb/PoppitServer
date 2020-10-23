@@ -6,7 +6,8 @@ const TABLE_NAME = "poppit_users";
 const MODEL_NAME = "User";
 const OBJECT_NAME = "user";
 
-const VALID_COLS = ["first_name","last_name","email_address","active","notifications","registration_type","city","state"];
+const VALID_COLS_MASS = ["first_name","last_name","email_address","active","notifications","registration_type","city","state"];
+const VALID_COLS = ["first_name","last_name","email_address","password_hash","active","notifications","registration_type","city","state"];
 const VALID_FILTER_COLS = ["first_name","last_name","email_address","active","registration_type","city","state"];
 
 const IDENTITY_COL = "id";
@@ -92,7 +93,7 @@ class User {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = `${IDENTITY_COL},${VALID_COLS_MASS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
             let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;

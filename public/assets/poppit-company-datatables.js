@@ -361,9 +361,9 @@ let KTDatatablesExtensionsKeytable = function() {
 
             columnDefs: [
                 {
-                    "targets": [ 2, 7, 11 ],
-                    "visible": false,
-                    "searchable": false
+                    targets: [ 2, 7, 11 ],
+                    visible: false,
+                    searchable: false
                 },
                 //render time stamp
                 {
@@ -444,13 +444,6 @@ let KTDatatablesExtensionsKeytable = function() {
         });
     };
 
-    // let handleSubmitForm() = function(){
-    //     $('.submit-edit-add-form').on('click', function(e) {
-    //         e.preventDefault();
-
-    //         form.ajaxSubmit({...});
-    //     });
-    // }
     return {
         //main function to initiate the module
         init: function() {
