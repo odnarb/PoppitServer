@@ -314,10 +314,6 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "actions" }
             ],
 
-            //TODO: after editing users: the click handlers don't work
-            // --add disable/activate user quick button -- as a per-row toggle button
-            // --add send forgotpassword email quick button
-
             columnDefs: [
                 {
                     targets: 6,
