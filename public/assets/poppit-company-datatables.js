@@ -4,6 +4,10 @@ let KTDatatablesExtensionsKeytable = function() {
     // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
+    let checkToggle = function(val){
+        return val === "on" || val === 1 || val === true;
+    };
+
     let initTable = function() {
 
         let initTableHandlers = function() {
@@ -59,13 +63,13 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_object_add-edit_modal form input[name=zip]').val(company.zip);
                 $('#kt_object_add-edit_modal form input[name=country_code]').val(company.country_code);
 
-                if( company.active === true ){
+                if( checkToggle(company.active) ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
                 }
 
-                if( company.demo_acct === true ){
+                if( checkToggle(company.demo_acct) ){
                     $('#kt_object_add-edit_modal form input[name=demo_acct]').prop('checked', true);
                 } else {
                     $('#kt_object_add-edit_modal form input[name=demo_acct]').prop('checked', false);
@@ -79,15 +83,59 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            description: {
+                                required: false,
+                                maxlength: 1000
+                            },
+                            address: {
+                                required: true,
+                                maxlength: 255
+                            },
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            },
+                            zip: {
+                                required: true,
+                                digits: true,
+                                maxlength: 5,
+                                minlength: 5
+                            },
+                            country_code: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( checkToggle(obj.active) ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
                     }
 
-                    if( obj.demo_acct === "on" ) {
+                    if( checkToggle(obj.demo_acct) ) {
                         obj.demo_acct = 1;
                     } else {
                         obj.demo_acct = 0;
@@ -95,12 +143,16 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     console.log("company obj: ", obj);
 
+                    btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
+
                     //add the company
                     $.ajax({
                         method: "PUT",
                         url: `/company/${company_id}`,
                         data: obj,
                         success: function(res) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             //reset form
                             resetForm();
 
@@ -113,6 +165,8 @@ let KTDatatablesExtensionsKeytable = function() {
                             });
                         },
                         error: function(e) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             console.error(e);
                         }
                     });
@@ -147,15 +201,67 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
 
+                    var btn = $(this);
+                    var form = $(this).closest('form');
+
+                    form.validate({
+                        rules: {
+                            name: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            description: {
+                                required: false,
+                                maxlength: 1000
+                            },
+                            address: {
+                                required: true,
+                                maxlength: 255
+                            },
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            },
+                            zip: {
+                                required: true,
+                                digits: true,
+                                maxlength: 5,
+                                minlength: 5
+                            },
+                            country_code: {
+                                required: true,
+                                maxlength: 2,
+                                minlength: 2
+                            }
+                        }
+                    });
+
+                    if (!form.valid()) {
+                        return;
+                    }
+
                     let obj = getFormData();
 
-                    if( obj.active === "on" ) {
+                    if( obj.active === "on" || obj.active === 1 ) {
                         obj.active = 1;
                     } else {
                         obj.active = 0;
                     }
 
+                    if( obj.demo_acct === "on" || obj.demo_acct === 1 ) {
+                        obj.demo_acct = 1;
+                    } else {
+                        obj.demo_acct = 0;
+                    }
+
                     console.log("new company obj: ", obj);
+
+                    btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
 
                     //add the company
                     $.ajax({
@@ -163,6 +269,8 @@ let KTDatatablesExtensionsKeytable = function() {
                         url: `/company`,
                         data: obj,
                         success: function(res) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             //reset form
                             resetForm();
 
@@ -175,6 +283,8 @@ let KTDatatablesExtensionsKeytable = function() {
                             });
                         },
                         error: function(e) {
+                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+
                             console.error(e);
                         }
                     });
@@ -337,6 +447,13 @@ let KTDatatablesExtensionsKeytable = function() {
         });
     };
 
+    // let handleSubmitForm() = function(){
+    //     $('.submit-edit-add-form').on('click', function(e) {
+    //         e.preventDefault();
+
+    //         form.ajaxSubmit({...});
+    //     });
+    // }
     return {
         //main function to initiate the module
         init: function() {
