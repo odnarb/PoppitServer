@@ -69,7 +69,10 @@ CREATE TABLE `poppit_company_invoices` (
     `company_id` BIGINT NOT NULL DEFAULT 0,
     `amount` FLOAT NOT NULL DEFAULT 0,
     `num_locations` INT NOT NULL DEFAULT 0,
+    `num_campaigns` INT NOT NULL DEFAULT 0,
     `notes` VARCHAR(1000) NOT NULL DEFAULT '',
+    `date_start` DATETIME NOT NULL DEFAULT NOW(),
+    `date_end` DATETIME NOT NULL DEFAULT NOW(),
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)

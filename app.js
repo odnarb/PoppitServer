@@ -177,6 +177,9 @@ app.use( (req,res,next) => {
 let main = require('./routes/main.js')(globals);
 app.use('/', main);
 
+let companyinvoice = require('./routes/companyinvoice.js')(globals);
+app.use('/companyinvoice', companyinvoice);
+
 let companyuser = require('./routes/companyuser.js')(globals);
 app.use('/companyuser', companyuser);
 
