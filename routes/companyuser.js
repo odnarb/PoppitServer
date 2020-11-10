@@ -8,12 +8,6 @@ const bcrypt = require('bcrypt');
 
 let CompanyUserModel = require('../models/PoppitCompanyUsers');
 
-//14 days
-const COOKIE_MAX_AGE = 14 * 24 * 60 * 60 * 1000;
-
-//1 hr
-const COOKIE_MIN_AGE =  60 * 60 * 1000;
-
 module.exports = (globals) => {
     return router
     // /setcontext/:id
@@ -208,9 +202,9 @@ module.exports = (globals) => {
                         req.session.isLoggedIn = true;
                         req.session.user = user;
                         if( req.body.remember && req.body.remember == "on" ){
-                            req.session.cookie.maxAge = COOKIE_MAX_AGE;
+                            req.session.cookie.maxAge = globals.COOKIE_MAX_AGE;
                         } else {
-                            req.session.cookie.maxAge = COOKIE_MIN_AGE;
+                            req.session.cookie.maxAge = globals.COOKIE_MIN_AGE;
                         }
                         globals.logger.info( `${routeHeader} :: CompanyUser.id=${user.id} logged IN` );
 

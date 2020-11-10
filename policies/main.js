@@ -16,7 +16,9 @@ module.exports = (globals) => {
             req.url.indexOf('/assets') > -1 ||
             req.url.indexOf('/companyuser/confirm') > -1 ||
             req.url === '/companyuser/logout' ||
-            req.url === '/companyuser/newpassword'
+            req.url === '/companyuser/newpassword' ||
+            req.url === '/appuser/login' ||
+            req.url === '/csrf'
         );
 
         if( allowRequest ) {
