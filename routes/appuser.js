@@ -1,4 +1,4 @@
-//user routes
+//appuser routes
 
 let express = require('express');
 let router = express.Router();
@@ -68,7 +68,7 @@ module.exports = (globals) => {
             }
         }
     })
-    // user/login
+    // appuser/login
     .post('/login', (req, res, next) => {
         let User = new UserModel( globals );
         let routeHeader = "POST /appuser/login";
@@ -136,12 +136,37 @@ module.exports = (globals) => {
             return next(err);
         }
     })
+    // appuser/logout
+    .get('/logout', (req, res, next) => {
+        let routeHeader = "GET /appuser/logout";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        let logoutRes = { success: true }
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+            if( req.session && req.session.isLoggedIn ){
+                //delete the session
+                req.session.destroy()
+            } else {
+                logoutRes.success = false;
+            }
+
+            return res.json(logoutRes);
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // appuser/signup
     .post('/signup', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;
         globals.logger.info( "POST /appuser/signup :: globals? ", gres );
         return res.json({ page: 'POST /appuser/signup'});
     })
-    //create user
+    // appuser/checkcookie
     .post('/checkcookie', (req, res, next) => {
         // let User = new UserModel( globals );
         let routeHeader = "POST /checkcookie";
@@ -161,7 +186,7 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // user/:id operations
+    // appuser/:id operations
     .get('/:id', (req, res, next) => {
         let User = new UserModel( globals );
         let routeHeader = "GET /appuser/:id";
