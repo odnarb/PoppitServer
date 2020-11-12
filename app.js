@@ -114,9 +114,6 @@ app.use(favicon(path.join(__dirname, 'public', 'assets', 'favicon.png')))
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
-app.use(cookieParser());
-app.use(csrfMiddleware);
-
 let redis_config = {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
@@ -140,6 +137,13 @@ app.use(session({
     },
     store: new redisStore(redis_config)
 }));
+
+app.use(cookieParser());
+
+let appuser = require('./routes/appuser.js')(globals);
+app.use('/appuser', appuser);
+
+app.use(csrfMiddleware);
 
 //apply our router function to ALL methods defined in router
 let policyFilter = require('./policies/main.js')(globals);
@@ -182,9 +186,6 @@ app.use('/companyinvoice', companyinvoice);
 
 let companyuser = require('./routes/companyuser.js')(globals);
 app.use('/companyuser', companyuser);
-
-let appuser = require('./routes/appuser.js')(globals);
-app.use('/appuser', appuser);
 
 let company = require('./routes/company.js')(globals);
 app.use('/company', company);

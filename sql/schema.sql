@@ -225,7 +225,7 @@ VALUES
 INSERT INTO
     poppit_users (first_name,last_name,email_address,password_hash,active)
 VALUES
-    ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',1),
+    ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$tjr7swVGFsawHX/C4kX2MeYZaNA5CJWit/GReBACjVNNWiVVWPtYe',1),
     ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
 
 

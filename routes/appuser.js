@@ -1,55 +1,10 @@
-//user routes
+//appuser routes
 
 let express = require('express');
 let router = express.Router();
 
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
-
-// // appuser/login
-// router.post('/login', (req, res) =>{
-//     if( !req.body ){
-//         return res.status(400).json({reason: "no_params_sent"});
-//     } else if (!req.body.email){
-//         return res.status(400).json({ reason: "no_email" });
-//     } else if (!req.body.password){
-//         return res.status(400).json({ reason: "no_password" });
-//     }
-
-//     let userEmail = { email: req.body.email };
-//     Users.find(userEmail, (err,user) => {
-//         if(err){
-//             globals.logger.info( "DB User.find() error: ", err);
-//             return res.status(500).json({reason: "server_error"});
-//         }
-
-//         //user not found at all
-//         if ( user == undefined ){
-//             return res.status(400).json({reason: "no_user"});
-//         }
-
-//         if( bcrypt.compareSync(req.body.password, user.password_hash) ){
-
-//             //only check if the passwords match
-//             //user has not been activated
-//             if( user.active == 0 ){
-//                 return res.status(400).json({reason: "not_active"});
-//             }
-
-//             req.session.regenerate( (err) => {
-//                 globals.logger.info( "User logged IN" );
-//                 req.session.isLoggedIn = true;
-//                 req.session.user = user;
-//                 if( req.body.remember && req.body.remember == "on" ){
-//                     req.session.cookie.maxAge = COOKIE_MAX_AGE;
-//                 }
-//                 return res.send({ result: user });
-//             });
-//         } else {
-//             return res.status(400).json({reason: "no_user"});
-//         }
-//     })
-// });
 
 let UserModel = require('../models/PoppitUsers');
 
@@ -113,67 +68,125 @@ module.exports = (globals) => {
             }
         }
     })
-    // user/login
-    .get('/login', (req, res, next) => {
-
-        globals.logger.info( "GET /appuser/login" );
-
-        return res.render('pages/login', {
-            pageTitle: "Login",
-            layout: 'login_layout'
-        });
-    })
-    // user/login
+    // appuser/login
     .post('/login', (req, res, next) => {
-        let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /appuser/login :: globals? ", gres );
-        return res.json({ page: 'POST /appuser/login'});
-    })
-    .post('/signup', (req, res, next) => {
-        let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /appuser/signup :: globals? ", gres );
-        return res.json({ page: 'POST /appuser/signup'});
-    })
-    //create user
-    .post('/', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "POST /appuser";
+        let routeHeader = "POST /appuser/login";
 
         try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
+            globals.logger.debug( `${routeHeader} :: BEGIN`);
 
-            let createParams = req.body;
+            if( !req.body ){
+                return res.status(400).json({reason: "no_params_sent"});
+            } else if (!req.body.email){
+                return res.status(400).json({ reason: "no_email" });
+            } else if (!req.body.password){
+                return res.status(400).json({ reason: "no_password" });
+            }
 
-            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
-
-            //auto-generate a password for the user when created via the panel
-            const salt = bcrypt.genSaltSync(globals.salt_rounds);
-            const hash = bcrypt.hashSync(uuid.v4(), salt);
-
-            createParams.password_hash = hash;
-
-            delete createParams._csrf;
-
-            User.create(createParams, (err, new_user_id) => {
-                if(err && err.error_type == "user") {
-                    res.status(400);
-                    return next(err);
-                } else if(err) {
-                    res.status(500);
-                    return next(err);
+            let userEmail = { email_address: req.body.email };
+            User.findOne(userEmail, (err,user) => {
+                if(err){
+                    globals.logger.debug( `${routeHeader} :: DB User.find() error: `, err);
+                    return res.status(500).json({reason: "server_error"});
                 }
 
-                globals.logger.info( `${routeHeader} :: User created: ${new_user_id}` );
+                //user not found at all
+                if ( user == undefined ){
+                    globals.logger.debug( `${routeHeader} :: user not found, login denied: `, req.body.email);
+                    return res.status(403).json({reason: "no_user"});
+                }
 
-                globals.logger.info( `${routeHeader} :: END` );
-                return res.json({ success: true, user_id: new_user_id });
+                if( bcrypt.compareSync(req.body.password, user.password_hash) ){
+                    //only check if the passwords match
+                    //user has not been activated
+                    if( user.active == 0 ){
+                        globals.logger.debug( `${routeHeader} :: user inactive, login denied: `, req.body.email);
+                        return res.status(403).json({reason: "no_user"});
+                    }
+
+                    globals.logger.info( `User.id=${user.id} logged IN` );
+
+                    //remove the password_hash field before being saved to the session
+                    delete user.password_hash;
+                    delete user.forgot_password_token;
+
+                    //save the session to redis store
+                    req.session.regenerate( (err) => {
+                        req.session.isLoggedIn = true;
+                        req.session.appuser = true;
+                        req.session.user = user;
+                        if( req.body.remember && req.body.remember == "on" ){
+                            req.session.cookie.maxAge = globals.COOKIE_MAX_AGE;
+                        } else {
+                            req.session.cookie.maxAge = globals.COOKIE_MIN_AGE;
+                        }
+                        globals.logger.info( `${routeHeader} :: User.id=${user.id} logged IN` );
+
+                        return res.json({ success: true });
+                    });
+                } else {
+                    globals.logger.debug( `${routeHeader} :: bad pw, login denied: `, req.body.email);
+                    return res.status(403).json({reason: "no_user"});
+                }
             });
+
         } catch( err ) {
             globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
             return next(err);
         }
     })
-    // user/:id operations
+    // appuser/logout
+    .get('/logout', (req, res, next) => {
+        let routeHeader = "GET /appuser/logout";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        let logoutRes = { success: true }
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+            if( req.session && req.session.isLoggedIn ){
+                //delete the session
+                req.session.destroy()
+            } else {
+                logoutRes.success = false;
+            }
+
+            return res.json(logoutRes);
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // appuser/signup
+    .post('/signup', (req, res, next) => {
+        let gres = (globals.logger == undefined )? true : false;
+        globals.logger.info( "POST /appuser/signup :: globals? ", gres );
+        return res.json({ page: 'POST /appuser/signup'});
+    })
+    // appuser/checkcookie
+    .post('/checkcookie', (req, res, next) => {
+        // let User = new UserModel( globals );
+        let routeHeader = "POST /checkcookie";
+
+        try {
+            globals.logger.info( `${routeHeader} :: START` );
+
+            if( req.session.user && req.session.user.id ) {
+                globals.logger.info( `${routeHeader} :: DONE :: logged in` );
+                return res.json({ success: true, loggedin: true, user_id: req.session.user.id });
+            } else {
+                globals.logger.info( `${routeHeader} :: DONE :: NOT logged in` );
+                return res.json({ success: false, loggedin: false });
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // appuser/:id operations
     .get('/:id', (req, res, next) => {
         let User = new UserModel( globals );
         let routeHeader = "GET /appuser/:id";
