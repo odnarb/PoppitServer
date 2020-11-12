@@ -114,6 +114,7 @@ module.exports = (globals) => {
                     //save the session to redis store
                     req.session.regenerate( (err) => {
                         req.session.isLoggedIn = true;
+                        req.session.appuser = true;
                         req.session.user = user;
                         if( req.body.remember && req.body.remember == "on" ){
                             req.session.cookie.maxAge = globals.COOKIE_MAX_AGE;
@@ -141,39 +142,20 @@ module.exports = (globals) => {
         return res.json({ page: 'POST /appuser/signup'});
     })
     //create user
-    .post('/', (req, res, next) => {
-        let User = new UserModel( globals );
-        let routeHeader = "POST /appuser";
+    .post('/checkcookie', (req, res, next) => {
+        // let User = new UserModel( globals );
+        let routeHeader = "POST /checkcookie";
 
         try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
+            globals.logger.info( `${routeHeader} :: START` );
 
-            let createParams = req.body;
-
-            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
-
-            //auto-generate a password for the user when created via the panel
-            const salt = bcrypt.genSaltSync(globals.salt_rounds);
-            const hash = bcrypt.hashSync(uuid.v4(), salt);
-
-            createParams.password_hash = hash;
-
-            delete createParams._csrf;
-
-            User.create(createParams, (err, new_user_id) => {
-                if(err && err.error_type == "user") {
-                    res.status(400);
-                    return next(err);
-                } else if(err) {
-                    res.status(500);
-                    return next(err);
-                }
-
-                globals.logger.info( `${routeHeader} :: User created: ${new_user_id}` );
-
-                globals.logger.info( `${routeHeader} :: END` );
-                return res.json({ success: true, user_id: new_user_id });
-            });
+            if( req.session.user && req.session.user.id ) {
+                globals.logger.info( `${routeHeader} :: DONE :: logged in` );
+                return res.json({ success: true, loggedin: true, user_id: req.session.user.id });
+            } else {
+                globals.logger.info( `${routeHeader} :: DONE :: NOT logged in` );
+                return res.json({ success: false, loggedin: false });
+            }
         } catch( err ) {
             globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
             return next(err);
