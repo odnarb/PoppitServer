@@ -162,9 +162,110 @@ module.exports = (globals) => {
     })
     // appuser/signup
     .post('/signup', (req, res, next) => {
-        let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /appuser/signup :: globals? ", gres );
-        return res.json({ page: 'POST /appuser/signup'});
+        let User = new UserModel( globals );
+        let routeHeader = "POST /appuser/signup";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            let createParams = req.body;
+
+            let error = {};
+
+            //check params
+            if( createParams.fullname === '' ){
+              error['fullname'] = true;
+            }
+            if( createParams.email === '' ){
+              error['email'] = true;
+            } else {
+                //validate email
+                ev = require('email-validator')
+                if( !ev.validate(createParams.email) ){
+                    error['email_invalid'] = true;
+                }
+            }
+            if( createParams.password === '' ){
+              error['password'] = true;
+            }
+            if( createParams.confirm_password === '' ){
+              error['confirm_password'] = true;
+            }
+            if( createParams.password !== createParams.confirm_password ){
+              error['passwords_mismatch'] = true;
+            }
+            if( createParams.agreeToTerms !== true ){
+              error['agreeToTerms'] = true;
+            }
+
+            //show errors
+            if( Object.keys(error).length > 0 ){
+              globals.logger.debug( `${routeHeader} :: error obj: `, error);
+              globals.logger.debug(`${routeHeader} :: Errors detected :: createParams: `, createParams );
+              return res.json({ success: false, errors: error });
+            } else {
+                //one last check before creating the user
+                User.findOne({ email_address: req.body.email }, (err, user) => {
+                    if(err){
+                        res.status(500);
+                        return next(err);
+                    }
+
+                    if( user !== undefined) {
+                        globals.logger.info( `${routeHeader} :: Email address already registered..` );
+                        error['email_taken'] = true;
+                        return res.json({ success: false, errors: error });
+                    } else {
+
+                        //agree to terms
+                        delete createParams.agreeToTerms
+
+                        //fix the name
+                        createParams.first_name = createParams.fullname.split(' ')[0];
+                        createParams.last_name = createParams.fullname.split(' ')[0];
+                        delete createParams.fullname;
+
+                        //fix the email
+                        createParams.email_address = createParams.email;
+                        delete createParams.email;
+
+                        createParams.registration_type = 'email';
+
+                        globals.logger.info( `${routeHeader} :: Email NOT registered..creating user..` );
+
+                        //auto-generate a password for the user when created via the panel
+                        const salt = bcrypt.genSaltSync(globals.salt_rounds);
+                        const hash = bcrypt.hashSync(createParams.password, salt);
+
+                        //save the password hash
+                        createParams.password_hash = hash;
+
+                        delete createParams.password;
+                        delete createParams.confirm_password;
+
+                        globals.logger.info( `${routeHeader} :: Creating user:`, createParams );
+
+                        User.create(createParams, (err, new_user_id) => {
+                            if(err && err.error_type == "user") {
+                                res.status(400);
+                                return next(err);
+                            } else if(err) {
+                                res.status(500);
+                                return next(err);
+                            }
+
+                            globals.logger.info( `${routeHeader} :: User created: ${new_user_id}` );
+
+                            globals.logger.info( `${routeHeader} :: END` );
+                            return res.json({ success: true });
+                        });
+                    }
+                });
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
     })
     // appuser/checkcookie
     .post('/checkcookie', (req, res, next) => {
