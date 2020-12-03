@@ -1,5 +1,5 @@
 /*
-    DBAL for PoppitInvoices
+    DBAL for Invoices
 */
 
 const TABLE_NAME = "company_invoices";

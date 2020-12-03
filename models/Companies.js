@@ -1,5 +1,5 @@
 /*
-    DBAL for PoppitCompanies
+    DBAL for Companies
 */
 
 const TABLE_NAME = "companies";
