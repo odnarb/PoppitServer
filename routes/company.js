@@ -3,7 +3,7 @@
 let express = require('express');
 let router = express.Router();
 
-let CompanyModel = require('../models/PoppitCompanies');
+let CompanyModel = require('../models/Companies');
 
 module.exports = (globals) => {
     return router

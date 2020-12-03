@@ -3,7 +3,7 @@
 let express = require('express');
 let router = express.Router();
 
-let CampaignModel = require('../models/PoppitCampaigns');
+let CampaignModel = require('../models/Campaigns');
 
 module.exports = (globals) => {
     return router

@@ -1,19 +1,19 @@
 /*
-    DBAL for PoppitInvoices
+    DBAL for PoppitCampaigns
 */
 
-const TABLE_NAME = "poppit_company_invoices";
-const MODEL_NAME = "Invoice";
-const OBJECT_NAME = "invoice";
+const TABLE_NAME = "company_campaigns";
+const MODEL_NAME = "Campaign";
+const OBJECT_NAME = "campaign";
 
-const VALID_COLS = ["company_id","num_locations","num_campaigns","notes","date_start","date_end","amount"];
-const VALID_FILTER_COLS = ["company_id","num_locations","num_campaigns","notes","date_start","date_end","amount"];
+const VALID_COLS = ["company_id","name","category","description","game_id","data","date_start","date_end","active"];
+const VALID_FILTER_COLS = ["company_id","name","category","game_id","date_start","date_end","active"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class Invoice {
+class Campaign {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -268,26 +268,6 @@ class Invoice {
             }
         });
     }
-
-/*
-    generate(cb){
-
-        // let sqlStr = `CALL invoices_generate('${JSON.stringify(obj)}');`;
-        let sqlStr = `CALL invoices_generate();`;
-
-        this.globals.logger.debug(`${MODEL_NAME}.generate() sqlStr: ${sqlStr}`);
-
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                this.globals.logger.error(`${MODEL_NAME}.generate() :: ERROR : `, error);
-                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
-            } else {
-                this.globals.logger.debug(`${MODEL_NAME}.generate() result?: `, result);
-                cb(null, result);
-            }
-        });
-    }
-*/
 }
 
-module.exports = Invoice;
+module.exports = Campaign;

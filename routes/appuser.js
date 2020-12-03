@@ -6,7 +6,7 @@ let router = express.Router();
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 
-let UserModel = require('../models/PoppitUsers');
+let UserModel = require('../models/Users');
 
 module.exports = (globals) => {
     return router

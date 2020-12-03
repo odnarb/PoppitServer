@@ -1,19 +1,19 @@
 /*
-    DBAL for PoppitCompanies
+    DBAL for PoppitInvoices
 */
 
-const TABLE_NAME = "poppit_companies";
-const MODEL_NAME = "Company";
-const OBJECT_NAME = "company";
+const TABLE_NAME = "company_invoices";
+const MODEL_NAME = "Invoice";
+const OBJECT_NAME = "invoice";
 
-const VALID_COLS = ["name","description","address","city","state","zip","country_code","active","demo_acct"];
-const VALID_FILTER_COLS = ["name","address","city","state","zip","country_code","active","demo_acct"];
+const VALID_COLS = ["company_id","num_locations","num_campaigns","notes","date_start","date_end","amount"];
+const VALID_FILTER_COLS = ["company_id","num_locations","num_campaigns","notes","date_start","date_end","amount"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class Company {
+class Invoice {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -147,12 +147,24 @@ class Company {
     }
 
     create(obj, cb){
+        //TODO: POP-168.. this poisons the data field
+        obj.data = {};
+
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
 
         let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
 
         //START remove sensitive data
+        //TODO: POP-168x
+        let search_index = local_valid_cols.indexOf("data");
+        if (search_index > -1) {
+            local_valid_cols.splice(search_index, 1);
+        }
+
+        //TODO: POP-168
+        delete obj.data;
+
         //END remove sensitive data
 
         Object.keys(obj).filter(el => {
@@ -256,6 +268,26 @@ class Company {
             }
         });
     }
+
+/*
+    generate(cb){
+
+        // let sqlStr = `CALL invoices_generate('${JSON.stringify(obj)}');`;
+        let sqlStr = `CALL invoices_generate();`;
+
+        this.globals.logger.debug(`${MODEL_NAME}.generate() sqlStr: ${sqlStr}`);
+
+        this.execSQL(this.db, sqlStr, (error, result) => {
+            if (error) {
+                this.globals.logger.error(`${MODEL_NAME}.generate() :: ERROR : `, error);
+                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+            } else {
+                this.globals.logger.debug(`${MODEL_NAME}.generate() result?: `, result);
+                cb(null, result);
+            }
+        });
+    }
+*/
 }
 
-module.exports = Company;
+module.exports = Invoice;

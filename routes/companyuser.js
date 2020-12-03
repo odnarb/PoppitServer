@@ -6,7 +6,7 @@ let router = express.Router();
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 
-let CompanyUserModel = require('../models/PoppitCompanyUsers');
+let CompanyUserModel = require('../models/CompanyUsers');
 
 module.exports = (globals) => {
     return router
