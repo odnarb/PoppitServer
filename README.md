@@ -1,2 +1,2 @@
-# PoppitServer
-Poppit server, dashboard and DB
+# AppServer
+App server, dashboard and DB
