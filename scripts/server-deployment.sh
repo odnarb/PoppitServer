@@ -1,7 +1,10 @@
 #!/bin/bash
 
-#check for args: $1 == git project name
-PROJECTNAME=$1
+#execute such as: ./server-deployment.sh odnarb PoppitServer
+
+#check for args: $1 == git project name, $2 == odnarb
+$REPO_NAME=$1
+PROJECTNAME=$2
 
 # Install mysql redis-server curl vim wget
 sudo apt-get -y install mysql-server redis-server curl vim wget git build-essential nginx logrotate
@@ -20,11 +23,13 @@ nvm install --lts
 npm install -g forever
 
 # Git clone project
-git clone git@github.com:odnarb/$PROJECTNAME.git
-
-#if last command failed, exit
+git clone git@github.com:$REPO_NAME/$PROJECTNAME.git
 
 cd $PROJECTNAME
+
+# replace path service script
+sed -i 's/__DB_USER__/poppit/g' sql/create_user_and_db.sql
+sed -i 's/__DB_PASSWORD__/88s87dp0pp\!t23H/g' sql/create_user_and_db.sql
 
 # Create db assets
 sudo mysql -u root -p < sql/create_user_and_db.sql
