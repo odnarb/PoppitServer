@@ -3,8 +3,11 @@
 #execute such as: ./server-deployment.sh odnarb PoppitServer
 
 #check for args: $1 == git project name, $2 == odnarb
-$REPO_NAME=$1
+REPO_NAME=$1
 PROJECTNAME=$2
+
+echo "REPO_NAME: $REPO_NAME"
+echo "PROJECTNAME: $PROJECTNAME"
 
 # Install mysql redis-server curl vim wget
 sudo apt-get -y install mysql-server redis-server curl vim wget git build-essential nginx logrotate
@@ -24,8 +27,6 @@ npm install -g forever
 
 # Git clone project
 git clone git@github.com:$REPO_NAME/$PROJECTNAME.git
-
-cd $PROJECTNAME
 
 # replace path service script
 sed -i 's/__DB_USER__/poppit/g' sql/create_user_and_db.sql
@@ -73,6 +74,8 @@ chmod +x scripts/backup.sh
 
 #prep the crontab
 sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' scripts/server.cron
+
+cp scripts/server.cron scripts/poppit.cron
 
 #copy the crontab to the system's /etc/cron.d/ area
 sudo crontab scripts/poppit.cron
