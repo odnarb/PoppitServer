@@ -3,8 +3,8 @@
 #execute such as: ./server-deployment.sh odnarb PoppitServer
 
 #check for args: $1 == git project name, $2 == odnarb
-GIT_REPO_NAME=$1
-GIT_PROJECTNAME=$2
+GIT_REPO_NAME="odnarb"
+GIT_PROJECTNAME="PoppitServer"
 
 echo "GIT_REPO_NAME: $GIT_REPO_NAME"
 echo "GIT_PROJECTNAME: $GIT_PROJECTNAME"
@@ -43,6 +43,8 @@ git clone git@github.com:$GIT_REPO_NAME/$GIT_PROJECTNAME.git $SERVICE_NAME
 cd $SERVICE_NAME
 git checkout .
 git checkout whitelabeling-part-1
+
+npm install
 
 echo "Replacing db info..."
 
@@ -122,8 +124,11 @@ sed -i "s/__LOGS_ERROR_PATH__/\/var\/log\/$SERVICE_NAME\/error.log/g" scripts/se
 
 sudo mkdir -p /var/log/$SERVICE_NAME
 sudo chown $SYSUSER:$SYSGROUP /var/log/$SERVICE_NAME
-sudo chown root:root scripts/server-logrotate.conf
-sudo chmod 644 scripts/server-logrotate.conf
-sudo logrotate -v scripts/server-logrotate.conf
+
+sudo cp scripts/server-logrotate.conf scripts/$SERVICE_NAME.conf
+sudo chown root:root scripts/$SERVICE_NAME.conf
+sudo chmod 644 scripts/$SERVICE_NAME.conf
+sudo cp scripts/$SERVICE_NAME.conf /etc/logrotate.d/$SERVICE_NAME.conf
+logrotate /etc/logrotate.d/$SERVICE_NAME.conf
 
 echo "Done!"
