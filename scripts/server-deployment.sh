@@ -59,25 +59,25 @@ sudo mysql -u root -p $DBNAME < sql/schema.sql
 echo "Prepping service..."
 
 # replace path service script
-sed -i 's/__SERVICE_NAME__/$SERVICE_NAME/g' scripts/app.service
-sed -i 's/__FOREVER_START_SCRIPT__/$PROJECT_PATH\/scripts\/forever-start.sh/g' scripts/app.service
-sed -i 's/__FOREVER_START_USER__/$SYSUSER/g' scripts/app.service
-sed -i 's/__FOREVER_START_GROUP__/$SYSGROUP/g' scripts/app.service
+sed -i "s/__SERVICE_NAME__/$SERVICE_NAME/g" scripts/app.service
+sed -i "s/__FOREVER_START_SCRIPT__/$PROJECT_PATH\/scripts\/forever-start.sh/g" scripts/app.service
+sed -i "s/__FOREVER_START_USER__/$SYSUSER/g" scripts/app.service
+sed -i "s/__FOREVER_START_GROUP__/$SYSGROUP/g" scripts/app.service
 
 #replace forever options
-sed -i 's/__SCRIPT_PATH__/$PROJECT_PATH\/app.js/g' scripts/forever-config.json
-sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/forever-config.json
-sed -i 's/__SERVICE_NAME__/$SERVICE_NAME/g' scripts/forever-config.json
-sed -i 's/__LOGS_FOREVER_PATH__/\/var\/log\/$SERVICE_NAME\/forever.log/g' scripts/forever-config.json
-sed -i 's/__LOGS_OUT_PATH__/\/var\/log\/$SERVICE_NAME\/out.log/g' scripts/forever-config.json
-sed -i 's/__LOGS_ERROR_PATH__/\/var\/log\/$SERVICE_NAME\/error.log/g' scripts/forever-config.json
+sed -i "s/__SCRIPT_PATH__/$PROJECT_PATH\/app.js/g" scripts/forever-config.json
+sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/forever-config.json
+sed -i "s/__SERVICE_NAME__/$SERVICE_NAME/g" scripts/forever-config.json
+sed -i "s/__LOGS_FOREVER_PATH__/\/var\/log\/$SERVICE_NAME\/forever.log/g" scripts/forever-config.json
+sed -i "s/__LOGS_OUT_PATH__/\/var\/log\/$SERVICE_NAME\/out.log/g" scripts/forever-config.json
+sed -i "s/__LOGS_ERROR_PATH__/\/var\/log\/$SERVICE_NAME\/error.log/g" scripts/forever-config.json
 
 #replace forever start script options
-sed -i 's/__SYSTEM_USER__/$SYSUSER/g' scripts/forever-start.sh
-sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/forever-start.sh
+sed -i "s/__SYSTEM_USER__/$SYSUSER/g" scripts/forever-start.sh
+sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/forever-start.sh
 
 #inject our path content
-sed -i 's/__PATH_CONTENT__/$PATHCONTENT/g' scripts/app.service
+sed -i "s/__PATH_CONTENT__/$PATHCONTENT/g" scripts/app.service
 
 #copy the script to the systemd path
 sudo cp scripts/app.service /usr/lib/systemd/system/$SERVICE_NAME.service
@@ -87,14 +87,14 @@ sudo systemctl daemon-reload
 sudo systemctl enable $SERVICE_NAME.service
 
 #prep the backup script
-sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/backup.sh
-sed -i 's/__SERVICE_NAME__/$SERVICE_NAME/g' scripts/backup.sh
+sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/backup.sh
+sed -i "s/__SERVICE_NAME__/$SERVICE_NAME/g" scripts/backup.sh
 
 mkdir -p backups
 chmod +x scripts/backup.sh
 
 #prep the crontab
-sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/server.cron
+sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/server.cron
 
 cp scripts/server.cron scripts/$SERVICE_NAME.cron
 
