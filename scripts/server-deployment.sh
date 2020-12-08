@@ -14,7 +14,8 @@ DBUSER=poppit
 DBNAME=poppit
 DBPW=poppit123
 
-PROJECT_PATH="\/home\/brandon\/test-deployment/$SERVICE_NAME"
+PROJECT_ROOT="test-deployment"
+
 PATHCONTENT="/home/brandon/.nvm/versions/node/v12.18.4/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 
 SYSUSER=brandon
@@ -59,8 +60,8 @@ sudo mysql -u root -p $DBNAME < sql/schema.sql
 echo "Prepping forever config..."
 
 #replace forever options
-sed -i "s/__SCRIPT_PATH__/$PROJECT_PATH\/app.js/g" scripts/forever-config.json
-sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/forever-config.json
+sed -i "s/__SCRIPT_PATH__/\/home\/$SYSUSER\/$PROJECT_ROOT\/$SERVICE_NAME\/app.js/g" scripts/forever-config.json
+sed -i "s/__PROJECT_PATH__/\/home\/$SYSUSER\/$PROJECT_ROOT\/$SERVICE_NAME/g" scripts/forever-config.json
 sed -i "s/__SERVICE_NAME__/$SERVICE_NAME/g" scripts/forever-config.json
 sed -i "s/__LOGS_FOREVER_PATH__/\/var\/log\/$SERVICE_NAME\/forever.log/g" scripts/forever-config.json
 sed -i "s/__LOGS_OUT_PATH__/\/var\/log\/$SERVICE_NAME\/out.log/g" scripts/forever-config.json
@@ -70,13 +71,13 @@ echo "Prepping forever start script..."
 
 #replace forever start script options
 sed -i "s/__SYSTEM_USER__/$SYSUSER/g" scripts/forever-start.sh
-sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/forever-start.sh
+sed -i "s/__PROJECT_PATH__/\/home\/$SYSUSER\/$PROJECT_ROOT\/$SERVICE_NAME/g" scripts/forever-start.sh
 
 echo "Prepping system-level startup script..."
 
 # replace slugs in service script
 sed -i "s/__SERVICE_NAME__/$SERVICE_NAME/g" scripts/app.service
-sed -i "s/__FOREVER_START_SCRIPT__/$PROJECT_PATH\/scripts\/forever-start.sh/g" scripts/app.service
+sed -i "s/__FOREVER_START_SCRIPT__/\/home\/$SYSUSER\/$PROJECT_ROOT\/$SERVICE_NAME\/scripts\/forever-start.sh/g" scripts/app.service
 sed -i "s/__FOREVER_START_USER__/$SYSUSER/g" scripts/app.service
 sed -i "s/__FOREVER_START_GROUP__/$SYSGROUP/g" scripts/app.service
 sed -i "s/__PATH_CONTENT__/$PATHCONTENT/g" scripts/app.service
@@ -95,7 +96,7 @@ sudo systemctl enable $SERVICE_NAME.service
 echo "Prep db backups..."
 
 #prep the backup script
-sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/backup.sh
+sed -i "s/__PROJECT_PATH__/\/home\/$SYSUSER\/$PROJECT_ROOT\/$SERVICE_NAME/g" scripts/backup.sh
 sed -i "s/__SERVICE_NAME__/$SERVICE_NAME/g" scripts/backup.sh
 
 mkdir -p backups
@@ -104,7 +105,7 @@ chmod +x scripts/backup.sh
 echo "Prep Crontab..."
 
 #prep the crontab
-sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/server.cron
+sed -i "s/__PROJECT_PATH__/\/home\/$SYSUSER\/$PROJECT_ROOT\/$SERVICE_NAME/g" scripts/server.cron
 
 cp scripts/server.cron scripts/$SERVICE_NAME.cron
 
@@ -114,7 +115,7 @@ sudo crontab scripts/$SERVICE_NAME.cron
 echo "Prop logrotate..."
 
 #add the logs paths and logrotate configs
-sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/server-logrotate.conf
+sed -i "s/__PROJECT_PATH__/\/home\/$SYSUSER\/$PROJECT_ROOT\/$SERVICE_NAME/g" scripts/server-logrotate.conf
 sed -i "s/__LOGS_FOREVER_PATH__/\/var\/log\/$SERVICE_NAME\/forever.log/g" scripts/server-logrotate.conf
 sed -i "s/__LOGS_OUT_PATH__/\/var\/log\/$SERVICE_NAME\/out.log/g" scripts/server-logrotate.conf
 sed -i "s/__LOGS_ERROR_PATH__/\/var\/log\/$SERVICE_NAME\/error.log/g" scripts/server-logrotate.conf
