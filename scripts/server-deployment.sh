@@ -3,11 +3,22 @@
 #execute such as: ./server-deployment.sh odnarb PoppitServer
 
 #check for args: $1 == git project name, $2 == odnarb
-REPO_NAME=$1
-PROJECTNAME=$2
+GIT_REPO_NAME=$1
+GIT_PROJECTNAME=$2
 
-echo "REPO_NAME: $REPO_NAME"
-echo "PROJECTNAME: $PROJECTNAME"
+echo "GIT_REPO_NAME: $GIT_REPO_NAME"
+echo "GIT_PROJECTNAME: $GIT_PROJECTNAME"
+
+SERVICE_NAME=poppit
+DBUSER=poppit
+DBNAME=poppit
+DBPW=poppit123
+
+PROJECT_PATH="\/home\/brandon\/test-deployment/$SERVICE_NAME"
+PATHCONTENT="/home/brandon/.nvm/versions/node/v12.18.4/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+
+SYSUSER=brandon
+SYSGROUP=brandon
 
 # Install mysql redis-server curl vim wget
 sudo apt-get -y install mysql-server redis-server curl vim wget git build-essential nginx logrotate
@@ -26,68 +37,78 @@ nvm install --lts
 npm install -g forever
 
 # Git clone project
-git clone git@github.com:$REPO_NAME/$PROJECTNAME.git
+git clone git@github.com:$GIT_REPO_NAME/$GIT_PROJECTNAME.git $SERVICE_NAME
+
+cd $SERVICE_NAME
+git checkout .
+git checkout whitelabeling-part-1
+
+echo "Replacing db info..."
 
 # replace path service script
-sed -i 's/__DB_USER__/poppit/g' sql/create_user_and_db.sql
-sed -i 's/__DB_PASSWORD__/88s87dp0pp\!t23H/g' sql/create_user_and_db.sql
+sed -i "s/__DB_USER__/$DBUSER/g" sql/create_user_and_db.sql
+sed -i "s/__DB_PASSWORD__/$DBPW/g" sql/create_user_and_db.sql
+sed -i "s/__DB_NAME__/$DBNAME/g" sql/create_user_and_db.sql
+
+echo "Creating db, user and importing db schema..."
 
 # Create db assets
 sudo mysql -u root -p < sql/create_user_and_db.sql
-sudo mysql -u root -p poppit < sql/schema.sql
+sudo mysql -u root -p $DBNAME < sql/schema.sql
+
+echo "Prepping service..."
 
 # replace path service script
-sed -i 's/__SERVICE_NAME__/poppit/g' scripts/app.service
-sed -i 's/__FOREVER_START_SCRIPT__/\/home\/brandon\/git-projects\/PoppitServer\/scripts\/forever-start.sh/g' scripts/app.service
-sed -i 's/__FOREVER_START_USER__/brandon/g' scripts/app.service
-sed -i 's/__FOREVER_START_GROUP__/brandon/g' scripts/app.service
+sed -i 's/__SERVICE_NAME__/$SERVICE_NAME/g' scripts/app.service
+sed -i 's/__FOREVER_START_SCRIPT__/$PROJECT_PATH\/scripts\/forever-start.sh/g' scripts/app.service
+sed -i 's/__FOREVER_START_USER__/$SYSUSER/g' scripts/app.service
+sed -i 's/__FOREVER_START_GROUP__/$SYSGROUP/g' scripts/app.service
 
 #replace forever options
-sed -i 's/__SCRIPT_PATH__/\/home\/brandon\/git-projects\/PoppitServer\/app.js/g' scripts/forever-config.json
-sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' scripts/forever-config.json
-sed -i 's/__PROJECT_NAME__/poppit/g' scripts/forever-config.json
-sed -i 's/__LOGS_FOREVER_PATH__/\/var\/log\/PoppitServer\/forever.log/g' scripts/forever-config.json
-sed -i 's/__LOGS_OUT_PATH__/\/var\/log\/PoppitServer\/out.log/g' scripts/forever-config.json
-sed -i 's/__LOGS_ERROR_PATH__/\/var\/log\/PoppitServer\/error.log/g' scripts/forever-config.json
+sed -i 's/__SCRIPT_PATH__/$PROJECT_PATH\/app.js/g' scripts/forever-config.json
+sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/forever-config.json
+sed -i 's/__SERVICE_NAME__/$SERVICE_NAME/g' scripts/forever-config.json
+sed -i 's/__LOGS_FOREVER_PATH__/\/var\/log\/$SERVICE_NAME\/forever.log/g' scripts/forever-config.json
+sed -i 's/__LOGS_OUT_PATH__/\/var\/log\/$SERVICE_NAME\/out.log/g' scripts/forever-config.json
+sed -i 's/__LOGS_ERROR_PATH__/\/var\/log\/$SERVICE_NAME\/error.log/g' scripts/forever-config.json
 
 #replace forever start script options
-sed -i 's/__SYSTEM_USER__/brandon/g' scripts/forever-start.sh
-sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' scripts/forever-start.sh
+sed -i 's/__SYSTEM_USER__/$SYSUSER/g' scripts/forever-start.sh
+sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/forever-start.sh
 
 #inject our path content
-PATHCONTENT="/home/brandon/.nvm/versions/node/v12.18.4/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
 sed -i 's/__PATH_CONTENT__/$PATHCONTENT/g' scripts/app.service
 
 #copy the script to the systemd path
-sudo cp scripts/app.service /usr/lib/systemd/system/poppit.service
+sudo cp scripts/app.service /usr/lib/systemd/system/$SERVICE_NAME.service
 
 #load the service
 sudo systemctl daemon-reload
-sudo systemctl enable poppit.service
+sudo systemctl enable $SERVICE_NAME.service
 
 #prep the backup script
-sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' scripts/backup.sh
-sed -i 's/__PROJECT_NAME__/poppit/g' scripts/backup.sh
+sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/backup.sh
+sed -i 's/__SERVICE_NAME__/$SERVICE_NAME/g' scripts/backup.sh
 
 mkdir -p backups
 chmod +x scripts/backup.sh
 
 #prep the crontab
-sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' scripts/server.cron
+sed -i 's/__PROJECT_PATH__/$PROJECT_PATH/g' scripts/server.cron
 
-cp scripts/server.cron scripts/poppit.cron
+cp scripts/server.cron scripts/$SERVICE_NAME.cron
 
 #copy the crontab to the system's /etc/cron.d/ area
-sudo crontab scripts/poppit.cron
+sudo crontab scripts/$SERVICE_NAME.cron
 
 #add the logs paths and logrotate configs
-sed -i 's/__PROJECT_PATH__/\/home\/brandon\/git-projects\/PoppitServer/g' scripts/server-logrotate.conf
-sed -i 's/__LOGS_FOREVER_PATH__/\/var\/log\/PoppitServer\/forever.log/g' scripts/server-logrotate.conf
-sed -i 's/__LOGS_OUT_PATH__/\/var\/log\/PoppitServer\/out.log/g' scripts/server-logrotate.conf
-sed -i 's/__LOGS_ERROR_PATH__/\/var\/log\/PoppitServer\/error.log/g' scripts/server-logrotate.conf
+sed -i "s/__PROJECT_PATH__/$PROJECT_PATH/g" scripts/server-logrotate.conf
+sed -i "s/__LOGS_FOREVER_PATH__/\/var\/log\/$SERVICE_NAME\/forever.log/g" scripts/server-logrotate.conf
+sed -i "s/__LOGS_OUT_PATH__/\/var\/log\/$SERVICE_NAME\/out.log/g" scripts/server-logrotate.conf
+sed -i "s/__LOGS_ERROR_PATH__/\/var\/log\/$SERVICE_NAME\/error.log/g" scripts/server-logrotate.conf
 
-sudo mkdir -p /var/log/$PROJECTNAME
-sudo chown brandon:brandon /var/log/$PROJECTNAME
+sudo mkdir -p /var/log/$SERVICE_NAME
+sudo chown $SYSUSER:$SYSGROUP /var/log/$SERVICE_NAME
 sudo chown root:root scripts/server-logrotate.conf
 sudo chmod 644 scripts/server-logrotate.conf
 sudo logrotate -v scripts/server-logrotate.conf

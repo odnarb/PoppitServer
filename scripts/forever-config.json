@@ -1,7 +1,7 @@
 //$ forever start ./forever/development.json
 [
     {
-        "uid": "__PROJECT_NAME__-server-3000",
+        "uid": "__SERVICE_NAME__-server-3000",
         "append": true,
         "watch": true,
         "script": "app.js",
@@ -12,7 +12,7 @@
         "args": ["--port", "3000"]
     },
     {
-        "uid": "__PROJECT_NAME__-server-3001",
+        "uid": "__SERVICE_NAME__-server-3001",
         "append": true,
         "watch": true,
         "script": "app.js",
