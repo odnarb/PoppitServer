@@ -1,20 +1,34 @@
 /*
-    DBAL for PoppitUsers
+    DBAL for CompanyUsers
 */
 
-const TABLE_NAME = "poppit_users";
-const MODEL_NAME = "User";
+const TABLE_NAME = "company_users";
+const MODEL_NAME = "CompanyUser";
 const OBJECT_NAME = "user";
 
-const VALID_COLS_MASS = ["first_name","last_name","email_address","active","notifications","registration_type","city","state"];
-const VALID_COLS = ["first_name","last_name","email_address","password_hash","forgot_password_token","active","notifications","registration_type","city","state"];
-const VALID_FILTER_COLS = ["first_name","last_name","email_address","active","registration_type","city","state"];
+const VALID_COLS_MASS = ["company_id","first_name","last_name","email_address","phone_number","active","admin","company_role","company_contact"];
+const VALID_COLS = ["company_id","first_name","last_name","email_address","phone_number","password_hash","invite_token","forgot_password_token","active","admin","company_role","company_contact"];
+const VALID_FILTER_COLS = ["first_name","last_name","email_address","phone_number","active","registration_type","city","state","company_contact"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class User {
+let mapRoleLookup = (role_text) => {
+    let res = -1
+    if (role_text === "none") {
+        res = 0;
+    } else if (role_text === "admin") {
+        res = 1;
+    } else if (role_text === "technical") {
+        res = 2;
+    } else if (role_text === "marketing") {
+        res = 3;
+    }
+    return res;
+};
+
+class CompanyUser {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -118,7 +132,7 @@ class User {
                     this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result);
+                    this.globals.logger.debug( `${MODEL_NAME}.find() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -148,29 +162,23 @@ class User {
     }
 
     create(obj, cb){
-        //TODO: POP-168.. this poisons the notifications field
-        obj.notifications = {};
-
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
 
         let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
 
         //START remove sensitive data
-        //TODO: POP-168x
+        //TODO: POP-168
         let search_index = local_valid_cols.indexOf("forgot_password_token");
         if (search_index > -1) {
             local_valid_cols.splice(search_index, 1);
         }
-        search_index = local_valid_cols.indexOf("notifications");
-        if (search_index > -1) {
-            local_valid_cols.splice(search_index, 1);
-        }
-
-        //TODO: POP-168
-        delete obj.notifications;
-
         //END remove sensitive data
+
+        //get the company role
+        if( mapRoleLookup(obj.company_role) == -1 ){
+            colErrors.push({ "invalid_value": "company_role" });
+        }
 
         Object.keys(obj).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
@@ -181,6 +189,10 @@ class User {
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
+
+            let tmp_company_role = mapRoleLookup(obj.company_role);
+            obj.company_role = tmp_company_role;
+
             //json to  col -> val
             let colsStr = "";
             let valsStr = "";
@@ -220,6 +232,40 @@ class User {
         }
     }
 
+    confirmRegistration(obj, cb){
+
+        let updateStr = `UPDATE ${TABLE_NAME} SET invite_token='', active=1 `;
+        updateStr += `where id = ${this.dbescape(obj.id)} AND invite_token = ${this.dbescape(obj.token)};`;
+
+        let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+        let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(obj.id)} LIMIT 1;`;
+
+        updateStr = `${updateStr}${sqlStr}`;
+
+        this.globals.logger.debug(`${MODEL_NAME}.confirmRegistration() updateStr: ${updateStr}`);
+
+        this.execSQL(this.db, updateStr, (error, result) => {
+            if (error) {
+                this.globals.logger.error(`${MODEL_NAME}.confirmRegistration() :: ERROR : `, error);
+                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+            } else {
+                this.globals.logger.debug(`${MODEL_NAME}.confirmRegistration() result? BEFORE MODS: `, result);
+
+                let user = result[1][0];
+
+                delete user.password_hash;
+                delete user.forgot_password_token;
+                delete user.invite_token;
+
+                result[1] = user;
+
+                this.globals.logger.debug(`${MODEL_NAME}.confirmRegistration() result? BEFORE RETURN: `, result);
+
+                cb(null,result);
+            }
+        });
+    }
+
     update(vals, cb){
         let obj = vals[OBJECT_NAME];
 
@@ -231,14 +277,22 @@ class User {
             }
         });
 
+        if(obj.company_role) {
+            //get the company role
+            if( mapRoleLookup(obj.company_role) == -1 ){
+                colErrors.push({ "invalid_value": "company_role" });
+            }
+        }
+
         if( colErrors.length > 0 ){
             cb({ error_type: "user", "error": colErrors });
         } else {
             obj.updated_at = new Date();
 
-            //TODO, POP-168: save a legit object for notifications
-                //or, make it more generic
-            obj.notifications = { type: "JSON" };
+            if(obj.company_role) {
+                let tmp_company_role = mapRoleLookup(obj.company_role);
+                obj.company_role = tmp_company_role;
+            }
 
             //json to  col -> val
             let updateStr = "";
@@ -254,14 +308,29 @@ class User {
             let sqlStr = `UPDATE ${TABLE_NAME} SET ${updateStr} `;
             sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
-            this.globals.logger.debug(`${MODEL_NAME}.update() sqlStr: ${sqlStr}`);
+            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let userSqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(vals.id)} LIMIT 1;`;
 
-            this.execSQL(this.db, sqlStr, (error, result) => {
+            let finalSqlStr = `${sqlStr}${userSqlStr}`;
+
+            this.globals.logger.debug(`${MODEL_NAME}.update() finalSqlStr: ${finalSqlStr}`);
+
+            this.globals.logger.debug(`${MODEL_NAME}.update() finalSqlStr: ${finalSqlStr}`);
+
+            this.execSQL(this.db, finalSqlStr, (error, result) => {
                 if (error) {
                     this.globals.logger.error(`${MODEL_NAME}.update() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug(`${MODEL_NAME}.update() result?: `, result);
+
+                    let user = result[1];
+
+                    delete user.password_hash;
+                    delete user.forgot_password_token;
+                    delete user.invite_token;
+
+                    result[1] = user;
+
                     cb(null,result);
                 }
             });
@@ -285,4 +354,4 @@ class User {
     }
 }
 
-module.exports = User;
+module.exports = CompanyUser;

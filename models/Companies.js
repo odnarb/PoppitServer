@@ -1,19 +1,19 @@
 /*
-    DBAL for PoppitCampaigns
+    DBAL for Companies
 */
 
-const TABLE_NAME = "poppit_company_campaigns";
-const MODEL_NAME = "Campaign";
-const OBJECT_NAME = "campaign";
+const TABLE_NAME = "companies";
+const MODEL_NAME = "Company";
+const OBJECT_NAME = "company";
 
-const VALID_COLS = ["company_id","name","category","description","game_id","data","date_start","date_end","active"];
-const VALID_FILTER_COLS = ["company_id","name","category","game_id","date_start","date_end","active"];
+const VALID_COLS = ["name","description","address","city","state","zip","country_code","active","demo_acct"];
+const VALID_FILTER_COLS = ["name","address","city","state","zip","country_code","active","demo_acct"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class Campaign {
+class Company {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -147,24 +147,12 @@ class Campaign {
     }
 
     create(obj, cb){
-        //TODO: POP-168.. this poisons the data field
-        obj.data = {};
-
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
 
         let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
 
         //START remove sensitive data
-        //TODO: POP-168x
-        let search_index = local_valid_cols.indexOf("data");
-        if (search_index > -1) {
-            local_valid_cols.splice(search_index, 1);
-        }
-
-        //TODO: POP-168
-        delete obj.data;
-
         //END remove sensitive data
 
         Object.keys(obj).filter(el => {
@@ -270,4 +258,4 @@ class Campaign {
     }
 }
 
-module.exports = Campaign;
+module.exports = Company;

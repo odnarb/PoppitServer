@@ -1,0 +1,16 @@
+#/usr/lib/systemd/system/__SERVICE_NAME__.service
+
+[Unit]
+Description=Job that runs app forever
+After=network.target
+
+[Service]
+Environment=PATH=__PATH_CONTENT__
+User=__FOREVER_START_USER__
+Group=__FOREVER_START_GROUP__
+ExecStart=/bin/bash __FOREVER_START_SCRIPT__
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

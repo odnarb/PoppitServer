@@ -1,19 +1,20 @@
 /*
-    DBAL for PoppitCompanies
+    DBAL for Users
 */
 
-const TABLE_NAME = "poppit_companies";
-const MODEL_NAME = "Company";
-const OBJECT_NAME = "company";
+const TABLE_NAME = "users";
+const MODEL_NAME = "User";
+const OBJECT_NAME = "user";
 
-const VALID_COLS = ["name","description","address","city","state","zip","country_code","active","demo_acct"];
-const VALID_FILTER_COLS = ["name","address","city","state","zip","country_code","active","demo_acct"];
+const VALID_COLS_MASS = ["first_name","last_name","email_address","active","notifications","registration_type","city","state"];
+const VALID_COLS = ["first_name","last_name","email_address","password_hash","forgot_password_token","active","notifications","registration_type","city","state"];
+const VALID_FILTER_COLS = ["first_name","last_name","email_address","active","registration_type","city","state"];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class Company {
+class User {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -92,7 +93,7 @@ class Company {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = `${IDENTITY_COL},${VALID_COLS_MASS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
             let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
@@ -117,7 +118,7 @@ class Company {
                     this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug( `${MODEL_NAME}.find() result?: `, result);
+                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result);
                     cb(null,result);
                 }
             });
@@ -125,21 +126,21 @@ class Company {
     }
 
     findOne(opts,cb){
-        if( !opts.id ){
-            cb({ error_type: "user", error: "id must be passed in" });
+        if( !opts.email_address ){
+            cb({ error_type: "user", error: "email_address must be passed in" });
         } else {
 
             let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
-            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
+            let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where email_address=${this.dbescape(opts.email_address)};`;
 
             this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );
 
             this.execSQL(this.db, sqlStr, (error, result) => {
                 if (error) {
-                    this.globals.logger.error(`${MODEL_NAME}.find() :: ERROR : `, error);
+                    this.globals.logger.error(`${MODEL_NAME}.findOne() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    this.globals.logger.debug(`${MODEL_NAME}.find() result?: `, result[0]);
+                    this.globals.logger.debug(`${MODEL_NAME}.findOne() result?: `, result[0]);
                     cb(null,result[0]);
                 }
             });
@@ -147,12 +148,28 @@ class Company {
     }
 
     create(obj, cb){
+        //TODO: POP-168.. this poisons the notifications field
+        obj.notifications = {};
+
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
 
         let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
 
         //START remove sensitive data
+        //TODO: POP-168x
+        let search_index = local_valid_cols.indexOf("forgot_password_token");
+        if (search_index > -1) {
+            local_valid_cols.splice(search_index, 1);
+        }
+        search_index = local_valid_cols.indexOf("notifications");
+        if (search_index > -1) {
+            local_valid_cols.splice(search_index, 1);
+        }
+
+        //TODO: POP-168
+        delete obj.notifications;
+
         //END remove sensitive data
 
         Object.keys(obj).filter(el => {
@@ -189,7 +206,10 @@ class Company {
             this.globals.logger.debug(`${MODEL_NAME}.create() sqlStr: ${sqlStr}`);
 
             this.execSQL(this.db, sqlStr, (error, result) => {
-                if (error) {
+                if (error && error.toString().indexOf("ER_DUP_ENTRY") > -1 ) {
+                    this.globals.logger.error(`${MODEL_NAME}.create() :: DUPLICATE ENTRY ERROR : `, error);
+                    cb({ error_type: "user", error: "Email already exists" });
+                } else if (error) {
                     this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
@@ -216,10 +236,17 @@ class Company {
         } else {
             obj.updated_at = new Date();
 
+            //TODO, POP-168: save a legit object for notifications
+                //or, make it more generic
+            obj.notifications = { type: "JSON" };
+
             //json to  col -> val
             let updateStr = "";
             Object.keys( obj ).map( (col) => {
-                updateStr += `${col}=${this.dbescape(obj[col])},`;
+                //TODO, POP-168: this poisons the query so JSON columns don't get written to
+                if( obj[col].type !== "JSON" ) {
+                    updateStr += `${col}=${this.dbescape(obj[col])},`;
+                }
             });
             //remove the last comma
             updateStr = updateStr.slice(0,-1);
@@ -258,4 +285,4 @@ class Company {
     }
 }
 
-module.exports = Company;
+module.exports = User;

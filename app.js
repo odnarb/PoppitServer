@@ -1,6 +1,6 @@
 /*
 *
-* Server for Poppit dashboard
+* Server for app dashboard
 *
 */
 
@@ -122,16 +122,24 @@ let redis_config = {
 };
 
 //setup session
+let session_secret = "fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf"
 app.use(session({
     genid: (req) => {
         return uuid.v4();
     },
-    secret: 'fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf',
-    name: '_poppit',
+    //always use a secure secret, not something committed to the repo
+    secret: `${session_secret}`,
+
+    //i.e. "sess_foobar" is the cookie name
+    name: `_${process.env.APP_NAME.toLowerCase()}`,
+
+    //probably a good thing to set to true for PROD
     resave: false,
+
+    //probably leave to true
     saveUninitialized: true,
     cookie: {
-        secure: false,
+        secure: false, // this should be set to true for SSL
               // m *  s * ms
         maxAge:  5 * 60 * 1000
     },
@@ -139,9 +147,6 @@ app.use(session({
 }));
 
 app.use(cookieParser());
-
-let appuser = require('./routes/appuser.js')(globals);
-app.use('/appuser', appuser);
 
 app.use(csrfMiddleware);
 
@@ -186,6 +191,9 @@ app.use('/companyinvoice', companyinvoice);
 
 let companyuser = require('./routes/companyuser.js')(globals);
 app.use('/companyuser', companyuser);
+
+let appuser = require('./routes/appuser.js')(globals);
+app.use('/appuser', appuser);
 
 let company = require('./routes/company.js')(globals);
 app.use('/company', company);

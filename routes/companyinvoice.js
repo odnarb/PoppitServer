@@ -3,7 +3,7 @@
 let express = require('express');
 let router = express.Router();
 
-let InvoiceModel = require('../models/PoppitInvoices');
+let InvoiceModel = require('../models/Invoices');
 
 module.exports = (globals) => {
     return router

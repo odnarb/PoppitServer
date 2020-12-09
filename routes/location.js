@@ -3,7 +3,7 @@
 let express = require('express');
 let router = express.Router();
 
-let LocationModel = require('../models/PoppitLocations');
+let LocationModel = require('../models/Locations');
 
 module.exports = (globals) => {
     return router

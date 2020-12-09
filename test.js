@@ -1,6 +1,6 @@
-let Users = require('./models/PoppitUsers'),
-	Companies = require('./models/PoppitCompanies'),
-	Campaigns = require('./models/PoppitCompanies');
+let Users = require('./models/Users'),
+	Companies = require('./models/Companies'),
+	Campaigns = require('./models/Companies');
 
 
 console.log( Users );
