@@ -8,6 +8,7 @@ npm run lint || { echo 'JS Lint Failed, exiting build process' ; exit 1; }
 cp .env-dev .env
 
 #replace env options for app
+sed -i 's/__NODE_ENV__/development/g' .env
 sed -i 's/__DB_HOST__/mydbhost/g' .env
 sed -i 's/__DB_PASS__/mydbpass123/g' .env
 sed -i 's/__DB_USER__/mydbuser/g' .env
