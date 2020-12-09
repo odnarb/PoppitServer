@@ -6,9 +6,6 @@
 GIT_REPO_NAME="odnarb"
 GIT_PROJECTNAME="PoppitServer"
 
-echo "GIT_REPO_NAME: $GIT_REPO_NAME"
-echo "GIT_PROJECTNAME: $GIT_PROJECTNAME"
-
 SERVICE_NAME=poppit
 DBUSER=poppit
 DBNAME=poppit
@@ -37,13 +34,15 @@ nvm install --lts
 # Install forever
 npm install -g forever
 
+#make sure project dir is fresh
+rm -rf $SERVICE_NAME
+
 # Git clone project
 git clone git@github.com:$GIT_REPO_NAME/$GIT_PROJECTNAME.git $SERVICE_NAME
 
 cd $SERVICE_NAME
-git checkout .
-git checkout whitelabeling-part-1
 
+#install the dependencies
 npm install
 
 echo "Replacing db info..."
