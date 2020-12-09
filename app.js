@@ -148,9 +148,6 @@ app.use(session({
 
 app.use(cookieParser());
 
-let appuser = require('./routes/appuser.js')(globals);
-app.use('/appuser', appuser);
-
 app.use(csrfMiddleware);
 
 //apply our router function to ALL methods defined in router
@@ -194,6 +191,9 @@ app.use('/companyinvoice', companyinvoice);
 
 let companyuser = require('./routes/companyuser.js')(globals);
 app.use('/companyuser', companyuser);
+
+let appuser = require('./routes/appuser.js')(globals);
+app.use('/appuser', appuser);
 
 let company = require('./routes/company.js')(globals);
 app.use('/company', company);
