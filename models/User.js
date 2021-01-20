@@ -6,9 +6,53 @@ const TABLE_NAME = "user";
 const MODEL_NAME = "User";
 const OBJECT_NAME = "user";
 
-const VALID_COLS_MASS = ["first_name","last_name","email_address","active","notifications","registration_type","city","state"];
-const VALID_COLS = ["first_name","last_name","email_address","password_hash","forgot_password_token","active","notifications","registration_type","city","state"];
-const VALID_FILTER_COLS = ["first_name","last_name","email_address","active","registration_type","city","state"];
+/*
+
+    "user_type_id",
+    "company_id",
+    "first_name",
+    "last_name",
+    "email_address",
+    "phone_number",
+    "city",
+    "state",
+    "invite_token",
+    "password_hash",
+    "forgot_password_token",
+    "active",
+    "notifications",
+    "registration_source"
+
+*/
+
+const VALID_COLS_MASS = ["first_name","last_name","email_address","active","registration_source","city","state"];
+const VALID_COLS = [
+    "user_type_id",
+    "company_id",
+    "first_name",
+    "last_name",
+    "email_address",
+    "phone_number",
+    "city",
+    "state",
+    "invite_token",
+    "password_hash",
+    "forgot_password_token",
+    "active",
+    "notifications",
+    "registration_source"
+];
+const VALID_FILTER_COLS = [
+    "user_type_id",
+    "company_id",
+    "first_name",
+    "last_name",
+    "city",
+    "state",
+    "invite_token",
+    "active",
+    "registration_source"
+];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";

@@ -6,7 +6,7 @@ let router = express.Router();
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 
-let UserModel = require('../models/Users');
+let UserModel = require('../models/User');
 
 module.exports = (globals) => {
     return router
@@ -66,6 +66,27 @@ module.exports = (globals) => {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
                 return next(err);
             }
+        }
+    })
+    // user/login
+    .get('/login', (req, res, next) => {
+        let User = new UserModel( globals );
+        let routeHeader = "GET /user/login";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+
+            globals.logger.debug( `${routeHeader} :: DONE`);
+
+            return res.render('pages/login', {
+                pageTitle: "Login",
+                showForm: "login",
+                layout: 'login_layout'
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
         }
     })
     // user/login

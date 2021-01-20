@@ -1,15 +1,14 @@
 SET FOREIGN_KEY_CHECKS=0; -- to disable them
 
-DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `user_types`;
+DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `user_campaigns`;
 DROP TABLE IF EXISTS `companies`;
-DROP TABLE IF EXISTS `games`;
 DROP TABLE IF EXISTS `company_invoices`;
 DROP TABLE IF EXISTS `company_subscriptions`;
-DROP TABLE IF EXISTS `company_users`;
 DROP TABLE IF EXISTS `company_campaigns`;
 DROP TABLE IF EXISTS `company_locations`;
+DROP TABLE IF EXISTS `games`;
 
 /*
 DROP TABLE IF EXISTS `user_role`;
@@ -129,22 +128,6 @@ CREATE TABLE `company_campaigns` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- games
-CREATE TABLE `games` (
-    `id` INT AUTO_INCREMENT,
-    `name` VARCHAR(80) NOT NULL DEFAULT '',
-    `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    `images` JSON NULL,
-    `url` VARCHAR(2000) NOT NULL DEFAULT '',
-    `data` JSON NULL,
-    `is_live` INT NOT NULL DEFAULT 0,
-    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
-    `created_at` DATETIME NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (`id`)
-)  ENGINE=INNODB;
-
--- need relational tables for categories of games...or tags
-
 -- company_locations
 CREATE TABLE `company_locations` (
     `id` BIGINT AUTO_INCREMENT,
@@ -165,6 +148,22 @@ CREATE TABLE `company_locations` (
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
+
+-- games
+CREATE TABLE `games` (
+    `id` INT AUTO_INCREMENT,
+    `name` VARCHAR(80) NOT NULL DEFAULT '',
+    `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `images` JSON NULL,
+    `url` VARCHAR(2000) NOT NULL DEFAULT '',
+    `data` JSON NULL,
+    `is_live` INT NOT NULL DEFAULT 0,
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- need relational tables for categories of games...or tags
 
 
 /*
@@ -210,12 +209,15 @@ VALUES
 */
 -- some hard-coded data
 
-
-INSERT INTO
-    users (first_name,last_name,email_address,password_hash,active)
-VALUES
-    ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$tjr7swVGFsawHX/C4kX2MeYZaNA5CJWit/GReBACjVNNWiVVWPtYe',1),
-    ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
+INSERT INTO `user_types` (
+    `name`,
+    `description`,
+    `internal_only`,
+    `admin`
+) VALUES
+    ('Admin','Administrators of the system',1,1),
+    ('CompanyUser','Users that maintain companies, campaigns, etc',0,0),
+    ('AppUser','End user -- app users',0,0);
 
 INSERT INTO
     companies (name,description,address,city,state,zip)
@@ -224,3 +226,24 @@ VALUES
     ('ACME 321','second company ever!','321 Nowhere Dr.','Phoenix','AZ','12345'),
     ('7 Eleven','home of the slurpee','321 Nowhere Dr.','Phoenix','AZ','12345'),
     ('QuikTrip','gas and food','321 Nowhere Dr.','Phoenix','AZ','12345');
+
+INSERT INTO `user` (
+    `user_type_id`,
+    `company_id`,
+    `first_name`,
+    `last_name`,
+    `email_address`,
+    `phone_number`,
+    `city`,
+    `state`,
+    `active`,
+    `notifications`,
+    `registration_source`,
+    `password_hash`
+)
+VALUES
+    (1,0,'Brandon','Chambers','bran.cham@gmail.com','(123) 123-1234','Tucson','AZ',1,'{}','code','$2b$10$tjr7swVGFsawHX/C4kX2MeYZaNA5CJWit/GReBACjVNNWiVVWPtYe'),
+    (2,1,'John','Smith','test@gmail.com','(123) 123-1234','Tucson','AZ',1,'{}','code','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW'),
+    (3,0,'Jane','Doe','testappuser@gmail.com','(123) 123-1234','Tucson','AZ',1,'{}','google',''),
+    (3,0,'Anne','Roth','anne@gmail.com','(123) 123-1234','Tucson','AZ',1,'{}','facebook',''),
+    (3,0,'Justin','Frye','justin@gmail.com','(123) 123-1234','Tucson','AZ',1,'{}','email','$2b$10$tjr7swVGFsawHX/C4kX2MeYZaNA5CJWit/GReBACjVNNWiVVWPtYe');
