@@ -39,7 +39,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('#kt_view_modal .object-field-updated_at').html( formatDate(user.updated_at) );
 
                 //load user information into modal and show it
-                $('#kt_view_modal .view-object-header').html( `${user.first_name} ${user.last_name} (App User ID: ${user.id})`);
+                $('#kt_view_modal .view-object-header').html( `${user.first_name} ${user.last_name} (User ID: ${user.id})`);
                 $('#kt_view_modal').modal('show');
             });
 
@@ -51,7 +51,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 let user = getRowData(user_id);
 
                 //fill modal with content
-                $('#kt_object_add-edit_modal .view-object-header').html( `${user.first_name} ${user.last_name} (App User ID: ${user.id})`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `${user.first_name} ${user.last_name} (User ID: ${user.id})`);
 
                 //fill form with content from user row
                 $('#kt_object_add-edit_modal form input[name=first_name]').val(user.first_name);
@@ -165,7 +165,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //make sure the form is empty
                 resetForm();
 
-                $('#kt_object_add-edit_modal .view-object-header').html( `Add New App User`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `Add New User`);
                 $('#kt_object_add-edit_modal').modal('show');
 
                 //unbind any handlers
@@ -259,7 +259,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 let user_id = $(e.currentTarget).data('user-id');
                 let row_id = `user-${user_id}`;
 
-                console.log( `remove app user id?: ${user_id}` );
+                console.log( `remove user id?: ${user_id}` );
 
                 //delete the user
                 $.ajax({
@@ -359,8 +359,8 @@ let KTDatatablesExtensionsKeytable = function() {
                               <i class="la la-ellipsis-h"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item edit-user" href="#" data-user-id=${user.id}><i class="la la-edit"></i> Edit App User</a>
-                                <a class="dropdown-item remove-user" href="#" data-user-id=${user.id}><i class="la la-remove"></i> Delete App User</a>
+                                <a class="dropdown-item edit-user" href="#" data-user-id=${user.id}><i class="la la-edit"></i> Edit User</a>
+                                <a class="dropdown-item remove-user" href="#" data-user-id=${user.id}><i class="la la-remove"></i> Delete User</a>
                             </div>
                         </span>
                         <a href="#" class="btn btn-sm btn-clean btn-icon btn-icon-md view-user" title="View All Details" data-user-id=${user.id}>
@@ -426,7 +426,7 @@ let KTDatatablesExtensionsKeytable = function() {
             $('#kt_object_add-edit_modal form input[name=email_address]').val('');
             $('#kt_object_add-edit_modal form input[name=city]').val('');
             $('#kt_object_add-edit_modal form input[name=state]').val('');
-            $('#kt_object_add-edit_modal form input[name=registration_type]').val('');
+            $('#kt_object_add-edit_modal form input[name=registration_source]').val('email');
             $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
         };
 
