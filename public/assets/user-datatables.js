@@ -309,16 +309,18 @@ let KTDatatablesExtensionsKeytable = function() {
                   return `user-${row.id}`;
             },
 
+// "user_type_id","first_name","last_name","email_address","city","state","active","registration_source"
+
             //define the columns
             columns: [
                 { "data": "id" },
+                { "data": "user_type_id" },
                 { "data": "first_name" },
                 { "data": "last_name" },
                 { "data": "email_address" },
                 { "data": "city" },
                 { "data": "state" },
-                { "data": "notifications" },
-                { "data": "registration_type" },
+                { "data": "registration_source" },
                 { "data": "active" },
                 { "data": "created_at" },
                 { "data": "updated_at" },
