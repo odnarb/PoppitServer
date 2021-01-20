@@ -14,10 +14,9 @@ module.exports = (globals) => {
         //if assets, allow through
         let allowRequest = (
             req.url.indexOf('/assets') > -1 ||
-            req.url.indexOf('/companyuser/confirm') > -1 ||
-            req.url === '/companyuser/logout' ||
-            req.url === '/companyuser/newpassword' ||
-            req.url === '/appuser/login' ||
+            req.url.indexOf('/user/confirm') > -1 ||
+            req.url === '/user/logout' ||
+            req.url === '/user/newpassword' ||
             req.url === '/csrf'
         );
 
@@ -25,12 +24,12 @@ module.exports = (globals) => {
             next();
 
         // check session... show login or show dashboard
-        } else if( req.url !== '/companyuser/login' && req.session.isLoggedIn ){
+        } else if( req.url !== '/user/login' && req.session.isLoggedIn ){
             next();
 
         // user needs to login
-        } else if( req.url !== '/companyuser/login' && req.session.isLoggedIn === undefined || req.session.isLoggedIn === false ) {
-            return res.redirect('/companyuser/login');
+        } else if( req.url !== '/user/login' && req.session.isLoggedIn === undefined || req.session.isLoggedIn === false ) {
+            return res.redirect('/user/login');
         // user is logging in
         } else {
             next();

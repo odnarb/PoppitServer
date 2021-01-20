@@ -39,7 +39,7 @@ rm -rf $SERVICE_NAME
 
 # Git clone project
 git clone git@github.com:$GIT_REPO_NAME/$GIT_PROJECTNAME.git $SERVICE_NAME
-
+2020-12-08T23:48:5
 cd $SERVICE_NAME
 
 #install the dependencies

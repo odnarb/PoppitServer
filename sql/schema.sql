@@ -1,7 +1,8 @@
 SET FOREIGN_KEY_CHECKS=0; -- to disable them
 
-DROP TABLE IF EXISTS `users`;
-DROP TABLE IF EXISTS `users_campaigns`;
+DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `user_types`;
+DROP TABLE IF EXISTS `user_campaigns`;
 DROP TABLE IF EXISTS `companies`;
 DROP TABLE IF EXISTS `games`;
 DROP TABLE IF EXISTS `company_invoices`;
@@ -9,33 +10,52 @@ DROP TABLE IF EXISTS `company_subscriptions`;
 DROP TABLE IF EXISTS `company_users`;
 DROP TABLE IF EXISTS `company_campaigns`;
 DROP TABLE IF EXISTS `company_locations`;
-DROP TABLE IF EXISTS `roles`;
+
+/*
 DROP TABLE IF EXISTS `user_role`;
 DROP TABLE IF EXISTS `roles_policies`;
 DROP TABLE IF EXISTS `policies`;
+*/
 
 SET FOREIGN_KEY_CHECKS=1; -- to re-enable them
 
--- users
-CREATE TABLE `users` (
+
+-- user_types
+CREATE TABLE `user_types` (
     `id` BIGINT AUTO_INCREMENT,
-    `first_name` VARCHAR(80) NOT NULL DEFAULT '',
-    `last_name` VARCHAR(80) NOT NULL DEFAULT '',
-    `email_address` VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
-    `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
-    `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
-    `active` INT NOT NULL DEFAULT 0,
-    `notifications` JSON NULL,
-    `registration_type` VARCHAR(80) NOT NULL DEFAULT '',
-    `city` VARCHAR(80) NOT NULL DEFAULT '',
-    `state` VARCHAR(2) NOT NULL DEFAULT '',
+    `name` VARCHAR(80) NOT NULL DEFAULT '',
+    `description` VARCHAR(1000) NOT NULL DEFAULT '',
+    `internal_only` INT NOT NULL,
+    `admin` INT NOT NULL,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- users_campaigns
-CREATE TABLE `users_campaigns` (
+-- user
+CREATE TABLE `user` (
+    `id` BIGINT AUTO_INCREMENT,
+    `user_type_id` INT NOT NULL DEFAULT 0,
+    `company_id` BIGINT NOT NULL DEFAULT 0,
+    `first_name` VARCHAR(80) NOT NULL DEFAULT '',
+    `last_name` VARCHAR(80) NOT NULL DEFAULT '',
+    `email_address` VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
+    `phone_number` VARCHAR(80) NOT NULL DEFAULT '',
+    `city` VARCHAR(80) NOT NULL DEFAULT '',
+    `state` VARCHAR(2) NOT NULL DEFAULT '',
+    `invite_token` VARCHAR(255) NOT NULL DEFAULT '',
+    `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
+    `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
+    `active` INT NOT NULL DEFAULT 0,
+    `notifications` JSON NULL,
+    `registration_source` VARCHAR(80) NOT NULL DEFAULT '',
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (`id`)
+)  ENGINE=INNODB;
+
+-- user_campaigns
+CREATE TABLE `user_campaigns` (
     `id` BIGINT AUTO_INCREMENT,
     `campaign_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
@@ -86,26 +106,6 @@ CREATE TABLE `company_subscriptions` (
     `amount` FLOAT NOT NULL DEFAULT 0,
     `subscription_start` DATETIME NOT NULL,
     `subscription_end` DATETIME NOT NULL,
-    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
-    `created_at` DATETIME NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (`id`)
-)  ENGINE=INNODB;
-
--- company_users
-CREATE TABLE `company_users` (
-    `id` BIGINT AUTO_INCREMENT,
-    `company_id` BIGINT NOT NULL DEFAULT 0,
-    `first_name` VARCHAR(80) NOT NULL DEFAULT '',
-    `last_name` VARCHAR(80) NOT NULL DEFAULT '',
-    `email_address` VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
-    `phone_number` VARCHAR(80) NOT NULL DEFAULT '',
-    `password_hash` VARCHAR(255) NOT NULL DEFAULT '',
-    `invite_token` VARCHAR(255) NOT NULL DEFAULT '',
-    `forgot_password_token` VARCHAR(255) NOT NULL DEFAULT '',
-    `admin` INT NOT NULL DEFAULT 0,
-    `company_role` INT NOT NULL DEFAULT 0,
-    `company_contact` INT NOT NULL DEFAULT 0,
-    `active` INT NOT NULL DEFAULT 0,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`)
@@ -166,17 +166,6 @@ CREATE TABLE `company_locations` (
     PRIMARY KEY (`id`)
 )  ENGINE=INNODB;
 
--- roles
-CREATE TABLE `roles` (
-    `id` BIGINT AUTO_INCREMENT,
-    `name` VARCHAR(80) NOT NULL DEFAULT '',
-    `description` VARCHAR(1000) NOT NULL DEFAULT '',
-    `internal_only` INT NOT NULL,
-    `admin` INT NOT NULL,
-    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
-    `created_at` DATETIME NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (`id`)
-)  ENGINE=INNODB;
 
 /*
 -- user_role
@@ -228,7 +217,6 @@ VALUES
     ('Brandon','Chambers','bran.cham@gmail.com','$2b$10$tjr7swVGFsawHX/C4kX2MeYZaNA5CJWit/GReBACjVNNWiVVWPtYe',1),
     ('John','Smith','test@gmail.com','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',0);
 
-
 INSERT INTO
     companies (name,description,address,city,state,zip)
 VALUES
@@ -236,9 +224,3 @@ VALUES
     ('ACME 321','second company ever!','321 Nowhere Dr.','Phoenix','AZ','12345'),
     ('7 Eleven','home of the slurpee','321 Nowhere Dr.','Phoenix','AZ','12345'),
     ('QuikTrip','gas and food','321 Nowhere Dr.','Phoenix','AZ','12345');
-
-INSERT INTO
-    company_users (company_id,first_name,last_name,email_address,phone_number,password_hash,company_role,company_contact,active,admin)
-VALUES
-    (1,'Brandon','Chambers','bran.cham@gmail.com','(123) 123-1234','$2b$10$r4nCvcCKWnioJ4Qm2DlWauErLW6vSeSRvOJLHR5s2NRyrPHl8rkAG',1,1,1,1),
-    (2,'John','Smith','test@gmail.com','(999) 598-7777','$2b$10$ffk8fvqKTigHEynvaRqJd.E4ytGV/vpNvOEXTvki4qXNY/Ti2g1XW',2,1,1,0);

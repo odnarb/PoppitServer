@@ -171,10 +171,10 @@ app.use( (req,res,next) => {
     } else {
         res.locals.company_context = undefined;
     }
-    if( req.session.companyuser_context && req.session.companyuser_context.id > 0 ){
-        res.locals.companyuser_context = req.session.companyuser_context;
+    if( req.session.user_context && req.session.user_context.id > 0 ){
+        res.locals.user_context = req.session.user_context;
     } else {
-        res.locals.companyuser_context = undefined;
+        res.locals.user_context = undefined;
     }
     next();
 });
@@ -189,11 +189,8 @@ app.use('/', main);
 let companyinvoice = require('./routes/companyinvoice.js')(globals);
 app.use('/companyinvoice', companyinvoice);
 
-let companyuser = require('./routes/companyuser.js')(globals);
-app.use('/companyuser', companyuser);
-
-let appuser = require('./routes/appuser.js')(globals);
-app.use('/appuser', appuser);
+let user = require('./routes/user.js')(globals);
+app.use('/user', user);
 
 let company = require('./routes/company.js')(globals);
 app.use('/company', company);

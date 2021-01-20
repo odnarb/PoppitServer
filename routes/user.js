@@ -1,4 +1,4 @@
-//appuser routes
+//user routes
 
 let express = require('express');
 let router = express.Router();
@@ -10,13 +10,13 @@ let UserModel = require('../models/Users');
 
 module.exports = (globals) => {
     return router
-    // appuser/ (get all users)
+    // user/ (get all users)
     .get('/', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "GET /appuser (HTTP)";
+        let routeHeader = "GET /user (HTTP)";
 
         if( req.xhr == true ){
-            routeHeader = "GET /appuser (XHR)";
+            routeHeader = "GET /user (XHR)";
 
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN :: filtered user list` );
@@ -59,7 +59,7 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/appuser',{
+                return res.render('pages/user',{
                     pageTitle: "Search App Users"
                 });
             } catch( err ) {
@@ -68,10 +68,10 @@ module.exports = (globals) => {
             }
         }
     })
-    // appuser/login
+    // user/login
     .post('/login', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "POST /appuser/login";
+        let routeHeader = "POST /user/login";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN`);
@@ -114,7 +114,7 @@ module.exports = (globals) => {
                     //save the session to redis store
                     req.session.regenerate( (err) => {
                         req.session.isLoggedIn = true;
-                        req.session.appuser = true;
+                        req.session.user = true;
                         req.session.user = user;
                         if( req.body.remember && req.body.remember == "on" ){
                             req.session.cookie.maxAge = globals.COOKIE_MAX_AGE;
@@ -136,9 +136,9 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // appuser/logout
+    // user/logout
     .get('/logout', (req, res, next) => {
-        let routeHeader = "GET /appuser/logout";
+        let routeHeader = "GET /user/logout";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -160,10 +160,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // appuser/signup
+    // user/signup
     .post('/signup', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "POST /appuser/signup";
+        let routeHeader = "POST /user/signup";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -267,7 +267,7 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // appuser/checkcookie
+    // user/checkcookie
     .post('/checkcookie', (req, res, next) => {
         // let User = new UserModel( globals );
         let routeHeader = "POST /checkcookie";
@@ -287,10 +287,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // appuser/:id operations
+    // user/:id operations
     .get('/:id', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "GET /appuser/:id";
+        let routeHeader = "GET /user/:id";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -304,7 +304,7 @@ module.exports = (globals) => {
                     return next(err);
                 }
 
-                globals.logger.info(`GET /appuser/:id :: user.id: ${req.params.id}`, user);
+                globals.logger.info(`GET /user/:id :: user.id: ${req.params.id}`, user);
 
                 globals.logger.info( `${routeHeader} :: END` );
 
@@ -317,7 +317,7 @@ module.exports = (globals) => {
     })
     .put('/:id', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "PUT /appuser/:id ";
+        let routeHeader = "PUT /user/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -346,7 +346,7 @@ module.exports = (globals) => {
     })
     .delete('/:id', (req, res, next) => {
         let User = new UserModel( globals );
-        let routeHeader = "DELETE /appuser/:id ";
+        let routeHeader = "DELETE /user/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );

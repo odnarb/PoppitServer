@@ -2,7 +2,7 @@
     DBAL for Users
 */
 
-const TABLE_NAME = "users";
+const TABLE_NAME = "user";
 const MODEL_NAME = "User";
 const OBJECT_NAME = "user";
 

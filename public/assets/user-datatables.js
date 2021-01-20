@@ -27,51 +27,42 @@ let KTDatatablesExtensionsKeytable = function() {
                 let user_id = $(e.currentTarget).data('user-id');
                 let user = getRowData(user_id);
 
-                $('#kt_view_modal .object-field-company_id').html(user.company_id);
                 $('#kt_view_modal .object-field-first_name').html(user.first_name);
                 $('#kt_view_modal .object-field-last_name').html(user.last_name);
                 $('#kt_view_modal .object-field-email_address').html(user.email_address);
-                $('#kt_view_modal .object-field-company_permissions').html(user.company_permissions);
-                $('#kt_view_modal .object-field-phone_number').html(user.phone_number);
-                $('#kt_view_modal .object-field-company_role').html(user.company_role);
-                $('#kt_view_modal .object-field-company_contact').html(user.company_contact);
+                $('#kt_view_modal .object-field-city').html(user.city);
+                $('#kt_view_modal .object-field-state').html(user.state);
+                $('#kt_view_modal .object-field-notifications').html(user.notifications);
+                $('#kt_view_modal .object-field-registration_type').html(user.registration_type);
                 $('#kt_view_modal .object-field-active').html(user.active);
                 $('#kt_view_modal .object-field-created_at').html( formatDate(user.created_at) );
                 $('#kt_view_modal .object-field-updated_at').html( formatDate(user.updated_at) );
 
                 //load user information into modal and show it
-                $('#kt_view_modal .view-object-header').html( `${user.first_name} ${user.last_name} (Company User ID: ${user.id})`);
+                $('#kt_view_modal .view-object-header').html( `${user.first_name} ${user.last_name} (App User ID: ${user.id})`);
                 $('#kt_view_modal').modal('show');
             });
 
             $('.edit-user').on('click', function(e) {
                 e.preventDefault();
 
-                //make sure the form is empty
-                resetForm();
-
                 //get user object
                 let user_id = $(e.currentTarget).data('user-id');
                 let user = getRowData(user_id);
 
-                console.log("edit user: ", user);
-
                 //fill modal with content
-                $('#kt_object_add-edit_modal .view-object-header').html( `${user.first_name} ${user.last_name} (Company User ID: ${user.id})`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `${user.first_name} ${user.last_name} (App User ID: ${user.id})`);
 
                 //fill form with content from user row
-                $('#kt_object_add-edit_modal form input[name=company_id]').val(user.company_id);
                 $('#kt_object_add-edit_modal form input[name=first_name]').val(user.first_name);
                 $('#kt_object_add-edit_modal form input[name=last_name]').val(user.last_name);
                 $('#kt_object_add-edit_modal form input[name=email_address]').val(user.email_address);
-                $(`#kt_object_add-edit_modal form option[value="${user.company_role}"]`).prop('selected', true);
-                $('#kt_object_add-edit_modal form input[name=phone_number]').val(user.phone_number);
+                $('#kt_object_add-edit_modal form input[name=city]').val(user.city);
+                $('#kt_object_add-edit_modal form input[name=state]').val(user.state);
+                $('#kt_object_add-edit_modal form input[name=notifications]').val(user.notifications);
+                // $('#kt_object_add-edit_modal form input[name=registration_type]').val(user.registration_type);
+                $(`#kt_object_add-edit_modal form option[value="${user.registration_type}"]`).prop('selected', true);
 
-                if( checkToggle(user.company_contact) ){
-                    $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', true);
-                } else {
-                    $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', false);
-                }
 
                 if( checkToggle(user.active) ){
                     $('#kt_object_add-edit_modal form input[name=active]').prop('checked', true);
@@ -92,11 +83,6 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     form.validate({
                         rules: {
-                            company_id: {
-                                required: true,
-                                maxlength: 32,
-                                digits: true
-                            },
                             first_name: {
                                 required: true,
                                 maxlength: 80
@@ -110,13 +96,17 @@ let KTDatatablesExtensionsKeytable = function() {
                                 email: true,
                                 maxlength: 255
                             },
-                            phone_number: {
-                                required: true,
-                                phoneUS: true
+                            registration_type: {
+                               required: true
                             },
-                            company_role: {
-                                required: true
-                            }
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2
+                            },
                         }
                     });
 
@@ -131,21 +121,17 @@ let KTDatatablesExtensionsKeytable = function() {
                     } else {
                         obj.active = 0;
                     }
-                    if( checkToggle(obj.company_contact) ){
-                        obj.company_contact = 1;
-                    } else {
-                        obj.company_contact = 0;
-                    }
 
-                    btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
+                    console.log("save [EDIT to] user obj: ", obj);
 
                     //add the user
                     $.ajax({
                         method: "PUT",
-                        url: `/companyuser/${user_id}`,
+                        url: `/user/${user_id}`,
                         data: obj,
                         success: function(res) {
-                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+                            //reset form
+                            resetForm();
 
                             //hide this, re-fetch and redraw table
                             $('#kt_object_add-edit_modal').modal('hide');
@@ -156,8 +142,6 @@ let KTDatatablesExtensionsKeytable = function() {
                             });
                         },
                         error: function(e) {
-                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
-
                             console.error(e);
                         }
                     });
@@ -168,6 +152,7 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     //close and reset form
                     $('#kt_object_add-edit_modal').modal('hide');
+                    resetForm();
                 });
 
                 //show the modal
@@ -180,7 +165,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //make sure the form is empty
                 resetForm();
 
-                $('#kt_object_add-edit_modal .view-object-header').html( `Add New Company User`);
+                $('#kt_object_add-edit_modal .view-object-header').html( `Add New App User`);
                 $('#kt_object_add-edit_modal').modal('show');
 
                 //unbind any handlers
@@ -196,11 +181,6 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     form.validate({
                         rules: {
-                            company_id: {
-                                required: true,
-                                maxlength: 32,
-                                digits: true
-                            },
                             first_name: {
                                 required: true,
                                 maxlength: 80
@@ -214,13 +194,17 @@ let KTDatatablesExtensionsKeytable = function() {
                                 email: true,
                                 maxlength: 255
                             },
-                            phone_number: {
-                                required: true,
-                                phoneUS: true
+                            registration_type: {
+                               required: true
                             },
-                            company_role: {
-                                required: true
-                            }
+                            city: {
+                                required: true,
+                                maxlength: 80
+                            },
+                            state: {
+                                required: true,
+                                maxlength: 2
+                            },
                         }
                     });
 
@@ -235,23 +219,17 @@ let KTDatatablesExtensionsKeytable = function() {
                     } else {
                         obj.active = 0;
                     }
-                    if( checkToggle(obj.company_contact) ){
-                        obj.company_contact = 1;
-                    } else {
-                        obj.company_contact = 0;
-                    }
 
                     console.log("new user obj: ", obj);
-
-                    btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
 
                     //add the user
                     $.ajax({
                         method: "POST",
-                        url: `/companyuser`,
+                        url: `/user`,
                         data: obj,
                         success: function(res) {
-                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
+                            //reset form
+                            resetForm();
 
                             //hide this, re-fetch and redraw table
                             $('#kt_object_add-edit_modal').modal('hide');
@@ -262,8 +240,6 @@ let KTDatatablesExtensionsKeytable = function() {
                             });
                         },
                         error: function(e) {
-                            btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
-
                             console.error(e);
                         }
                     });
@@ -273,6 +249,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     e.preventDefault();
 
                     $('#kt_object_add-edit_modal').modal('hide');
+                    resetForm();
                 });
             });
 
@@ -282,12 +259,12 @@ let KTDatatablesExtensionsKeytable = function() {
                 let user_id = $(e.currentTarget).data('user-id');
                 let row_id = `user-${user_id}`;
 
-                console.log( `remove Company User id?: ${user_id}` );
+                console.log( `remove app user id?: ${user_id}` );
 
                 //delete the user
                 $.ajax({
                     method: "DELETE",
-                    url: `/companyuser/${user_id}?_csrf=${window._csrf}`,
+                    url: `/user/${user_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("user deleted!: ", res);
 
@@ -323,7 +300,7 @@ let KTDatatablesExtensionsKeytable = function() {
             ],
 
             //request uri
-            ajax: "/companyuser",
+            ajax: "/user",
 
             dataSrc: '',
 
@@ -335,27 +312,24 @@ let KTDatatablesExtensionsKeytable = function() {
             //define the columns
             columns: [
                 { "data": "id" },
-                { "data": "company_id" },
                 { "data": "first_name" },
                 { "data": "last_name" },
                 { "data": "email_address" },
-                { "data": "phone_number" },
-                { "data": "company_role" },
-                { "data": "company_contact" },
+                { "data": "city" },
+                { "data": "state" },
+                { "data": "notifications" },
+                { "data": "registration_type" },
                 { "data": "active" },
                 { "data": "created_at" },
                 { "data": "updated_at" },
                 { "data": "actions" }
             ],
 
-            // --add disable/activate user quick button -- as a per-row toggle button
-            // --add send forgotpassword email quick button
-
             columnDefs: [
                 {
-                    "targets": [ 5,6,7 ],
-                    "visible": false,
-                    "searchable": false
+                    targets: 6,
+                    visible: false,
+                    searchable: false
                 },
                 //render time stamp
                 {
@@ -383,8 +357,8 @@ let KTDatatablesExtensionsKeytable = function() {
                               <i class="la la-ellipsis-h"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item edit-user" href="#" data-user-id=${user.id}><i class="la la-edit"></i> Edit Company User</a>
-                                <a class="dropdown-item remove-user" href="#" data-user-id=${user.id}><i class="la la-remove"></i> Delete Company User</a>
+                                <a class="dropdown-item edit-user" href="#" data-user-id=${user.id}><i class="la la-edit"></i> Edit App User</a>
+                                <a class="dropdown-item remove-user" href="#" data-user-id=${user.id}><i class="la la-remove"></i> Delete App User</a>
                             </div>
                         </span>
                         <a href="#" class="btn btn-sm btn-clean btn-icon btn-icon-md view-user" title="View All Details" data-user-id=${user.id}>
@@ -445,16 +419,13 @@ let KTDatatablesExtensionsKeytable = function() {
 
         let resetForm = function() {
             $('#kt_object_add-edit_modal .view-object-header').html( '' );
-            $('#kt_object_add-edit_modal form input[name=company_id]').val('');
             $('#kt_object_add-edit_modal form input[name=first_name]').val('');
             $('#kt_object_add-edit_modal form input[name=last_name]').val('');
             $('#kt_object_add-edit_modal form input[name=email_address]').val('');
-            $('#kt_object_add-edit_modal form input[name=phone_number]').val('');
-            $('#kt_object_add-edit_modal form input[name=company_role]').val('');
-            $('#kt_object_add-edit_modal form input[name=company_contact]').prop('checked', false);
+            $('#kt_object_add-edit_modal form input[name=city]').val('');
+            $('#kt_object_add-edit_modal form input[name=state]').val('');
+            $('#kt_object_add-edit_modal form input[name=registration_type]').val('');
             $('#kt_object_add-edit_modal form input[name=active]').prop('checked', false);
-            $(`#kt_object_add-edit_modal form option[value="none"]`).prop('selected', true);
-
         };
 
         table.on( 'init', function(e, settings, json ) {

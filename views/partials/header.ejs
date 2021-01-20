@@ -20,14 +20,14 @@
                                     </div>
                                 </div>
 
-                                <div class="companyuser-context" style="padding: 10px;">
-                                    <div class="form-constrol set-companyuser-context"<% if(companyuser_context !== undefined) { %> style="display:none;"<% } %>>
-                                        <input class="form-control" type="text" placeholder="User Email Address" name="companyuser__id" autocomplete="off">
-                                        <button id="companyuser_context_submit" class="btn btn-brand btn-pill">Change User</button>
+                                <div class="user-context" style="padding: 10px;">
+                                    <div class="form-constrol set-user-context"<% if(user_context !== undefined) { %> style="display:none;"<% } %>>
+                                        <input class="form-control" type="text" placeholder="User Email Address" name="user__id" autocomplete="off">
+                                        <button id="user_context_submit" class="btn btn-brand btn-pill">Change User</button>
                                     </div>
-                                    <div class="show-companyuser-context"<% if(companyuser_context === undefined) { %> style="display:none;"<% } %>>
-                                        Current User: <span class="show-companyuser-context-details" style="margin-right: 10px;"><% if(companyuser_context !== undefined) { %><%- companyuser_context.last_name %>, <%- companyuser_context.first_name %> (id:<%- companyuser_context.id %>)<% } %></span>
-                                        <button id="companyuser_context_reset" class="btn btn-brand btn-pill">Logout of User Context</button>
+                                    <div class="show-user-context"<% if(user_context === undefined) { %> style="display:none;"<% } %>>
+                                        Current User: <span class="show-user-context-details" style="margin-right: 10px;"><% if(user_context !== undefined) { %><%- user_context.last_name %>, <%- user_context.first_name %> (id:<%- user_context.id %>)<% } %></span>
+                                        <button id="user_context_reset" class="btn btn-brand btn-pill">Logout of User Context</button>
                                     </div>
                                 </div>
                             </div>
