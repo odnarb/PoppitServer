@@ -1,4 +1,4 @@
-//users routes
+//user routes
 
 let express = require('express');
 let router = express.Router();
@@ -13,17 +13,17 @@ module.exports = (globals) => {
     // /setcontext/:id
     .get('/setcontext/:id', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /users/setcontext/:id";
+        let routeHeader = "GET /user/setcontext/:id";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN` );
 
-            globals.logger.debug( `${routeHeader} :: company id: ${req.params.id}` );
+            globals.logger.debug( `${routeHeader} :: user id: ${req.params.id}` );
 
             globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
 
             if(req.session.user.is_admin === 1){
-                globals.logger.debug( `${routeHeader} :: BEFORE Users.findOne() :: company id: ${req.params.id}` );
+                globals.logger.debug( `${routeHeader} :: BEFORE Users.findOne() :: user id: ${req.params.id}` );
 
                 Users.findOne({ email_address: req.params.id }, (err, dbRes) => {
                     if(err){
@@ -37,11 +37,11 @@ module.exports = (globals) => {
 
                     let context_res = { success: false }
                     if( dbRes !== undefined ){
-                        req.session.users_context = dbRes;
+                        req.session.user_context = dbRes;
 
-                        globals.logger.debug( `${routeHeader} :: NEW req.session.users_context:`, req.session.users_context);
+                        globals.logger.debug( `${routeHeader} :: NEW req.session.user_context:`, req.session.user_context);
 
-                        context_res.company = dbRes;
+                        context_res.user = dbRes;
                         context_res.success = true;
                     }
                     globals.logger.debug( `${routeHeader} :: END` );
@@ -49,7 +49,7 @@ module.exports = (globals) => {
                     return res.json(context_res);
                 });
             } else {
-                globals.logger.debug( `${routeHeader} :: user :: ${req.session.user.id} ${req.session.user.email_address} :: NOT admin for company context :: company id: ${req.params.id}` );
+                globals.logger.debug( `${routeHeader} :: user :: ${req.session.user.id} ${req.session.user.email_address} :: NOT admin for user context :: user id: ${req.params.id}` );
 
                 return res.redirect('/');
             }
@@ -58,13 +58,13 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // users/ (get all users)
+    // user/ (get all users)
     .get('/', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /users (HTTP)";
+        let routeHeader = "GET /user (HTTP)";
 
         if( req.xhr == true ){
-            routeHeader = "GET /users (XHR)";
+            routeHeader = "GET /user (XHR)";
 
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN :: filtered user list` );
@@ -78,12 +78,12 @@ module.exports = (globals) => {
                 //remove timestamp param for datatables
                 if( params._ !== undefined ) delete params._;
 
-                //get users
+                //get user
                 Users.find(req.query, (err, dbresult) => {
 
-                    let users = dbresult[0];
-                    for(let i=0; i < users.length;i++) {
-                        let user = users[i];
+                    let user = dbresult[0];
+                    for(let i=0; i < user.length;i++) {
+                        let user = user[i];
                         let res = "none";
                         if (user.company_role === 1) {
                             res = "admin"
@@ -93,7 +93,7 @@ module.exports = (globals) => {
                             res = "marketing";
                         }
                         user.company_role = res;
-                        users[i] = user;
+                        user[i] = user;
                     }
 
                     globals.logger.debug( `${routeHeader} :: DB CB: `, err);
@@ -109,7 +109,7 @@ module.exports = (globals) => {
                     }
                     globals.logger.debug( `${routeHeader} :: DONE`);
                     return res.json({
-                        aaData: users,
+                        aaData: user,
                         iTotalRecords: dbresult[1].totalCount,
                         iTotalDisplayRecords: dbresult[2].totalCountWithFilter
                     });
@@ -123,8 +123,8 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/users',{
-                    pageTitle: "Search Company Users"
+                return res.render('pages/user',{
+                    pageTitle: "Search Users"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -132,10 +132,10 @@ module.exports = (globals) => {
             }
         }
     })
-    // users/login
+    // user/login
     .get('/login', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /users/login";
+        let routeHeader = "GET /user/login";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -153,20 +153,25 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // users/login
+    // user/login
     .post('/login', (req, res, next) => {
 
         let Users = new UsersModel( globals );
-        let routeHeader = "POST /users/login";
+        let routeHeader = "POST /user/login";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN`);
 
             if( !req.body ){
+                globals.logger.debug( `${routeHeader} :: ERR 1 `);
                 return res.status(400).json({reason: "no_params_sent"});
             } else if (!req.body.email){
+                globals.logger.debug( `${routeHeader} :: ERR 2`);
+
                 return res.status(400).json({ reason: "no_email" });
             } else if (!req.body.password){
+                globals.logger.debug( `${routeHeader} :: ERR 3 `);
+
                 return res.status(400).json({ reason: "no_password" });
             }
 
@@ -178,7 +183,7 @@ module.exports = (globals) => {
                 }
 
                 //user not found at all
-                if ( user == undefined ){
+                if ( user === undefined ){
                     globals.logger.debug( `${routeHeader} :: user not found, login denied: `, req.body.email);
                     return res.status(403).json({reason: "no_user"});
                 }
@@ -191,7 +196,7 @@ module.exports = (globals) => {
                         return res.status(403).json({reason: "no_user"});
                     }
 
-                    globals.logger.info( `Users.id=${user.id} logged IN` );
+                    globals.logger.info( `Users.id=${user.id} logged IN, regen session` );
 
                     //remove the password_hash field before being saved to the session
                     delete user.password_hash;
@@ -200,7 +205,7 @@ module.exports = (globals) => {
                     //save the session to redis store
                     req.session.regenerate( (err) => {
                         req.session.isLoggedIn = true;
-                        req.session.user = user;
+                        req.session.user = JSON.parse(JSON.stringify(user));
                         if( req.body.remember && req.body.remember == "on" ){
                             req.session.cookie.maxAge = globals.COOKIE_MAX_AGE;
                         } else {
@@ -221,10 +226,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // users/logout
+    // user/logout
     .get('/logout', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /users/logout";
+        let routeHeader = "GET /user/logout";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -235,7 +240,7 @@ module.exports = (globals) => {
                 //delete the session
                 req.session.destroy()
 
-                return res.redirect('/users/login');
+                return res.redirect('/user/login');
             } else {
                 return res.redirect('/');
             }
@@ -246,13 +251,13 @@ module.exports = (globals) => {
     })
     .post('/signup', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /users/signup :: globals? ", gres );
-        return res.json({ page: 'POST /users/signup'});
+        globals.logger.info( "POST /user/signup :: globals? ", gres );
+        return res.json({ page: 'POST /user/signup'});
     })
     // create user
     .post('/', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "POST /users";
+        let routeHeader = "POST /user";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -334,10 +339,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-     // users/newpassword
+     // user/newpassword
     .get('/newpassword', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /users/newpassword";
+        let routeHeader = "GET /user/newpassword";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -348,7 +353,7 @@ module.exports = (globals) => {
 
                 globals.logger.debug( `${routeHeader} :: Does not need new password :: END`);
 
-                return res.redirect('/users/login');
+                return res.redirect('/user/login');
             } else {
                 globals.logger.debug( `${routeHeader} :: Show change password form :: END`);
 
@@ -363,10 +368,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-     // users/newpassword
+     // user/newpassword
     .post('/newpassword', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "POST /users/newpassword";
+        let routeHeader = "POST /user/newpassword";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -441,10 +446,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-     // users/confirm/:id/:token
+     // user/confirm/:id/:token
     .get('/confirm/:id/:token', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /users/confirm/:id/:token";
+        let routeHeader = "GET /user/confirm/:id/:token";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -483,7 +488,7 @@ module.exports = (globals) => {
                     globals.logger.debug( `${routeHeader} :: SESSION SET :: ${req.session}`);
 
                     //success
-                    return res.redirect('/users/newpassword');
+                    return res.redirect('/user/newpassword');
                 } else {
                     globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
 
@@ -497,10 +502,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // users/:id operations
+    // user/:id operations
     .get('/:id', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /users/:id";
+        let routeHeader = "GET /user/:id";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN` );
@@ -514,7 +519,7 @@ module.exports = (globals) => {
                     return next(err);
                 }
 
-                globals.logger.debug(`GET /users/:id :: user.id: ${req.params.id}`, user);
+                globals.logger.debug(`GET /user/:id :: user.id: ${req.params.id}`, user);
 
                 globals.logger.debug( `${routeHeader} :: END` );
 
@@ -527,7 +532,7 @@ module.exports = (globals) => {
     })
     .put('/:id', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "PUT /users/:id ";
+        let routeHeader = "PUT /user/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -559,7 +564,7 @@ module.exports = (globals) => {
     })
     .delete('/:id', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "DELETE /users/:id ";
+        let routeHeader = "DELETE /user/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );

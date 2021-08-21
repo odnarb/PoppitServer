@@ -1,47 +1,22 @@
 /*
-    DBAL for User
+    DBAL for Users
 */
 
-const TABLE_NAME = "user";
-const MODEL_NAME = "User";
-const OBJECT_NAME = "user";
-
-const VALID_COLS_MASS = [
-    "user_type_id",
-    "language_id",
-    "active",
-    "first_name",
-    "last_name",
-    "email_address",
-    "phone",
-    "profession",
-    "address1",
-    "address2",
-    "city",
-    "state_province",
-    "country",
-    "country_code",
-    "postal_code",
-    "profile_picture",
-    "password_hash",
-    "verified",
-    "data",
-    "update_user_id",
-    "create_user_id"
-];
+const TABLE_NAME = "users";
+const MODEL_NAME = "Users";
+const OBJECT_NAME = "users";
 
 const VALID_COLS = [
+    "id",
     "user_type_id",
-    "language_id",
-    "active",
+    "is_admin",
+    "is_support",
     "first_name",
     "last_name",
-    "gender",
-    "needs_pw_change",
-    "forgot_password_token",
     "email_address",
     "phone",
     "profession",
+    "gender",
     "address1",
     "address2",
     "city",
@@ -50,40 +25,26 @@ const VALID_COLS = [
     "country_code",
     "postal_code",
     "profile_picture",
-    "password_hash",
     "verified",
+    "needs_pw_change",
+    "password_hash",
+    "forgot_password_token",
     "invite_token",
+    "registration_type",
+    "notifications",
+    "active",
     "data",
     "update_user_id",
-    "create_user_id"
-];
-const VALID_FILTER_COLS = [
-    "user_type_id",
-    "language_id",
-    "active",
-    "first_name",
-    "last_name",
-    "email_address",
-    "phone",
-    "profession",
-    "address1",
-    "address2",
-    "city",
-    "state_province",
-    "country",
-    "country_code",
-    "postal_code",
-    "profile_picture",
-    "verified",
-    "update_user_id",
-    "create_user_id"
+    "updated_at",
+    "create_user_id",
+    "created_at"
 ];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class User {
+class Users {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -142,7 +103,7 @@ class User {
         let colErrors = [];
         if( Object.keys(opts.where).length > 0 ) {
             Object.keys(opts.where).filter(el => {
-                if( VALID_FILTER_COLS.indexOf(el) < 0 ){
+                if( VALID_COLS.indexOf(el) < 0 ){
                     colErrors.push({ "invalid_col": el });
                 }
             });
@@ -162,7 +123,7 @@ class User {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let cols = `${IDENTITY_COL},${VALID_COLS_MASS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
             let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
@@ -201,7 +162,7 @@ class User {
             cb({ error_type: "user", error: "A valid id or email_address must be passed in" });
         } else {
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr;
             if(opts.id) {
                 sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} WHERE id=${parseInt(opts.id)}`;
@@ -524,7 +485,7 @@ class User {
         let updateStr = `UPDATE ${TABLE_NAME} SET invite_token='', verified = 1 `;
         updateStr += `WHERE ${IDENTITY_COL} = ${this.dbescape(obj.id)} AND invite_token = ${this.dbescape(obj.token)} AND active = 1;`;
 
-        let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+        let cols = VALID_COLS.join(',');
         let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(obj.id)} LIMIT 1;`;
 
         updateStr = `${updateStr}${sqlStr}`;
@@ -586,7 +547,7 @@ class User {
             let sqlStr = `UPDATE ${TABLE_NAME} SET ${updateStr} `;
             sqlStr += `where ${IDENTITY_COL} = ${this.dbescape(vals.id)};`;
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let userSqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(vals.id)} LIMIT 1;`;
 
             let finalSqlStr = `${sqlStr}${userSqlStr}`;
@@ -634,4 +595,4 @@ class User {
     }
 }
 
-module.exports = User;
+module.exports = Users;

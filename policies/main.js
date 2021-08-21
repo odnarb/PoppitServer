@@ -7,7 +7,7 @@ module.exports = (globals) => {
         // const allowUrls = [
         // ];
 
-        // globals.logger.info("main policy :: METHOD: ", req.method);
+        globals.logger.info("main policy :: METHOD: ", req.method);
 
         if (!allowedMethods.includes(req.method)) {
             return res.sendStatus(404);
@@ -38,17 +38,22 @@ module.exports = (globals) => {
         }
 
         if( allowRequest ) {
+            globals.logger.info("main policy :: allowRequest ");
             next();
 
         // check session... show login or show dashboard
         } else if( req.url !== '/user/login' && req.session.isLoggedIn ){
+            globals.logger.info("main policy :: allow page ");
             next();
 
         // user needs to login
         } else if( req.url !== '/user/login' && req.session.isLoggedIn === undefined || req.session.isLoggedIn === false ) {
+            globals.logger.info("main policy :: show login , req.url == ", req.url);
+
             return res.redirect('/user/login');
         // user is logging in
         } else {
+            globals.logger.info("main policy :: user is logging in ");
             next();
         }
     };

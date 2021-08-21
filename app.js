@@ -207,17 +207,17 @@ let main = require('./routes/main.js')(globals);
 app.use('/', main);
 
 
-let users = require('./routes/users.js')(globals);
-app.use('/users', users);
+let user = require('./routes/user.js')(globals);
+app.use('/user', user);
 
 let appuser = require('./routes/appuser.js')(globals);
 app.use('/appuser', appuser);
 
-let campaign = require('./routes/campaign.js')(globals);
-app.use('/campaign', campaign);
+let campaigns = require('./routes/campaigns.js')(globals);
+app.use('/campaigns', campaigns);
 
-let location = require('./routes/location.js')(globals);
-app.use('/location', location);
+let locations = require('./routes/locations.js')(globals);
+app.use('/locations', locations);
 
 //handle 404's
 app.use( (req, res, next) => {

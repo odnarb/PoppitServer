@@ -1,5 +1,5 @@
 {
-  "name": "DivDesignsAppServer",
+  "name": "PoppitAppServer",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -32,5 +32,5 @@
     "lint": "jshint **.js models/*.js routes/*.js policies/*.js lib/*.js"
   },
   "author": "Brandon Chambers",
-  "license": "Copyright 2020 Brandon Chambers - All rights reserved."
+  "license": "Copyright 2021 Brandon Chambers - All rights reserved."
 }
