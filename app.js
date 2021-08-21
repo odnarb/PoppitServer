@@ -1,3 +1,5 @@
+// require('newrelic');
+
 /*
 *
 * Server for app dashboard
@@ -7,13 +9,15 @@
 //get the args starting at position 2 (node app.js --port 3000)
 const args = require('minimist')(process.argv.slice(2));
 
+//load env vars from .env file
+require('dotenv').config();
+
 //get the log level, depending on what's passed
-let level = { loglevel: args.loglevel || 'debug' };
+const level = { loglevel: process.env.LOG_LEVEL || 'debug' };
 
 const
     globals = require('./lib/globals.js')(level),
     express = require('express'),
-    dotenv = require('dotenv'),
     _ = require('lodash'),
     mysql = require('mysql'),
     moment = require('moment'),
@@ -31,9 +35,6 @@ const
 const app = express();
 const eventEmitter = new events.EventEmitter();
 const router = express.Router();
-
-//load env vars from .env file
-dotenv.config();
 
 //csrf options
 const csrfMiddleware = csrf({
@@ -84,6 +85,14 @@ connection.connect( (err) => {
     eventEmitter.emit('mysqlReady');
 });
 
+connection.on('error', (err) => {
+    logger.error("DB ERROR: ", err)
+    if(err.code === "PROTOCOL_CONNECTION_LOST"){
+        logger.error("Terminating process...")
+        process.exit(-1)
+    }
+});
+
 //////////////////////////////////////////////////////////////////
 // EXPRESS SETUP
 //////////////////////////////////////////////////////////////////
@@ -105,10 +114,21 @@ app.set('view engine', 'ejs');
 app.set('layout', './layout.ejs');
 
 //where are the static assets?
+    //I've tested this and if an asset exists, the file is served directly
+    // without any policies being applied, but if it does not, the asset request
+    // flows next through the policy chain and routes
 app.use(express.static('public'));
 
 //set the favicon
-app.use(favicon(path.join(__dirname, 'public', 'assets', 'favicon.png')))
+app.use(favicon(path.join(__dirname, 'public', process.env.APP_FAVICON )))
+
+// Ensures that the content-type for SNS messages
+app.use(function(req, res, next) {
+    if (req.get("x-amz-sns-message-type")) {
+      req.headers["content-type"] = "application/json"; //IMPORTANT, otherwise content-type is text for topic confirmation reponse, and body is empty
+    }
+    next();
+});
 
 //Don't need to do parsing just yet..
 app.use(bodyParser.json()); // support json encoded bodies
@@ -122,7 +142,7 @@ let redis_config = {
 };
 
 //setup session
-let session_secret = "fdsklgf890-gdf890-fsdf9f-fd888vcx89fsdgjaskjksdjksdkfjdsf"
+const session_secret = "fdsk4f7b787fdslgf890-fsdf9f-fd888vcx89fs"
 app.use(session({
     genid: (req) => {
         return uuid.v4();
@@ -151,8 +171,8 @@ app.use(cookieParser());
 app.use(csrfMiddleware);
 
 //apply our router function to ALL methods defined in router
-let policyFilter = require('./policies/main.js')(globals);
-app.use(policyFilter);
+let mainPolicy = require('./policies/main.js')(globals);
+app.use(mainPolicy);
 
 //set some local variables to boot, so routes and views can access
 app.use( (req,res,next) => {

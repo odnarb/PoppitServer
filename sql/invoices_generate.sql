@@ -1,6 +1,4 @@
 -- invoices_generate()
-DROP PROCEDURE IF EXISTS invoices_generate;
-
 DELIMITER //
 CREATE PROCEDURE invoices_generate(IN o_packet JSON)
 BEGIN

@@ -22,7 +22,7 @@ module.exports = (globals) => {
 
             globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
 
-            if(req.session.user.admin === 1){
+            if(req.session.user.is_admin === 1){
                 globals.logger.debug( `${routeHeader} :: BEFORE CompanyUser.findOne() :: company id: ${req.params.id}` );
 
                 CompanyUser.findOne({ email_address: req.params.id }, (err, dbRes) => {
@@ -288,12 +288,12 @@ module.exports = (globals) => {
                 //now send some emails
                 globals.logger.info( `${routeHeader} :: Send registration email...` );
 
-                let regEmail = globals.admin_registration_email({ user: createParams })
+                let regEmail = globals.is_admin_registration_email({ user: createParams })
 
                 //send regristration email
                 let email = {
                     to: createParams.email_address,
-                    from: `${process.env.ADMIN_EMAIL}`,
+                    from: `${process.env.is_admin_EMAIL}`,
                     subject: `[${process.env.APP_NAME}] New User Registered`,
                     html: regEmail.html,
                     text: regEmail.text
@@ -311,7 +311,7 @@ module.exports = (globals) => {
 
                 email = {
                     to: createParams.email_address,
-                    from: `${process.env.ADMIN_EMAIL}`,
+                    from: `${process.env.is_admin_EMAIL}`,
                     subject: `[${process.env.APP_NAME}] Registration Confirm`,
                     html: regUserEmail.html,
                     text: regUserEmail.text

@@ -1,0 +1,17 @@
+default-character-set=utf8mb4
+default-collation=utf8mb4_0900_ai_ci
+generator=skeema:1.5.0-community
+flavor=mysql:8.0
+port=3306
+allow-auto-inc=int
+
+[local]
+allow-unsafe
+skip-format
+skip-alter-wrapper
+skip-alter-algorithm
+skip-alter-lock
+host=127.0.0.1
+user=poppit
+schema=poppit
+password=poppit

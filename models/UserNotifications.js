@@ -1,19 +1,47 @@
 /*
-    DBAL for Invoices
+    DBAL for UserNotifications
 */
 
-const TABLE_NAME = "company_invoices";
-const MODEL_NAME = "Invoice";
-const OBJECT_NAME = "invoice";
+const TABLE_NAME = "user_notifications";
+const MODEL_NAME = "UserNotifications";
+const OBJECT_NAME = "user_notification";
 
-const VALID_COLS = ["company_id","num_locations","num_campaigns","notes","date_start","date_end","amount"];
-const VALID_FILTER_COLS = ["company_id","num_locations","num_campaigns","notes","date_start","date_end","amount"];
+const VALID_COLS = [
+    "user_id",
+    "notification_type_id",
+    "notification_method_id",
+    "to_email",
+    "from_email",
+    "subject",
+    "body_html",
+    "body_text",
+    "status",
+    "status_detail",
+    "data",
+    "update_user_id",
+    "create_user_id"
+];
+const VALID_FILTER_COLS = [
+    "user_id",
+    "notification_type_id",
+    "notification_method_id",
+    "to_email",
+    "from_email",
+    "subject",
+    "body_html",
+    "body_text",
+    "status",
+    "status_detail",
+    "data",
+    "update_user_id",
+    "create_user_id"
+];
 
 const IDENTITY_COL = "id";
 const CREATED_AT_COL = "created_at";
 const UPDATED_AT_COL = "updated_at";
 
-class Invoice {
+class UserNotifications {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -21,8 +49,7 @@ class Invoice {
         this.dbescape = globals.dbescape;
     }
 
-    find(opts,cb){
-
+    find(opts, cb) {
         this.globals.logger.debug(`${MODEL_NAME}.find() :: BEFORE opts initialized: `, opts);
 
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
@@ -147,42 +174,75 @@ class Invoice {
     }
 
     create(obj, cb){
-        //TODO: POP-168.. this poisons the data field
-        obj.data = {};
-
-        //need more resilience: send back which columns are invalid?
-        let colErrors = [];
-
-        let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
-
-        //START remove sensitive data
-        //TODO: POP-168x
-        let search_index = local_valid_cols.indexOf("data");
-        if (search_index > -1) {
-            local_valid_cols.splice(search_index, 1);
+        if ( obj instanceof Array && obj.length === 0 ) {
+            return cb({ error_type: "user", "error": "Notifications array is empty" });
         }
 
-        //TODO: POP-168
-        delete obj.data;
+        let colErrors = [];
+        let local_valid_cols = JSON.parse( JSON.stringify( VALID_COLS ) );
 
-        //END remove sensitive data
+        //json to  col -> val
+        let colsStr = "", valsStr = "", sqlStr = "", colsStrExample = ""
 
-        Object.keys(obj).filter(el => {
+        //START COLUMN GENERATION
+
+        //detect bad cols from a sample, either the object or an item from the array
+        let sample = obj
+        if ( obj instanceof Array && obj.length > 0 ) {
+            sample = obj[0]
+        }
+
+        Object.keys(sample).filter(el => {
             if( local_valid_cols.indexOf(el) < 0 ){
-                colErrors.push({ "invalid_col": el });
+                colErrors.push({ "invalid_col": el })
             }
+        })
+        if( colErrors.length > 0 ){
+            return cb({ error_type: "user", "error": colErrors });
+        }
+
+        //move on to create the col string
+        Object.keys(sample).map( (col) => {
+            colsStr += `\`${this.dbescape(col)}\`,`;
+            colsStrExample += `\`${this.dbescape(col)}\`,`;
         });
 
-        if( colErrors.length > 0 ){
-            cb({ error_type: "user", "error": colErrors });
-        } else {
-            //json to  col -> val
-            let colsStr = "";
-            let valsStr = "";
+        //remove the last comma
+        colsStr = colsStr.slice(0,-1);
 
-            Object.keys( obj ).map( (col) => {
-                colsStr += `${this.dbescape(col)},`;
-            });
+        //remove quotes around columns
+        colsStr = colsStr.replace(/\'/g, "");
+
+        //END COLUMN GENERATION
+
+        if ( obj instanceof Array && obj.length > 0 ) {
+            obj.forEach( (n,i) => {
+                //first check the cols match
+                let colsStr = ""
+                Object.keys(sample).map( (col) => {
+                    colsStr += `\`${this.dbescape(col)}\`,`;
+                });
+                if( colsStr !== colsStrExample ){
+                    return cb({ error_type: "user", "error": `Columns at [${i}] differ from the first column set in the array.` });
+                }
+
+                valsStr += "("
+
+                //get the vals
+                Object.keys(n).map( (col) => {
+                    valsStr += `${this.dbescape(n[col])},`;
+                });
+
+                //remove the last comma per item
+                valsStr = valsStr.slice(0,-1);
+
+                valsStr += "),"
+            })
+
+            //remove the last comma
+            valsStr = valsStr.slice(0,-1);
+        } else {
+            valsStr += "("
 
             Object.keys( obj ).map( (col) => {
                 valsStr += `${this.dbescape(obj[col])},`;
@@ -190,26 +250,22 @@ class Invoice {
 
             //remove the last comma
             valsStr = valsStr.slice(0,-1);
-            colsStr = colsStr.slice(0,-1);
 
-            //remove quotes around columns
-            colsStr = colsStr.replace(/\'/g, "");
-
-            let sqlStr = `INSERT INTO ${TABLE_NAME} (${colsStr}) `;
-            sqlStr += `VALUES (${valsStr});`;
-
-            this.globals.logger.debug(`${MODEL_NAME}.create() sqlStr: ${sqlStr}`);
-
-            this.execSQL(this.db, sqlStr, (error, result) => {
-                if (error) {
-                    this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
-                    cb({ error_type: "system", error: "A system error has occurred, please contact support" });
-                } else {
-                    this.globals.logger.debug(`${MODEL_NAME}.create() result?: `, result.insertId);
-                    cb(null,result.insertId);
-                }
-            });
+            valsStr += ")"
         }
+
+        sqlStr = `INSERT INTO ${TABLE_NAME} (${colsStr}) `;
+        sqlStr += `VALUES ${valsStr};`;
+
+        this.execSQL(this.db, sqlStr, (error, result) => {
+            if (error) {
+                this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
+                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
+            } else {
+                this.globals.logger.debug(`${MODEL_NAME}.create() result?: `, result.insertId);
+                cb(null,result.insertId);
+            }
+        });
     }
 
     update(vals, cb){
@@ -268,26 +324,6 @@ class Invoice {
             }
         });
     }
-
-/*
-    generate(cb){
-
-        // let sqlStr = `CALL invoices_generate('${JSON.stringify(obj)}');`;
-        let sqlStr = `CALL invoices_generate();`;
-
-        this.globals.logger.debug(`${MODEL_NAME}.generate() sqlStr: ${sqlStr}`);
-
-        this.execSQL(this.db, sqlStr, (error, result) => {
-            if (error) {
-                this.globals.logger.error(`${MODEL_NAME}.generate() :: ERROR : `, error);
-                cb({ error_type: "system", error: "A system error has occurred, please contact support" });
-            } else {
-                this.globals.logger.debug(`${MODEL_NAME}.generate() result?: `, result);
-                cb(null, result);
-            }
-        });
-    }
-*/
 }
 
-module.exports = Invoice;
+module.exports = UserNotifications;

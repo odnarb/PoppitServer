@@ -19,7 +19,7 @@ module.exports = (globals) => {
 
             globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
 
-            if(req.session.user.admin === 1){
+            if(req.session.user.is_admin === 1){
                 globals.logger.debug( `${routeHeader} :: BEFORE Company.findOne() :: company id: ${req.params.id}` );
 
                 Company.findOne({ id: parseInt(req.params.id) }, (err, dbRes) => {

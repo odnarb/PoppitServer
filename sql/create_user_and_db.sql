@@ -1,8 +1,16 @@
-DROP USER IF EXISTS __DB_NAME__;
-DROP DATABASE IF EXISTS __DB_NAME__;
-CREATE DATABASE __DB_NAME__;
-CREATE USER '__DB_USER__'@'%' IDENTIFIED BY '__DB_PASSWORD__';
-GRANT ALL PRIVILEGES ON __DB_NAME__.* TO '__DB_USER__'@'%';
+/*
+DROP USER IF EXISTS 'poppit'@'localhost';
+DROP USER IF EXISTS 'poppit'@'%';
+
+DROP DATABASE IF EXISTS poppit;
+CREATE DATABASE poppit;
+
+CREATE USER 'poppit'@'localhost' IDENTIFIED WITH mysql_native_password BY 'poppit';
+GRANT ALL PRIVILEGES ON poppit.* TO 'poppit'@'localhost';
+GRANT ALL PRIVILEGES ON _skeema_tmp.* TO 'poppit'@'localhost';
+
+CREATE USER 'poppit'@'%' IDENTIFIED WITH mysql_native_password BY 'poppit';
+GRANT ALL PRIVILEGES ON poppit.* TO 'poppit'@'%';
 
 FLUSH PRIVILEGES;
-USE __DB_NAME__;
+*/
