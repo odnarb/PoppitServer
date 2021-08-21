@@ -101,7 +101,7 @@ var KTLoginGeneral = function() {
             btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
 
             form.ajaxSubmit({
-                url: '/companyuser/newpassword',
+                url: '/user/newpassword',
                 dataType : 'json', // data type
                 data : form.serialize(),
                 success: function(response, status, xhr, $form) {
@@ -114,7 +114,7 @@ var KTLoginGeneral = function() {
                     }
                 },
                 error: function(){
-                    window.location = "/companyuser/login";
+                    window.location = "/user/login";
                 }
             });
         });
@@ -146,7 +146,7 @@ var KTLoginGeneral = function() {
             btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
 
             form.ajaxSubmit({
-                url: '/companyuser/login',
+                url: '/user/login',
                 dataType : 'json', // data type
                 data : form.serialize(),
                 success: function(response, status, xhr, $form) {

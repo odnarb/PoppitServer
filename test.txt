@@ -1,0 +1,12 @@
++----------------------+
+| Tables_in_poppit     |
++----------------------+
+| campaigns            |
+| games                |
+| user_account_history |
+| user_analytics       |
+| user_locations       |
+| user_rewards         |
+| user_type            |
+| users                |
++----------------------+

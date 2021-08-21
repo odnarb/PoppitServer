@@ -47,49 +47,49 @@ let initChangeCompanyContext = function(){
 }
 
 let initChangeUserContext = function(){
-    $('#companyuser_context_reset').click( function(e){
+    $('#user_context_reset').click( function(e){
         e.preventDefault();
 
-        $('.show-companyuser-context-details').html('');
-        $('.set-companyuser-context').show();
-        $('.show-companyuser-context').hide();
+        $('.show-user-context-details').html('');
+        $('.set-user-context').show();
+        $('.show-user-context').hide();
     });
 
-    $('#companyuser_context_submit').click( function(e){
+    $('#user_context_submit').click( function(e){
         e.preventDefault();
 
         var validUser = false
-        var companyuser_id = $('.set-companyuser-context input').val();
-        if( companyuser_id !== '' ){
+        var user_id = $('.set-user-context input').val();
+        if( user_id !== '' ){
             validUser = true
         }
 
         if(validUser){
             $.ajax({
                 method: "GET",
-                url: `/companyuser/setcontext/${companyuser_id}?_csrf=${window._csrf}`,
+                url: `/user/setcontext/${user_id}?_csrf=${window._csrf}`,
                 success: function(res) {
                     console.log("User context res: ", res)
 
                     if(res.success === true) {
-                        $('.show-companyuser-context-details').html(`${res.companyuser.name} (id:${res.companyuser.id})`);
-                        $('.set-companyuser-context').hide();
-                        $('.show-companyuser-context').show();
-                        $('.set-companyuser-context input').removeClass('is-invalid');
+                        $('.show-user-context-details').html(`${res.user.name} (id:${res.user.id})`);
+                        $('.set-user-context').hide();
+                        $('.show-user-context').show();
+                        $('.set-user-context input').removeClass('is-invalid');
                     } else {
-                        $('.set-companyuser-context input').addClass('is-invalid');
+                        $('.set-user-context input').addClass('is-invalid');
                     }
                 },
                 error: function(e) {
-                    $('.set-companyuser-context').show();
-                    $('.show-companyuser-context').hide();
-                    $('.set-companyuser-context input').addClass('is-invalid');
+                    $('.set-user-context').show();
+                    $('.show-user-context').hide();
+                    $('.set-user-context input').addClass('is-invalid');
                 }
             });
         } else {
-            $('.set-companyuser-context').show();
-            $('.show-companyuser-context').hide();
-            $('.set-companyuser-context input').addClass('is-invalid');
+            $('.set-user-context').show();
+            $('.show-user-context').hide();
+            $('.set-user-context input').addClass('is-invalid');
         }
     });
 }
