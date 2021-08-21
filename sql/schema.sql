@@ -17,6 +17,34 @@ SET FOREIGN_KEY_CHECKS=1; -- to re-enable them
 -- some hard-coded data
 /*
 
+
+INSERT INTO `notification_types` (
+    `description`,
+    `update_user_id`,
+    `updated_at`,
+    `create_user_id`,
+    `created_at`
+)
+VALUES
+('registration',0,now(),0,now()),
+('billing',0,now(),0,now()),
+('forgot_password',0,now(),0,now());
+
+
+INSERT INTO `notification_methods` (
+    `description`,
+    `update_user_id`,
+    `updated_at`,
+    `create_user_id`,
+    `created_at`
+)
+VALUES
+('sms',0,now(),0,now()),
+('fb_messenger',0,now(),0,now()),
+('whatsapp',0,now(),0,now()),
+('email',0,now(),0,now());
+
+
 INSERT INTO `user_type`
 (
     `user_type_name`,

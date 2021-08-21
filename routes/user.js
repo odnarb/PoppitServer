@@ -7,6 +7,7 @@ const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 
 let UsersModel = require('../models/Users');
+let UserNotificationsModel = require('../models/UserNotifications');
 
 module.exports = (globals) => {
     return router
@@ -557,6 +558,121 @@ module.exports = (globals) => {
                 globals.logger.info( routeHeader  + " :: END" );
                 return res.json({ success: true, user: user });
             });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .get('/forgotpassword/:id/:token', (req,res,next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /forgotpassword/:id/:token";
+
+        globals.logger.debug(`${routeHeader} :: req.params: `, req.params);
+
+        //check id && token, and set to needs pw change for
+            //this session until the pw change has taken place
+        if( req.params.id !== '' && req.params.token !== '' ){
+            let opts = {
+                id: parseInt( req.params.id ),
+                token: req.params.token
+            }
+            Users.findForgotPW(opts, (err, dbRes) => {
+                if(err){
+                    globals.logger.debug( `${routeHeader} :: DB user.login() error: `, err);
+                    return res.status(500).json({reason: "server_error"});
+                }
+
+                globals.logger.debug(`${routeHeader} :: dbRes`, dbRes);
+
+                if( dbRes === undefined || dbRes.id <= 0 ) {
+                    globals.logger.debug(`${routeHeader} :: ForgotPW dbRes is undefined.. redirecting..`);
+                    return res.redirect('/')
+                }
+
+                //set some parameters to remember this user while resetting their password
+                req.session.isLoggedIn = false;
+                req.session.user_id = dbRes.id
+                req.session.needsNewpassword = true;
+
+                globals.logger.debug(`${routeHeader} :: req.session: `, req.session);
+
+                return res.redirect('/user/newpassword')
+            })
+        }
+    })
+    // user/forgotpassword
+    .post('/forgotpassword', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let userNotification = new UserNotificationsModel( globals );
+        let routeHeader = "POST /user/forgotpassword";
+
+        try {
+
+            globals.logger.debug( `${routeHeader} :: req.body `, req.body);
+
+            let email_address = req.body.email || ""
+
+            if( email_address !== "" ){
+                //try to find it and generate a forgot pw token
+                let opts = {
+                    email_address: email_address.toLowerCase()
+                }
+                Users.forgotPW( opts, (err, dbRes) => {
+                    if(err){
+                        globals.logger.debug( `${routeHeader} :: DB user.login() error: `, err);
+                        return res.status(500).json({reason: "server_error"});
+                    }
+
+                    globals.logger.debug(`${routeHeader} :: user.forgotPW() :: dbRes`, dbRes);
+
+                    if( dbRes.user_id !== undefined
+                        && dbRes !== ''
+                        && dbRes.forgot_password_token !== undefined
+                        && dbRes.forgot_password_token !== '')
+                    {
+                        let opts = {
+                            id: dbRes.user_id,
+                            token: dbRes.forgot_password_token
+                        }
+                        let forgotPWEmail = globals.forgotpw_email(opts)
+
+                        notification = {
+                            user_id: dbRes.user_id,
+                            notification_type_id: globals.NOTIFICATION_TYPES.forgot_password,
+                            notification_method_id: globals.NOTIFICATION_METHODS.email,
+                            status: globals.NOTIFICATION_STATUS.PENDING,
+                            status_detail: "",
+                            to_email: dbRes.email_address,
+                            from_email: `${process.env.APP_NAME} Admin <${process.env.ADMIN_EMAIL_FROM}>`,
+                            subject: `[${process.env.APP_NAME}] Reset Password`,
+                            body_html: forgotPWEmail.html,
+                            body_text: forgotPWEmail.text,
+                            update_user_id: dbRes.user_id,
+                            create_user_id: dbRes.user_id
+                        }
+
+                        globals.logger.debug(`${routeHeader} :: Forgot PW email :: email: `, notification);
+
+                        // create a record in the user_notifications table
+                        userNotification.create(notification, (err, _userNotifications) => {
+                            if(err && err.error_type == "user") {
+                                globals.logger.error(`${routeHeader} :: user db error: `, err );
+                                return res.json({ success: false })
+                            } else if(err) {
+                                globals.logger.error(`${routeHeader} :: system db error: `, err );
+                                return res.json({ success: false })
+                            } else {
+                                return res.json({ success: true })
+                            }
+                        });
+                    } else {
+                        return res.json({ success: false })
+                    }
+                })
+            } else {
+                globals.logger.debug( `${routeHeader} :: failed..`, );
+                return res.json({ success: false })
+            }
         } catch( err ) {
             globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
             return next(err);
