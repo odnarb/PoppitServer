@@ -174,6 +174,9 @@ app.use(csrfMiddleware);
 let mainPolicy = require('./policies/main.js')(globals);
 app.use(mainPolicy);
 
+let loadResLocalsPolicy = require('./policies/loadResLocals.js')(globals);
+app.use(loadResLocalsPolicy);
+
 //set some local variables to boot, so routes and views can access
 app.use( (req,res,next) => {
     req.app.locals.appName = process.env.APP_NAME;
@@ -205,7 +208,6 @@ app.use( (req,res,next) => {
 
 let main = require('./routes/main.js')(globals);
 app.use('/', main);
-
 
 let user = require('./routes/user.js')(globals);
 app.use('/user', user);

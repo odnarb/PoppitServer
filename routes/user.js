@@ -160,7 +160,7 @@ module.exports = (globals) => {
         let routeHeader = "POST /user/login";
 
         try {
-            globals.logger.debug( `${routeHeader} :: BEGIN`);
+            globals.logger.debug( `${routeHeader} :: BEGIN:`, req.originalUrl );
 
             if( !req.body ){
                 globals.logger.debug( `${routeHeader} :: ERR 1 `);

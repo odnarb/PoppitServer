@@ -1,7 +1,9 @@
 <%
     let formClass = "signin";
-    if (showForm == "newpassword") {
+    if (showForm === "newpassword") {
         formClass = "newpassword";
+    } else if (showForm === "signup") {
+        formClass = "signup";
     }
 %>
         <div class="kt-grid kt-grid--ver kt-grid--root">
@@ -124,3 +126,21 @@
                 </div>
             </div>
         </div>
+
+<!-- START TERMS MODAL -->
+<div class="modal fade" id="terms_and_conditions_modal" tabindex="-1" role="dialog" aria-labelledby="tc_title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+         <div class="modal-header">
+          <h5 class="modal-title" id="tc_title">Terms And Conditions</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="innerTerms">
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+<!-- END TERMS MODAL -->

@@ -1,59 +1,58 @@
 module.exports = (globals) => {
     return (req, res, next) => {
+        //quick health check
+        if( req.url == "/ping?health-check=1" ){
+            return res.json({ success: true })
+        }
+
         const routeHeader = "main() policy"
 
-        const allowedMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS'];
+        globals.logger.debug(`${routeHeader} :: --------------------- BEGIN`)
 
-        // const allowUrls = [
-        // ];
+        //init session vars and info
+        if( req.session.isLoggedIn === undefined ) {
+            req.session.isLoggedIn = false;
+        }
 
-        globals.logger.info("main policy :: METHOD: ", req.method);
+        globals.logger.debug(`${routeHeader} :: ${req.method}, ${req.url}`);
 
-        if (!allowedMethods.includes(req.method)) {
+        if ( globals.allowedMethods.includes(req.method) === false ) {
             return res.sendStatus(404);
         }
 
-        //if assets, allow through
-        let allowRequest = (
-            req.url.indexOf('/assets') > -1 ||
-            req.url.indexOf('/user/confirm') > -1 ||
-            req.url === '/user/logout' ||
-            req.url === '/user/newpassword' ||
-            req.url === '/appuser/login' ||
-            req.url === '/csrf'
-        );
-
-        if (req.method !== "GET") {
-          globals.logger.debug( `${routeHeader} :: Most likely a post method..no res.locals needed` )
-          next()
-        } else {
-          //this is a GET method, so we're most likely going to be rendering a view that needs res.locals
-          req.app.locals.appName    = process.env.APP_NAME;
-          req.app.locals.appRelease = process.env.APP_RELEASE;
-          req.app.locals.appEnv     = process.env.NODE_ENV;
-          // req.app.locals.sentryKey  = process.env.SENTRY_KEY;
-          req.app.locals.appLogo    = process.env.APP_LOGO;
-          req.app.locals.appIcon    = process.env.APP_ICON;
-          req.app.locals.url        = process.env.APP_URL;
-        }
-
-        if( allowRequest ) {
-            globals.logger.info("main policy :: allowRequest ");
+        if( globals.allowPassThruRequest(req.url) === true) {
+            globals.logger.debug(`${routeHeader} :: allowPassThruRequest TRUE`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
             next();
-
-        // check session... show login or show dashboard
-        } else if( req.url !== '/user/login' && req.session.isLoggedIn ){
-            globals.logger.info("main policy :: allow page ");
+        } else if( globals.loginPageRequest(req.url) === true ) {
+            globals.logger.debug(`${routeHeader} :: loginPageRequest TRUE`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
             next();
+        } else if( req.session.needsNewpassword === true ){
+            globals.logger.debug(`${routeHeader} :: needsNewpassword TRUE`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
+            //grab the query params and pass to the redirect
+            let queryStr = Object.keys(req.query).map(key => `${key}=${req.query[key]}`).join('&');
+            if( queryStr !== '' ){
+                queryStr = "?" + queryStr
+            }
+            res.redirect('/user/newpassword' + queryStr)
+        } else if( globals.loginPageRequest(req.url) === false && req.session.isLoggedIn === false ) {
+            //grab the query params and pass to the redirect
+            let queryStr = Object.keys(req.query).map(key => `${key}=${req.query[key]}`).join('&');
+            if( queryStr !== '' ){
+                queryStr = "?" + queryStr
+            }
+            globals.logger.debug(`${routeHeader} ::  REDIRECTING TO LOGIN PAGE (with queryStr?): `, queryStr)
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
+            res.redirect('/user/login' + queryStr)
+        } else if( globals.loginPageRequest(req.url) === false && req.session.isLoggedIn === true ){
+            globals.logger.debug("main policy :: ALLOW APP PAGES");
 
-        // user needs to login
-        } else if( req.url !== '/user/login' && req.session.isLoggedIn === undefined || req.session.isLoggedIn === false ) {
-            globals.logger.info("main policy :: show login , req.url == ", req.url);
-
-            return res.redirect('/user/login');
-        // user is logging in
+            next();
         } else {
-            globals.logger.info("main policy :: user is logging in ");
+            globals.logger.debug(`${routeHeader} :: USER IS LOGGING IN`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
             next();
         }
     };
