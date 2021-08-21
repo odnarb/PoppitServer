@@ -3,13 +3,13 @@
 let express = require('express');
 let router = express.Router();
 
-let LocationModel = require('../models/Locations');
+let UserLocationsModal = require('../models/UserLocations');
 
 module.exports = (globals) => {
     return router
     // /location (get all locations)
     .get('/', (req, res, next) => {
-        let Location = new LocationModel( globals );
+        let UserLocations = new UserLocationsModal( globals );
         let routeHeader = "GET /location (HTTP)";
 
         if( req.xhr == true ){
@@ -68,7 +68,7 @@ module.exports = (globals) => {
     })
     //create location
     .post('/', (req, res, next) => {
-        let Location = new LocationModel( globals );
+        let UserLocations = new UserLocationsModal( globals );
         let routeHeader = "POST /location";
 
         try {
@@ -86,7 +86,7 @@ module.exports = (globals) => {
                     return next(err);
                 }
 
-                globals.logger.info( `${routeHeader} :: Location created: ${new_location_id}` );
+                globals.logger.info( `${routeHeader} :: UserLocations created: ${new_location_id}` );
 
                 globals.logger.info( `${routeHeader} :: END` );
                 return res.json({ success: true, location_id: new_location_id });
@@ -98,7 +98,7 @@ module.exports = (globals) => {
     })
     // location/:id operations
     .get('/:id', (req, res, next) => {
-        let Location = new LocationModel( globals );
+        let UserLocations = new UserLocationsModal( globals );
         let routeHeader = "GET /location/:id";
 
         try {
@@ -125,7 +125,7 @@ module.exports = (globals) => {
         }
     })
     .put('/:id', (req, res, next) => {
-        let Location = new LocationModel( globals );
+        let UserLocations = new UserLocationsModal( globals );
         let routeHeader = "PUT /location/:id ";
 
         try {
@@ -156,7 +156,7 @@ module.exports = (globals) => {
         }
     })
     .delete('/:id', (req, res, next) => {
-        let Location = new LocationModel( globals );
+        let UserLocations = new UserLocationsModal( globals );
         let routeHeader = "DELETE /location/:id ";
 
         try {

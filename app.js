@@ -206,17 +206,12 @@ app.use( (req,res,next) => {
 let main = require('./routes/main.js')(globals);
 app.use('/', main);
 
-let companyinvoice = require('./routes/companyinvoice.js')(globals);
-app.use('/companyinvoice', companyinvoice);
 
-let companyuser = require('./routes/companyuser.js')(globals);
-app.use('/companyuser', companyuser);
+let users = require('./routes/users.js')(globals);
+app.use('/users', users);
 
 let appuser = require('./routes/appuser.js')(globals);
 app.use('/appuser', appuser);
-
-let company = require('./routes/company.js')(globals);
-app.use('/company', company);
 
 let campaign = require('./routes/campaign.js')(globals);
 app.use('/campaign', campaign);

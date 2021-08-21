@@ -1,4 +1,4 @@
-//companyuser routes
+//users routes
 
 let express = require('express');
 let router = express.Router();
@@ -6,14 +6,14 @@ let router = express.Router();
 const uuid = require('uuid');
 const bcrypt = require('bcrypt');
 
-let CompanyUserModel = require('../models/CompanyUsers');
+let UsersModel = require('../models/Users');
 
 module.exports = (globals) => {
     return router
     // /setcontext/:id
     .get('/setcontext/:id', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /companyuser/setcontext/:id";
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /users/setcontext/:id";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN` );
@@ -23,23 +23,23 @@ module.exports = (globals) => {
             globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
 
             if(req.session.user.is_admin === 1){
-                globals.logger.debug( `${routeHeader} :: BEFORE CompanyUser.findOne() :: company id: ${req.params.id}` );
+                globals.logger.debug( `${routeHeader} :: BEFORE Users.findOne() :: company id: ${req.params.id}` );
 
-                CompanyUser.findOne({ email_address: req.params.id }, (err, dbRes) => {
+                Users.findOne({ email_address: req.params.id }, (err, dbRes) => {
                     if(err){
                         res.status(500);
                         return next(err);
                     }
 
-                    globals.logger.debug( `${routeHeader} :: AFTER CompanyUser.findOne() :: dbRes:`, dbRes);
+                    globals.logger.debug( `${routeHeader} :: AFTER Users.findOne() :: dbRes:`, dbRes);
 
-                    globals.logger.debug( `${routeHeader} :: AFTER CompanyUser.findOne() :: req.session:`, req.session);
+                    globals.logger.debug( `${routeHeader} :: AFTER Users.findOne() :: req.session:`, req.session);
 
                     let context_res = { success: false }
                     if( dbRes !== undefined ){
-                        req.session.companyuser_context = dbRes;
+                        req.session.users_context = dbRes;
 
-                        globals.logger.debug( `${routeHeader} :: NEW req.session.companyuser_context:`, req.session.companyuser_context);
+                        globals.logger.debug( `${routeHeader} :: NEW req.session.users_context:`, req.session.users_context);
 
                         context_res.company = dbRes;
                         context_res.success = true;
@@ -58,13 +58,13 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // companyuser/ (get all users)
+    // users/ (get all users)
     .get('/', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /companyuser (HTTP)";
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /users (HTTP)";
 
         if( req.xhr == true ){
-            routeHeader = "GET /companyuser (XHR)";
+            routeHeader = "GET /users (XHR)";
 
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN :: filtered user list` );
@@ -79,7 +79,7 @@ module.exports = (globals) => {
                 if( params._ !== undefined ) delete params._;
 
                 //get users
-                CompanyUser.find(req.query, (err, dbresult) => {
+                Users.find(req.query, (err, dbresult) => {
 
                     let users = dbresult[0];
                     for(let i=0; i < users.length;i++) {
@@ -103,7 +103,7 @@ module.exports = (globals) => {
                         res.status(500);
                         return next(err);
                     } else if( err && err.error_type === "user"){
-                        globals.logger.debug( `${routeHeader} :: CompanyUser DB ERROR: `, err);
+                        globals.logger.debug( `${routeHeader} :: Users DB ERROR: `, err);
                         res.status(400);
                         return next(err);
                     }
@@ -123,7 +123,7 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/companyuser',{
+                return res.render('pages/users',{
                     pageTitle: "Search Company Users"
                 });
             } catch( err ) {
@@ -132,10 +132,10 @@ module.exports = (globals) => {
             }
         }
     })
-    // companyuser/login
+    // users/login
     .get('/login', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /companyuser/login";
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /users/login";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -153,11 +153,11 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // companyuser/login
+    // users/login
     .post('/login', (req, res, next) => {
 
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "POST /companyuser/login";
+        let Users = new UsersModel( globals );
+        let routeHeader = "POST /users/login";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN`);
@@ -171,9 +171,9 @@ module.exports = (globals) => {
             }
 
             let userEmail = { email_address: req.body.email };
-            CompanyUser.findOne(userEmail, (err,user) => {
+            Users.findOne(userEmail, (err,user) => {
                 if(err){
-                    globals.logger.debug( `${routeHeader} :: DB CompanyUser.find() error: `, err);
+                    globals.logger.debug( `${routeHeader} :: DB Users.find() error: `, err);
                     return res.status(500).json({reason: "server_error"});
                 }
 
@@ -191,7 +191,7 @@ module.exports = (globals) => {
                         return res.status(403).json({reason: "no_user"});
                     }
 
-                    globals.logger.info( `CompanyUser.id=${user.id} logged IN` );
+                    globals.logger.info( `Users.id=${user.id} logged IN` );
 
                     //remove the password_hash field before being saved to the session
                     delete user.password_hash;
@@ -206,7 +206,7 @@ module.exports = (globals) => {
                         } else {
                             req.session.cookie.maxAge = globals.COOKIE_MIN_AGE;
                         }
-                        globals.logger.info( `${routeHeader} :: CompanyUser.id=${user.id} logged IN` );
+                        globals.logger.info( `${routeHeader} :: Users.id=${user.id} logged IN` );
 
                         return res.json({ success: true });
                     });
@@ -221,10 +221,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // companyuser/logout
+    // users/logout
     .get('/logout', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /companyuser/logout";
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /users/logout";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -235,7 +235,7 @@ module.exports = (globals) => {
                 //delete the session
                 req.session.destroy()
 
-                return res.redirect('/companyuser/login');
+                return res.redirect('/users/login');
             } else {
                 return res.redirect('/');
             }
@@ -246,13 +246,13 @@ module.exports = (globals) => {
     })
     .post('/signup', (req, res, next) => {
         let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /companyuser/signup :: globals? ", gres );
-        return res.json({ page: 'POST /companyuser/signup'});
+        globals.logger.info( "POST /users/signup :: globals? ", gres );
+        return res.json({ page: 'POST /users/signup'});
     })
     // create user
     .post('/', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "POST /companyuser";
+        let Users = new UsersModel( globals );
+        let routeHeader = "POST /users";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -273,7 +273,7 @@ module.exports = (globals) => {
 
             delete createParams._csrf;
 
-            CompanyUser.create(createParams, (err, new_user_id) => {
+            Users.create(createParams, (err, new_user_id) => {
                 if(err && err.error_type == "user") {
                     res.status(400);
                     return next(err);
@@ -282,7 +282,7 @@ module.exports = (globals) => {
                     return next(err);
                 }
 
-                globals.logger.info( `${routeHeader} :: CompanyUser created: ${new_user_id}` );
+                globals.logger.info( `${routeHeader} :: Users created: ${new_user_id}` );
 
                 /*
                 //now send some emails
@@ -334,10 +334,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-     // companyuser/newpassword
+     // users/newpassword
     .get('/newpassword', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /companyuser/newpassword";
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /users/newpassword";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -348,7 +348,7 @@ module.exports = (globals) => {
 
                 globals.logger.debug( `${routeHeader} :: Does not need new password :: END`);
 
-                return res.redirect('/companyuser/login');
+                return res.redirect('/users/login');
             } else {
                 globals.logger.debug( `${routeHeader} :: Show change password form :: END`);
 
@@ -363,10 +363,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-     // companyuser/newpassword
+     // users/newpassword
     .post('/newpassword', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "POST /companyuser/newpassword";
+        let Users = new UsersModel( globals );
+        let routeHeader = "POST /users/newpassword";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -408,7 +408,7 @@ module.exports = (globals) => {
 
                  globals.logger.debug( `${routeHeader} :: before user update`, updateParams);
 
-                CompanyUser.update(updateParams, (err, dbres) => {
+                Users.update(updateParams, (err, dbres) => {
                     if(err){
                         res.status(500);
                         return next(err);
@@ -441,10 +441,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-     // companyuser/confirm/:id/:token
+     // users/confirm/:id/:token
     .get('/confirm/:id/:token', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /companyuser/confirm/:id/:token";
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /users/confirm/:id/:token";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -457,7 +457,7 @@ module.exports = (globals) => {
                 token: req.params.token
             };
 
-            CompanyUser.confirmRegistration(tokenParams, (err, dbres) => {
+            Users.confirmRegistration(tokenParams, (err, dbres) => {
                 globals.logger.debug( `${routeHeader} :: Back from db`);
 
                 if(err){
@@ -483,7 +483,7 @@ module.exports = (globals) => {
                     globals.logger.debug( `${routeHeader} :: SESSION SET :: ${req.session}`);
 
                     //success
-                    return res.redirect('/companyuser/newpassword');
+                    return res.redirect('/users/newpassword');
                 } else {
                     globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
 
@@ -497,10 +497,10 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // companyuser/:id operations
+    // users/:id operations
     .get('/:id', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "GET /companyuser/:id";
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /users/:id";
 
         try {
             globals.logger.debug( `${routeHeader} :: BEGIN` );
@@ -508,13 +508,13 @@ module.exports = (globals) => {
             globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
 
             //get user
-            CompanyUser.findOne({ id: parseInt(req.params.id) }, (err, user) => {
+            Users.findOne({ id: parseInt(req.params.id) }, (err, user) => {
                 if(err){
                     res.status(500);
                     return next(err);
                 }
 
-                globals.logger.debug(`GET /companyuser/:id :: user.id: ${req.params.id}`, user);
+                globals.logger.debug(`GET /users/:id :: user.id: ${req.params.id}`, user);
 
                 globals.logger.debug( `${routeHeader} :: END` );
 
@@ -526,8 +526,8 @@ module.exports = (globals) => {
         }
     })
     .put('/:id', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "PUT /companyuser/:id ";
+        let Users = new UsersModel( globals );
+        let routeHeader = "PUT /users/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
@@ -540,7 +540,7 @@ module.exports = (globals) => {
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
 
-            CompanyUser.update(updateParams, (err, dbres) => {
+            Users.update(updateParams, (err, dbres) => {
                 if(err){
                     res.status(500);
                     return next(err);
@@ -558,15 +558,15 @@ module.exports = (globals) => {
         }
     })
     .delete('/:id', (req, res, next) => {
-        let CompanyUser = new CompanyUserModel( globals );
-        let routeHeader = "DELETE /companyuser/:id ";
+        let Users = new UsersModel( globals );
+        let routeHeader = "DELETE /users/:id ";
 
         try {
             globals.logger.info( `${routeHeader} :: BEGIN` );
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
 
-            CompanyUser.delete( parseInt(req.params.id), (err, deleteRes) => {
+            Users.delete( parseInt(req.params.id), (err, deleteRes) => {
                 if(err){
                     res.status(500);
                     return next(err);
