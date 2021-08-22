@@ -1,7 +1,5 @@
 "use strict";
 
-var intlPhone
-
 // Class Definition
 var KTLoginGeneral = function() {
 
@@ -9,8 +7,8 @@ var KTLoginGeneral = function() {
 
     var showFormMsg = function(form, type, msg) {
         var alert = $('<div class="kt-alert kt-alert--outline alert alert-' + type + ' alert-dismissible" role="alert">\
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"></button>\
-            <p></p>\</div>');
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close"></button>\
+			<p></p>\</div>');
 
         if(form === null){
             form = $(".kt-login__logo")
@@ -25,13 +23,10 @@ var KTLoginGeneral = function() {
         alert.find('p').html(msg);
     }
 
-    const params = new URLSearchParams(window.location.search);
-
     var hideAllForms = function () {
         login.removeClass('kt-login--newpassword');
         login.removeClass('kt-login--forgot');
         login.removeClass('kt-login--signup');
-        login.removeClass('kt-login--signupP2');
         login.removeClass('kt-login--signin');
     }
 
@@ -48,13 +43,6 @@ var KTLoginGeneral = function() {
 
         login.addClass('kt-login--signup');
         KTUtil.animateClass(login.find('.kt-login__signup')[0], 'flipInX animated');
-    }
-
-    var displaySignUpFormP2 = function() {
-        hideAllForms()
-
-        login.addClass('kt-login--signupP2');
-        KTUtil.animateClass(login.find('.kt-login__signupP2')[0], 'flipInY animated');
     }
 
     var displaySignInForm = function() {
@@ -90,45 +78,7 @@ var KTLoginGeneral = function() {
             displaySignUpForm();
         });
 
-        $('#kt_login_signup_page2').click(function(e) {
-            e.preventDefault();
-
-            //validate form 1 and move on if the validation works
-            var form = $(this).closest('form');
-
-            form.validate({
-                rules: {
-                    first_name: {
-                        required: true
-                    },
-                    last_name: {
-                        required: true
-                    },
-                    gender: {
-                        required: true
-                    },
-                    email_address: {
-                        required: true,
-                        email: true
-                    },
-                    phone: {
-                        required: true
-                    }
-                }
-            });
-
-            if (!form.valid()) {
-                return;
-            } else {
-                displaySignUpFormP2();
-            }
-        });
-
         $('#kt_login_signup_cancel').click(function(e) {
-            e.preventDefault();
-            displaySignInForm();
-        });
-        $('#kt_login_signup_cancel2').click(function(e) {
             e.preventDefault();
             displaySignInForm();
         });
@@ -243,21 +193,18 @@ var KTLoginGeneral = function() {
             e.preventDefault();
             var btn = $(this);
             var form = $(this).closest('form');
-            var form2 = $("#kt_login_signup_page2").closest('form');
 
             form.validate({
                 rules: {
-                    language: {
+                    first_name: {
                         required: true
                     },
-                    city: {
+                    last_name: {
                         required: true
                     },
-                    state_province: {
-                        required: true
-                    },
-                    country: {
-                        required: true
+                    email_address: {
+                        required: true,
+                        email: true
                     },
                     password: {
                         required: true
@@ -290,20 +237,19 @@ var KTLoginGeneral = function() {
             let serializedData = $('.kt-login__signup .kt-form').serialize()
 
             let formData = Object.fromEntries(new URLSearchParams( serializedData ))
-            const params = new URLSearchParams(window.location.search);
 
-            formData.phone = intlPhone.getNumber()
+            console.log("signup form data: ", formData)
 
             form.ajaxSubmit({
                 url: '/user/signup',
+                headers: {
+                    'CSRF-Token': formData._csrf
+                },
                 data: formData,
                 success: function(response, status, xhr, $form) {
                     btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
                     form.clearForm();
                     form.validate().resetForm();
-
-                    form2.clearForm();
-                    form2.validate().resetForm();
 
                     // display signup form
                     displaySignInForm();
@@ -390,15 +336,11 @@ var KTLoginGeneral = function() {
 jQuery(document).ready(function() {
     KTLoginGeneral.init();
 
-    var phone = document.querySelector("input[name=phone]");
-    intlPhone = window.intlTelInput(phone, {
-        utilsScript: "/assets/telUtils.js",
-        separateDialCode: true
-    });
-
     //lazy load the terms.. only load when the modal is loaded
     let loadedTerms = false
     $("#terms_and_conditions_modal").on('shown.bs.modal', function(e) {
+        console.log("loadedTerms: ", loadedTerms)
+
         //update the modal content once
         if( loadedTerms === false ){
             $.ajax('/terms.html', {

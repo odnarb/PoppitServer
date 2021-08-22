@@ -36,11 +36,6 @@ const app = express();
 const eventEmitter = new events.EventEmitter();
 const router = express.Router();
 
-//csrf options
-const csrfMiddleware = csrf({
-    cookie: true
-});
-
 //setup redis
 const redis = require('redis');
 let redisStore = require('connect-redis')(session);
@@ -141,6 +136,13 @@ let redis_config = {
     // ttl: process.env.REDIS_TTL
 };
 
+app.use(cookieParser());
+// //csrf options
+const csrfMiddleware = csrf({
+    cookie: true
+});
+app.use(csrfMiddleware);
+
 //setup session
 const session_secret = "fdsk4f7b787fdslgf890-fsdf9f-fd888vcx89fs"
 app.use(session({
@@ -166,10 +168,6 @@ app.use(session({
     store: new redisStore(redis_config)
 }));
 
-app.use(cookieParser());
-
-app.use(csrfMiddleware);
-
 //apply our router function to ALL methods defined in router
 let mainPolicy = require('./policies/main.js')(globals);
 app.use(mainPolicy);
@@ -179,9 +177,9 @@ app.use(loadResLocalsPolicy);
 
 //set some local variables to boot, so routes and views can access
 app.use( (req,res,next) => {
-    req.app.locals.appName = process.env.APP_NAME;
-    req.app.locals.url = req.url;
-    req.app.locals._csrf = req.csrfToken();
+    res.locals.appName = process.env.APP_NAME;
+    res.locals.url = req.url;
+    res.locals._csrf = req.csrfToken();
 
     if( res.locals.error_status == undefined ){
         res.locals.error_status = ''

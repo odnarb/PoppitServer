@@ -1,0 +1,18 @@
+.iti__flag {background-image: url("/assets/images/flags.png");}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .iti__flag {background-image: url("/assets/images/flags@2x.png");}
+}
+
+.iti {
+  margin-top: 1.5rem;
+  width: 100%;
+}
+.iti--allow-dropdown .iti__flag-container,
+.iti--separate-dial-code .iti__flag-container {
+  padding-left: 0.25em;
+}
+.iti--allow-dropdown .iti__flag-container:hover .iti__selected-flag,
+.iti--separate-dial-code .iti__selected-flag {
+  background-color: rgba(0,0,0,0);
+}

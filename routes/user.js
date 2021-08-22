@@ -166,7 +166,7 @@ module.exports = (globals) => {
             if( !req.body ){
                 globals.logger.debug( `${routeHeader} :: ERR 1 `);
                 return res.status(400).json({reason: "no_params_sent"});
-            } else if (!req.body.email){
+            } else if (!req.body.email_address){
                 globals.logger.debug( `${routeHeader} :: ERR 2`);
 
                 return res.status(400).json({ reason: "no_email" });
@@ -176,7 +176,7 @@ module.exports = (globals) => {
                 return res.status(400).json({ reason: "no_password" });
             }
 
-            let userEmail = { email_address: req.body.email };
+            let userEmail = { email_address: req.body.email_address };
             Users.findOne(userEmail, (err,user) => {
                 if(err){
                     globals.logger.debug( `${routeHeader} :: DB Users.find() error: `, err);
@@ -185,7 +185,7 @@ module.exports = (globals) => {
 
                 //user not found at all
                 if ( user === undefined ){
-                    globals.logger.debug( `${routeHeader} :: user not found, login denied: `, req.body.email);
+                    globals.logger.debug( `${routeHeader} :: user not found, login denied: `, req.body.email_address);
                     return res.status(403).json({reason: "no_user"});
                 }
 
@@ -193,7 +193,7 @@ module.exports = (globals) => {
                     //only check if the passwords match
                     //user has not been activated
                     if( user.active == 0 ){
-                        globals.logger.debug( `${routeHeader} :: user inactive, login denied: `, req.body.email);
+                        globals.logger.debug( `${routeHeader} :: user inactive, login denied: `, req.body.email_address);
                         return res.status(403).json({reason: "no_user"});
                     }
 
