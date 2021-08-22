@@ -6,7 +6,7 @@
                         <!-- begin:: Header Topbar -->
                         <div class="kt-header__topbar">
 
-                        <% if( user.is_admin === 1 ){ %>
+                        <% if( user !== undefined && user.is_admin === 1 ){ %>
                             <div class="form-inline">
 
                                 <div class="company-context" style="padding: 10px;">

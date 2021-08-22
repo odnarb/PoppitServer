@@ -29,45 +29,53 @@ BEGIN
     -- user creation data
     DECLARE v_first_name VARCHAR(255) DEFAULT '';
     DECLARE v_last_name VARCHAR(255) DEFAULT '';
+    DECLARE v_phone VARCHAR(30) DEFAULT '';
     DECLARE v_gender VARCHAR(1) DEFAULT '';
     DECLARE v_email_address VARCHAR(255) DEFAULT '';
-    DECLARE v_phone VARCHAR(30) DEFAULT '';
-    DECLARE v_profession VARCHAR(80) DEFAULT '';
-    DECLARE i_language_id INT DEFAULT 1;
+    DECLARE v_address1 VARCHAR(500) DEFAULT '';
+    DECLARE v_address2 VARCHAR(500) DEFAULT '';
     DECLARE v_city VARCHAR(255) DEFAULT '';
     DECLARE v_state_province VARCHAR(255) DEFAULT '';
     DECLARE v_country VARCHAR(255) DEFAULT '';
     DECLARE v_country_code VARCHAR(255) DEFAULT '';
     DECLARE v_postal_code VARCHAR(255) DEFAULT '';
+    DECLARE v_profile_picture VARCHAR(255) DEFAULT '';
+
     DECLARE v_password_hash VARCHAR(255) DEFAULT '';
     DECLARE v_invite_token VARCHAR(255) DEFAULT '';
-    DECLARE i_user_type_id INT DEFAULT 1;
 
-    SET v_first_name = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.first_name'));
-    SET v_last_name = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.last_name'));
-    SET v_gender = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.gender'));
-    SET v_email_address = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.email_address'));
-    SET v_phone = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.phone'));
-    SET v_profession = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.profession'));
-    SET i_language_id = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.language_id'));
-    SET v_city = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.city'));
-    SET v_state_province = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.state_province'));
-    SET v_country = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.country'));
-    SET v_country_code = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.country_code'));
-    SET v_postal_code = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.postal_code'));
-    SET v_password_hash = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.password_hash'));
-    SET v_invite_token = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.invite_token'));
-    SET i_user_type_id = JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.user_type_id'));
+    DECLARE i_user_type_id INT DEFAULT 4;
+    DECLARE i_is_admin INT DEFAULT 0;
+    DECLARE i_is_support INT DEFAULT 0;
+
+    SET v_first_name      = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.first_name')),'');
+    SET v_last_name       = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.last_name')),'');
+    SET v_gender          = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.gender')),'');
+    SET v_email_address   = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.email_address')),'');
+    SET v_phone           = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.phone')), '');
+    SET v_address1        = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.address1')),'');
+    SET v_address2        = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.address2')),'');
+    SET v_city            = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.city')),'');
+    SET v_state_province  = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.state_province')),'');
+    SET v_country         = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.country')),'');
+    SET v_country_code    = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.country_code')),'');
+    SET v_postal_code     = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.postal_code')),'');
+    SET v_profile_picture = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.profile_picture')),'');
+    SET v_password_hash   = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.password_hash')),'');
+    SET v_invite_token    = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.invite_token')),'');
+    SET i_user_type_id    = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.user_type_id')),4);
+    SET i_is_admin        = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.is_admin')), 0);
+    SET i_is_support      = COALESCE(JSON_UNQUOTE(JSON_EXTRACT(o_user,'$.is_support')), 0);
 
   -- insert user into table
-    INSERT INTO `user` (
+    INSERT INTO `users` (
         `user_type_id`,
-        `language_id`,
+        `is_admin`,
+        `is_support`,
         `active`,
         `first_name`,
         `last_name`,
         `phone`,
-        `profession`,
         `gender`,
         `email_address`,
         `address1`,
@@ -81,22 +89,23 @@ BEGIN
         `verified`,
         `invite_token`,
         `data`,
+        `notifications`,
         `update_user_id`,
         `updated_at`,
         `create_user_id`,
         `created_at`
     ) VALUES (
-        i_user_type_id, -- user_type_id: Students only for now
-        i_language_id,
+        i_user_type_id,
+        i_is_admin,
+        i_is_support,
         1, -- active
         v_first_name,
         v_last_name,
         v_phone,
-        v_profession,
         v_gender,
         v_email_address,
-        '', -- address1..nothing for now..
-        '', -- address2..nothing for now..
+        v_address1,
+        v_address2,
         v_city,
         v_state_province,
         v_country,
@@ -105,6 +114,7 @@ BEGIN
         v_password_hash,
         0, -- not verified until they click the link in the registration email
         v_invite_token,
+        '{}', -- no data just yet
         '{}', -- no data just yet
         0,
         now(),
@@ -123,32 +133,9 @@ BEGIN
         u.last_name,
         u.email_address,
         u.phone,
-        u.invite_token,
-
-        g.id as group_id,
-        g.group_name as group_name,
-        g.country
-      FROM `user` u
-      INNER JOIN `group_members` gm ON u.id = gm.user_id
-      INNER JOIN `group` g ON g.id = gm.group_id
+        u.invite_token
+      FROM `users` u
       WHERE u.id = user_id;
-
-      -- get the group owners' information (for notifications)
-      SELECT
-        u.id,
-        u.first_name,
-        u.last_name,
-        u.email_address,
-        u.phone,
-
-        g.id as g_id,
-        g.group_name as g_name,
-        g.country as g_country,
-        g.country_code as country_code
-      FROM `group_owners` go
-      INNER JOIN `group` g ON go.group_id = g.id
-      INNER JOIN `user` u ON go.user_id = u.id
-      WHERE go.group_id = group_id;
 
     ELSE
       -- select nothing for the user object

@@ -234,18 +234,8 @@ var KTLoginGeneral = function() {
 
             btn.addClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', true);
 
-            let serializedData = $('.kt-login__signup .kt-form').serialize()
-
-            let formData = Object.fromEntries(new URLSearchParams( serializedData ))
-
-            console.log("signup form data: ", formData)
-
             form.ajaxSubmit({
                 url: '/user/signup',
-                headers: {
-                    'CSRF-Token': formData._csrf
-                },
-                data: formData,
                 success: function(response, status, xhr, $form) {
                     btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
                     form.clearForm();

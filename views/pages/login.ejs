@@ -50,7 +50,7 @@
                                     <h3 class="kt-login__title">Sign Up</h3>
                                     <div class="kt-login__desc">Enter your details to create your account:</div>
                                 </div>
-                                <form class="kt-form" action="/user/register" method="post">
+                                <form class="kt-form" action="/user/signup" method="post">
                                     <div class="input-group">
                                         <input class="form-control" type="text" placeholder="First Name" name="first_name">
                                     </div>
@@ -94,8 +94,8 @@
                                     <div class="kt-login__actions">
                                         <button id="kt_login_forgot_submit" class="btn btn-brand btn-pill kt-login__btn-primary">Request</button>&nbsp;&nbsp;
                                         <button id="kt_login_forgot_cancel" class="btn btn-secondary btn-pill kt-login__btn-secondary">Cancel</button>
-                                        <input type="hidden" name="_csrf" value="<%- _csrf %>" />
                                     </div>
+                                    <input type="hidden" name="_csrf" value="<%- _csrf %>" />
                                 </form>
                             </div>
                             <div class="kt-login__newpassword">

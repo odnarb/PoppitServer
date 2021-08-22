@@ -1,10 +1,25 @@
         <div class="kt-grid kt-grid--ver kt-grid--root">
-            <div class="kt-grid__item kt-grid__item--fluid kt-grid  kt-error-v1">
-                <div class="kt-error-v1__container">
-                    <h1 class="kt-error-v1__number"><%- error_status %></h1>
-                    <p class="kt-error-v1__desc">
-                        OOPS! That page doesn't exist.
-                    </p>
+            <div class="kt-grid kt-grid--hor kt-grid--root  kt-login kt-login--v4 kt-login--<%- formClass %>" id="kt_login">
+                <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--hor" style="background-image: url(../assets/media/bg/bg-2.jpg);">
+                    <div class="kt-grid__item kt-grid__item--fluid kt-login__wrapper">
+                        <div class="kt-login__container">
+                            <div class="kt-login__logo">
+                                <a href="#">
+                                    <img src="<%- appLogo %>">
+                                </a>
+                            </div>
+
+                            <div class="kt-grid__item kt-grid__item--fluid kt-grid kt-error-v1">
+                                <div class="kt-error-v1__container">
+                                    <h1 class="kt-error-v1__number"><%- error_status %></h1>
+                                    <p class="kt-error-v1__desc">
+                                    OOPS! That page doesn't exist.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

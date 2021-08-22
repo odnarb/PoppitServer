@@ -1,8 +1,5 @@
 module.exports = (globals) => {
     return (error, req, res, next) => {
-        req.app.locals.appName = process.env.APP_NAME;
-        req.app.locals.url = process.env.APP_URL;
-
         if( res.headersSent ) {
             console.log(`---req.method / req.url: `, req.method, req.url)
             console.log("HEADERS ALREADY SENT: ", error)
@@ -39,6 +36,7 @@ module.exports = (globals) => {
 
                 } //end if(error)
             } catch(e) {
+                globals.logger.debug(`ERROR HANDLER :: CATCH :: error: `, e);
                 return res.status(500).json({ status: "500 Internal Server Error"});
             }
         }

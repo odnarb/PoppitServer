@@ -249,10 +249,156 @@ module.exports = (globals) => {
             return next(err);
         }
     })
+    // /user/signup
+    .get('/signup', (req, res, next) => {
+        let routeHeader = "GET /user/signup";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+            return res.render('pages/login', {
+                pageTitle: "Sign Up",
+                showForm: "signup",
+                layout: 'login_layout'
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
     .post('/signup', (req, res, next) => {
-        let gres = (globals.logger == undefined )? true : false;
-        globals.logger.info( "POST /user/signup :: globals? ", gres );
-        return res.json({ page: 'POST /user/signup'});
+        let Users = new UsersModel( globals );
+        let UserNotifications = new UserNotificationsModel( globals );
+
+        let routeHeader = "POST /user/signup";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+        globals.logger.debug( `${routeHeader} :: PARAMS (user obj):`, req.body );
+
+        try {
+            //try to create a new user from params..
+            let createParams = JSON.parse(JSON.stringify(req.body));
+
+            let tmpAddr = createParams.email_address.toLowerCase()
+            createParams.email_address = tmpAddr
+
+            //auto-generate a password for the user when created via the panel
+            if( createParams.password === createParams.rpassword){
+                const salt = bcrypt.genSaltSync(globals.salt_rounds);
+                const hash = bcrypt.hashSync( createParams.password, salt);
+
+                //save the password hash
+                createParams.password_hash = hash;
+            }
+
+            //create a token for first login
+            createParams.invite_token = uuid.v4()
+
+            //remove some unneeded items
+            delete createParams.password
+            delete createParams.rpassword
+            delete createParams._csrf
+            delete createParams.agree
+
+            createParams.user_type_id = globals.DEFAULT_USER_TYPE
+
+            globals.logger.info(`${routeHeader} :: BEFORE user.signup() :: createParams: `, createParams );
+
+            // dbRes[0] === new_user, and dbRes[1] === group owners array
+            Users.signup(createParams, (err, dbRes) => {
+                if(err && err.error_type == "user") {
+                    globals.logger.error(`${routeHeader} :: user db error: `, err );
+
+                    let reason = "SYSTEM"
+                    if( err.error === "DUPLICATE_EMAIL"){
+                        reason = "duplicate_email"
+                    }
+                    return res.status(400).json({ reason: reason });
+                } else if(err) {
+                    globals.logger.error(`${routeHeader} :: system db error: `, err );
+                    res.status(500);
+                    return next(err);
+                }
+
+                //some simple checks..
+                let validDbRres = (
+                    dbRes[0].length > 0 &&
+                    dbRes[0][0] !== null &&
+                    dbRes[0][0].id > 0
+                )
+
+                if( validDbRres === false ){
+                    globals.logger.error(`${routeHeader} :: validDbRres === false!: dbRes`, dbRes );
+                    res.status(400);
+                    return next();
+                }
+
+                //extract the db result information
+                let new_user = dbRes[0][0];
+                let owners = dbRes[1];
+
+                globals.logger.info( `${routeHeader} :: user created: ${new_user.id}` );
+
+                console.log("SEND USER REG EMAIL TO:", new_user.email_address)
+
+                globals.logger.info( `${routeHeader} :: Create registration email notification...` );
+
+                new_user.registration_url = req.protocol + '://' + req.get('Host') + req.originalUrl;
+
+                let regEmail = globals.user_registration_email(new_user)
+
+                let notifications = []
+                //Email to user
+                let notification = {
+                    user_id: new_user.id,
+                    notification_type_id: globals.NOTIFICATION_TYPES.registration,
+                    notification_method_id: globals.NOTIFICATION_METHODS.email,
+                    status: globals.NOTIFICATION_STATUS.PENDING,
+                    status_detail: "",
+                    to_email: new_user.email_address,
+                    from_email: `${process.env.APP_NAME} Admin <${process.env.ADMIN_EMAIL_FROM}>`,
+                    subject: `[${process.env.APP_NAME}] Please Verify Email Address`,
+                    body_html: regEmail.html,
+                    body_text: regEmail.text,
+                    update_user_id: new_user.id,
+                    create_user_id: new_user.id
+                }
+                notifications.push(notification)
+
+                //Email to admin
+                regEmail = globals.admin_registration_email(new_user)
+                notification = {
+                    user_id: 0,
+                    notification_type_id: globals.NOTIFICATION_TYPES.registration,
+                    notification_method_id: globals.NOTIFICATION_METHODS.email,
+                    status: globals.NOTIFICATION_STATUS.PENDING,
+                    status_detail: "",
+                    to_email: process.env.ADMIN_EMAIL,
+                    from_email: `${process.env.APP_NAME} Admin <${process.env.ADMIN_EMAIL_FROM}>`,
+                    subject: `[${process.env.APP_NAME}] New User Registered`,
+                    body_html: regEmail.html,
+                    body_text: regEmail.text,
+                    update_user_id: new_user.id,
+                    create_user_id: new_user.id
+                }
+                notifications.push(notification)
+
+                // create a record in the user_notifications table
+                UserNotifications.create(notifications, (err, _userNotifications) => {
+                    if(err && err.error_type == "user") {
+                        globals.logger.error(`${routeHeader} :: user db error: `, err );
+                    } else if(err) {
+                        globals.logger.error(`${routeHeader} :: system db error: `, err );
+                    }
+                });
+
+                globals.logger.info( `${routeHeader} :: END` );
+                return res.json({ success: true, user_id: new_user.id });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
     })
     // create user
     .post('/', (req, res, next) => {
@@ -503,6 +649,13 @@ module.exports = (globals) => {
             globals.logger.debug( `${routeHeader} :: BEGIN` );
 
             globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            globals.logger.debug( `${routeHeader} :: parseInt(req.params.id): ${parseInt(req.params.id)}` );
+
+            if( req.params.id === undefined || isNaN( parseInt(req.params.id) ) ){
+                res.status(404)
+                return next()
+            }
 
             //get user
             Users.findOne({ id: parseInt(req.params.id) }, (err, user) => {

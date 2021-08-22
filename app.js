@@ -184,6 +184,9 @@ app.use( (req,res,next) => {
     if( res.locals.error_status == undefined ){
         res.locals.error_status = ''
     }
+    if( res.locals.user === undefined ){
+        res.locals.user = {}
+    }
     if( req.session.isLoggedIn ){
         res.locals.user = req.session.user;
     }
@@ -222,11 +225,24 @@ app.use('/locations', locations);
 //handle 404's
 app.use( (req, res, next) => {
     globals.logger.info("ERROR 404 :: requested url: " + req.url );
-    res.status(404).render('errors/404.ejs', {
-        pageTitle: "404 Error",
-        error_status: res.statusCode
-    });
+
+
+    if( req.xhr ) {
+        return res.json({ status_code: res.status, status: "error", err_msg: "Not found" });
+    } else {
+        let error_layout = (req.session.user && req.session.id > 0)? 'layout' : 'login_layout'
+
+globals.logger.debug(`BC ERROR HANDLER :: error_layout: `, error_layout);
+
+        //for the error handler, we need to set the variable in res.locals
+        return res.render('errors/404.ejs', {
+            pageTitle: `Not Found`,
+            error_status: 404,
+            layout: error_layout
+        });
+    } //end if(req.xhr)
 });
+
 
 //error handler
 let errorHandler = require('./policies/errorHandler.js')(globals);
