@@ -229,7 +229,6 @@ module.exports = (globals) => {
     })
     // user/logout
     .get('/logout', (req, res, next) => {
-        let Users = new UsersModel( globals );
         let routeHeader = "GET /user/logout";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
@@ -342,22 +341,18 @@ module.exports = (globals) => {
     })
      // user/newpassword
     .get('/newpassword', (req, res, next) => {
-        let Users = new UsersModel( globals );
         let routeHeader = "GET /user/newpassword";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
         try {
-            globals.logger.debug( `${routeHeader} :: id:: ${req.session.user.id} :: needsNewpassword :: ${req.session.needsNewpassword}`);
+            globals.logger.debug( `${routeHeader} :: needsNewpassword :: ${req.session.needsNewpassword}`);
 
-            if(!req.session.needsNewpassword){
-
+            if(!req.session.needsNewpassword || req.session.needsNewpassword === false){
                 globals.logger.debug( `${routeHeader} :: Does not need new password :: END`);
-
                 return res.redirect('/user/login');
             } else {
                 globals.logger.debug( `${routeHeader} :: Show change password form :: END`);
-
                 return res.render('pages/login', {
                     pageTitle: "New Password",
                     showForm: "newpassword",
@@ -377,15 +372,11 @@ module.exports = (globals) => {
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
         try {
-            let validNewpassword = (req.session.user && req.session.user.id && req.session.needsNewpassword);
+            let validNewpassword = (req.session.user_id !== undefined && req.session.user_id > 0);
 
             //check password1 and password2
             let pw1 = req.body.password1;
             let pw2 = req.body.password2;
-
-            globals.logger.debug( `${routeHeader} :: validNewpassword :: ${validNewpassword}`);
-
-            globals.logger.debug( `${routeHeader} :: pw1 :: ${pw1} :: pw2 :: ${pw2}`);
 
             let invalidPws = (pw1 !== pw2 && pw1 !== '' && pw2 !== '');
 
@@ -404,7 +395,7 @@ module.exports = (globals) => {
 
                 //save the password hash
                 let updateParams = {
-                    id: req.session.user.id,
+                    id: req.session.user_id,
                     user: {
                         password_hash: hash
                     }
@@ -589,6 +580,8 @@ module.exports = (globals) => {
                     return res.redirect('/')
                 }
 
+                globals.logger.debug(`${routeHeader} :: req.session: `, req.session);
+
                 //set some parameters to remember this user while resetting their password
                 req.session.isLoggedIn = false;
                 req.session.user_id = dbRes.id
@@ -610,7 +603,7 @@ module.exports = (globals) => {
 
             globals.logger.debug( `${routeHeader} :: req.body `, req.body);
 
-            let email_address = req.body.email || ""
+            let email_address = req.body.email_address || ""
 
             if( email_address !== "" ){
                 //try to find it and generate a forgot pw token

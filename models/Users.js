@@ -4,7 +4,7 @@
 
 const TABLE_NAME = "users";
 const MODEL_NAME = "Users";
-const OBJECT_NAME = "users";
+const OBJECT_NAME = "user";
 
 const VALID_COLS = [
     "id",
@@ -518,6 +518,8 @@ class Users {
 
     update(vals, cb){
         let obj = vals[OBJECT_NAME];
+
+        this.globals.logger.debug(`${MODEL_NAME}.update() obj?: `, obj);
 
         //need more resilience: send back which columns are invalid?
         let colErrors = [];
