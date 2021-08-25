@@ -11,54 +11,6 @@ let UserNotificationsModel = require('../models/UserNotifications');
 
 module.exports = (globals) => {
     return router
-    // /setcontext/:id
-    .get('/setcontext/:id', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "GET /user/setcontext/:id";
-
-        try {
-            globals.logger.debug( `${routeHeader} :: BEGIN` );
-
-            globals.logger.debug( `${routeHeader} :: user id: ${req.params.id}` );
-
-            globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
-
-            if(req.session.user.is_admin === 1){
-                globals.logger.debug( `${routeHeader} :: BEFORE Users.findOne() :: user id: ${req.params.id}` );
-
-                Users.findOne({ email_address: req.params.id }, (err, dbRes) => {
-                    if(err){
-                        res.status(500);
-                        return next(err);
-                    }
-
-                    globals.logger.debug( `${routeHeader} :: AFTER Users.findOne() :: dbRes:`, dbRes);
-
-                    globals.logger.debug( `${routeHeader} :: AFTER Users.findOne() :: req.session:`, req.session);
-
-                    let context_res = { success: false }
-                    if( dbRes !== undefined ){
-                        req.session.user_context = dbRes;
-
-                        globals.logger.debug( `${routeHeader} :: NEW req.session.user_context:`, req.session.user_context);
-
-                        context_res.user = dbRes;
-                        context_res.success = true;
-                    }
-                    globals.logger.debug( `${routeHeader} :: END` );
-
-                    return res.json(context_res);
-                });
-            } else {
-                globals.logger.debug( `${routeHeader} :: user :: ${req.session.user.id} ${req.session.user.email_address} :: NOT admin for user context :: user id: ${req.params.id}` );
-
-                return res.redirect('/');
-            }
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
     // user/ (get all users)
     .get('/', (req, res, next) => {
         let Users = new UsersModel( globals );
@@ -131,6 +83,355 @@ module.exports = (globals) => {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
                 return next(err);
             }
+        }
+    })
+    .delete('/:id', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "DELETE /user/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            Users.delete( parseInt(req.params.id), (err, deleteRes) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+                globals.logger.info( routeHeader  + " :: res", deleteRes );
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // create user
+    .post('/', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "POST /user";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            let createParams = req.body;
+
+            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
+
+            //auto-generate a password for the user when created via the panel
+            const salt = bcrypt.genSaltSync(globals.salt_rounds);
+            const hash = bcrypt.hashSync(uuid.v4(), salt);
+
+            //save the password hash
+            createParams.password_hash = hash;
+
+            //create a token for first login
+            createParams.invite_token = uuid.v4()
+
+            delete createParams._csrf;
+
+            Users.create(createParams, (err, new_user_id) => {
+                if(err && err.error_type == "user") {
+                    res.status(400);
+                    return next(err);
+                } else if(err) {
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.info( `${routeHeader} :: Users created: ${new_user_id}` );
+
+                /*
+                //now send some emails
+                globals.logger.info( `${routeHeader} :: Send registration email...` );
+
+                let regEmail = globals.is_admin_registration_email({ user: createParams })
+
+                //send regristration email
+                let email = {
+                    to: createParams.email_address,
+                    from: `${process.env.is_admin_EMAIL}`,
+                    subject: `[${process.env.APP_NAME}] New User Registered`,
+                    html: regEmail.html,
+                    text: regEmail.text
+                }
+
+                globals.sendEmail(email, (err,emailRes) => {
+                    if(err){
+                        next(err);
+                    } else {
+                        globals.logger.info( `${routeHeader} :: Email sent to new user: ${createParams.email_address}` );
+                    }
+                });
+
+                let regUserEmail = globals.user_registration_email({ user: createParams });
+
+                email = {
+                    to: createParams.email_address,
+                    from: `${process.env.is_admin_EMAIL}`,
+                    subject: `[${process.env.APP_NAME}] Registration Confirm`,
+                    html: regUserEmail.html,
+                    text: regUserEmail.text
+                }
+
+                globals.sendEmail(email, (err,emailRes) => {
+                    if(err){
+                        next(err);
+                    } else {
+                        globals.logger.info( `${routeHeader} :: Admin email sent for new registration:` );
+                    }
+                });
+                */
+
+                globals.logger.info( `${routeHeader} :: END` );
+                return res.json({ success: true, user_id: new_user_id });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // user/:id operations
+    .get('/:id', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /user/:id";
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN` );
+
+            globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            globals.logger.debug( `${routeHeader} :: parseInt(req.params.id): ${parseInt(req.params.id)}` );
+
+            if( req.params.id === undefined || isNaN( parseInt(req.params.id) ) ){
+                res.status(404)
+                return next()
+            }
+
+            //get user
+            Users.findOne({ id: parseInt(req.params.id) }, (err, user) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.debug(`GET /user/:id :: user.id: ${req.params.id}`, user);
+
+                globals.logger.debug( `${routeHeader} :: END` );
+
+                return res.json(user);
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .put('/:id', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "PUT /user/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
+
+            let user = req.body;
+            delete user._csrf;
+            let updateParams = { id: parseInt(req.params.id), user: req.body };
+
+            globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
+
+            Users.update(updateParams, (err, dbres) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                let user = dbres[1];
+                globals.logger.debug( `${routeHeader} :: user ::`, user);
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true, user: user });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // user/confirm/:id/:token
+    .get('/confirm/:id/:token', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /user/confirm/:id/:token";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+
+            globals.logger.debug( `${routeHeader} :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+            let tokenParams = {
+                id: parseInt(req.params.id),
+                token: req.params.token
+            };
+
+            Users.confirmRegistration(tokenParams, (err, dbres) => {
+                globals.logger.debug( `${routeHeader} :: Back from db`);
+
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                if(dbres[0].changedRows > 0){
+                    globals.logger.debug( `${routeHeader} :: SUCCESS :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+                    let user = dbres[1];
+
+                    globals.logger.debug( `${routeHeader} :: user :: ${user}`);
+
+                    delete user.password_hash;
+                    delete user.forgot_password_token;
+                    delete user.invite_token;
+
+                    req.session.user = user;
+                    req.session.needsNewpassword = true;
+                    req.session.isLoggedIn = false;
+
+                    globals.logger.debug( `${routeHeader} :: SESSION SET :: ${req.session}`);
+
+                    //success
+                    return res.redirect('/user/newpassword');
+                } else {
+                    globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+                    //invalid request
+                    res.status(400);
+                    return next(err);
+                }
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .get('/forgotpassword/:id/:token', (req,res,next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /forgotpassword/:id/:token";
+
+        globals.logger.debug(`${routeHeader} :: req.params: `, req.params);
+
+        //check id && token, and set to needs pw change for
+            //this session until the pw change has taken place
+        if( req.params.id !== '' && req.params.token !== '' ){
+            let opts = {
+                id: parseInt( req.params.id ),
+                token: req.params.token
+            }
+            Users.findForgotPW(opts, (err, dbRes) => {
+                if(err){
+                    globals.logger.debug( `${routeHeader} :: DB user.login() error: `, err);
+                    return res.status(500).json({reason: "server_error"});
+                }
+
+                globals.logger.debug(`${routeHeader} :: dbRes`, dbRes);
+
+                if( dbRes === undefined || dbRes.id <= 0 ) {
+                    globals.logger.debug(`${routeHeader} :: ForgotPW dbRes is undefined.. redirecting..`);
+                    return res.redirect('/')
+                }
+
+                globals.logger.debug(`${routeHeader} :: req.session: `, req.session);
+
+                //set some parameters to remember this user while resetting their password
+                req.session.isLoggedIn = false;
+                req.session.user_id = dbRes.id
+                req.session.needsNewpassword = true;
+
+                globals.logger.debug(`${routeHeader} :: req.session: `, req.session);
+
+                return res.redirect('/user/newpassword')
+            })
+        }
+    })
+    // user/forgotpassword
+    .post('/forgotpassword', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let userNotification = new UserNotificationsModel( globals );
+        let routeHeader = "POST /user/forgotpassword";
+
+        try {
+
+            globals.logger.debug( `${routeHeader} :: req.body `, req.body);
+
+            let email_address = req.body.email_address || ""
+
+            if( email_address !== "" ){
+                //try to find it and generate a forgot pw token
+                let opts = {
+                    email_address: email_address.toLowerCase()
+                }
+                Users.forgotPW( opts, (err, dbRes) => {
+                    if(err){
+                        globals.logger.debug( `${routeHeader} :: DB user.login() error: `, err);
+                        return res.status(500).json({reason: "server_error"});
+                    }
+
+                    globals.logger.debug(`${routeHeader} :: user.forgotPW() :: dbRes`, dbRes);
+
+                    if( dbRes.user_id !== undefined
+                        && dbRes !== ''
+                        && dbRes.forgot_password_token !== undefined
+                        && dbRes.forgot_password_token !== '')
+                    {
+                        let opts = {
+                            id: dbRes.user_id,
+                            token: dbRes.forgot_password_token
+                        }
+                        let forgotPWEmail = globals.forgotpw_email(opts)
+
+                        notification = {
+                            user_id: dbRes.user_id,
+                            notification_type_id: globals.NOTIFICATION_TYPES.forgot_password,
+                            notification_method_id: globals.NOTIFICATION_METHODS.email,
+                            status: globals.NOTIFICATION_STATUS.PENDING,
+                            status_detail: "",
+                            to_email: dbRes.email_address,
+                            from_email: `${process.env.APP_NAME} Admin <${process.env.ADMIN_EMAIL_FROM}>`,
+                            subject: `[${process.env.APP_NAME}] Reset Password`,
+                            body_html: forgotPWEmail.html,
+                            body_text: forgotPWEmail.text,
+                            update_user_id: dbRes.user_id,
+                            create_user_id: dbRes.user_id
+                        }
+
+                        globals.logger.debug(`${routeHeader} :: Forgot PW email :: email: `, notification);
+
+                        // create a record in the user_notifications table
+                        userNotification.create(notification, (err, _userNotifications) => {
+                            if(err && err.error_type == "user") {
+                                globals.logger.error(`${routeHeader} :: user db error: `, err );
+                                return res.json({ success: false })
+                            } else if(err) {
+                                globals.logger.error(`${routeHeader} :: system db error: `, err );
+                                return res.json({ success: false })
+                            } else {
+                                return res.json({ success: true })
+                            }
+                        });
+                    } else {
+                        return res.json({ success: false })
+                    }
+                })
+            } else {
+                globals.logger.debug( `${routeHeader} :: failed..`, );
+                return res.json({ success: false })
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
         }
     })
     // user/login
@@ -242,6 +543,153 @@ module.exports = (globals) => {
 
                 return res.redirect('/user/login');
             } else {
+                return res.redirect('/');
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // user/newpassword
+    .get('/newpassword', (req, res, next) => {
+        let routeHeader = "GET /user/newpassword";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+            globals.logger.debug( `${routeHeader} :: needsNewpassword :: ${req.session.needsNewpassword}`);
+
+            if(!req.session.needsNewpassword || req.session.needsNewpassword === false){
+                globals.logger.debug( `${routeHeader} :: Does not need new password :: END`);
+                return res.redirect('/user/login');
+            } else {
+                globals.logger.debug( `${routeHeader} :: Show change password form :: END`);
+                return res.render('pages/login', {
+                    pageTitle: "New Password",
+                    showForm: "newpassword",
+                    layout: 'login_layout'
+                });
+            }
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // user/newpassword
+    .post('/newpassword', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "POST /user/newpassword";
+
+        globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+        try {
+            let validNewpassword = (req.session.user_id !== undefined && req.session.user_id > 0);
+
+            //check password1 and password2
+            let pw1 = req.body.password1;
+            let pw2 = req.body.password2;
+
+            let invalidPws = (pw1 !== pw2 && pw1 !== '' && pw2 !== '');
+
+            if(!validNewpassword) {
+                res.status(400);
+                next();
+                // return next();
+            } else if (invalidPws) {
+                return res.json({ success: false })
+            } else {
+                 globals.logger.debug( `${routeHeader} :: generating pw hash...`);
+
+                //auto-generate a password for the user when created via the panel
+                const salt = bcrypt.genSaltSync(globals.salt_rounds);
+                const hash = bcrypt.hashSync(pw1, salt);
+
+                //save the password hash
+                let updateParams = {
+                    id: req.session.user_id,
+                    user: {
+                        password_hash: hash
+                    }
+                };
+
+                delete req.session.needsNewpassword;
+
+                 globals.logger.debug( `${routeHeader} :: before user update`, updateParams);
+
+                Users.update(updateParams, (err, dbres) => {
+                    if(err){
+                        res.status(500);
+                        return next(err);
+                    }
+
+                    if( dbres[0].changedRows > 0 ){
+                        let user = dbres[1];
+
+                        globals.logger.debug( `${routeHeader} :: user ::`, user);
+
+                        //save the session to redis store
+                        req.session.regenerate( (err) => {
+                            req.session.isLoggedIn = true;
+                            req.session.user = user;
+
+                            return res.json({ success: true });
+                            // return res.redirect('/');
+                        });
+                    } else {
+                        globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
+
+                        //invalid request
+                        res.status(400);
+                        return res.json({ success: false })
+                    }
+                });
+            } //endif validNewpassword
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // /setcontext/:id
+    .get('/setcontext/:id', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /user/setcontext/:id";
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN` );
+
+            globals.logger.debug( `${routeHeader} :: user id: ${req.params.id}` );
+
+            globals.logger.debug( `${routeHeader} :: user: `, req.session.user );
+
+            if(req.session.user.is_admin === 1){
+                globals.logger.debug( `${routeHeader} :: BEFORE Users.findOne() :: user id: ${req.params.id}` );
+
+                Users.findOne({ email_address: req.params.id }, (err, dbRes) => {
+                    if(err){
+                        res.status(500);
+                        return next(err);
+                    }
+
+                    globals.logger.debug( `${routeHeader} :: AFTER Users.findOne() :: dbRes:`, dbRes);
+
+                    globals.logger.debug( `${routeHeader} :: AFTER Users.findOne() :: req.session:`, req.session);
+
+                    let context_res = { success: false }
+                    if( dbRes !== undefined ){
+                        req.session.user_context = dbRes;
+
+                        globals.logger.debug( `${routeHeader} :: NEW req.session.user_context:`, req.session.user_context);
+
+                        context_res.user = dbRes;
+                        context_res.success = true;
+                    }
+                    globals.logger.debug( `${routeHeader} :: END` );
+
+                    return res.json(context_res);
+                });
+            } else {
+                globals.logger.debug( `${routeHeader} :: user :: ${req.session.user.id} ${req.session.user.email_address} :: NOT admin for user context :: user id: ${req.params.id}` );
+
                 return res.redirect('/');
             }
         } catch( err ) {
@@ -400,452 +848,4 @@ module.exports = (globals) => {
             return next(err);
         }
     })
-    // create user
-    .post('/', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "POST /user";
-
-        try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
-
-            let createParams = req.body;
-
-            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
-
-            //auto-generate a password for the user when created via the panel
-            const salt = bcrypt.genSaltSync(globals.salt_rounds);
-            const hash = bcrypt.hashSync(uuid.v4(), salt);
-
-            //save the password hash
-            createParams.password_hash = hash;
-
-            //create a token for first login
-            createParams.invite_token = uuid.v4()
-
-            delete createParams._csrf;
-
-            Users.create(createParams, (err, new_user_id) => {
-                if(err && err.error_type == "user") {
-                    res.status(400);
-                    return next(err);
-                } else if(err) {
-                    res.status(500);
-                    return next(err);
-                }
-
-                globals.logger.info( `${routeHeader} :: Users created: ${new_user_id}` );
-
-                /*
-                //now send some emails
-                globals.logger.info( `${routeHeader} :: Send registration email...` );
-
-                let regEmail = globals.is_admin_registration_email({ user: createParams })
-
-                //send regristration email
-                let email = {
-                    to: createParams.email_address,
-                    from: `${process.env.is_admin_EMAIL}`,
-                    subject: `[${process.env.APP_NAME}] New User Registered`,
-                    html: regEmail.html,
-                    text: regEmail.text
-                }
-
-                globals.sendEmail(email, (err,emailRes) => {
-                    if(err){
-                        next(err);
-                    } else {
-                        globals.logger.info( `${routeHeader} :: Email sent to new user: ${createParams.email_address}` );
-                    }
-                });
-
-                let regUserEmail = globals.user_registration_email({ user: createParams });
-
-                email = {
-                    to: createParams.email_address,
-                    from: `${process.env.is_admin_EMAIL}`,
-                    subject: `[${process.env.APP_NAME}] Registration Confirm`,
-                    html: regUserEmail.html,
-                    text: regUserEmail.text
-                }
-
-                globals.sendEmail(email, (err,emailRes) => {
-                    if(err){
-                        next(err);
-                    } else {
-                        globals.logger.info( `${routeHeader} :: Admin email sent for new registration:` );
-                    }
-                });
-                */
-
-                globals.logger.info( `${routeHeader} :: END` );
-                return res.json({ success: true, user_id: new_user_id });
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-     // user/newpassword
-    .get('/newpassword', (req, res, next) => {
-        let routeHeader = "GET /user/newpassword";
-
-        globals.logger.debug( `${routeHeader} :: BEGIN`);
-
-        try {
-            globals.logger.debug( `${routeHeader} :: needsNewpassword :: ${req.session.needsNewpassword}`);
-
-            if(!req.session.needsNewpassword || req.session.needsNewpassword === false){
-                globals.logger.debug( `${routeHeader} :: Does not need new password :: END`);
-                return res.redirect('/user/login');
-            } else {
-                globals.logger.debug( `${routeHeader} :: Show change password form :: END`);
-                return res.render('pages/login', {
-                    pageTitle: "New Password",
-                    showForm: "newpassword",
-                    layout: 'login_layout'
-                });
-            }
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-     // user/newpassword
-    .post('/newpassword', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "POST /user/newpassword";
-
-        globals.logger.debug( `${routeHeader} :: BEGIN`);
-
-        try {
-            let validNewpassword = (req.session.user_id !== undefined && req.session.user_id > 0);
-
-            //check password1 and password2
-            let pw1 = req.body.password1;
-            let pw2 = req.body.password2;
-
-            let invalidPws = (pw1 !== pw2 && pw1 !== '' && pw2 !== '');
-
-            if(!validNewpassword) {
-                res.status(400);
-                next();
-                // return next();
-            } else if (invalidPws) {
-                return res.json({ success: false })
-            } else {
-                 globals.logger.debug( `${routeHeader} :: generating pw hash...`);
-
-                //auto-generate a password for the user when created via the panel
-                const salt = bcrypt.genSaltSync(globals.salt_rounds);
-                const hash = bcrypt.hashSync(pw1, salt);
-
-                //save the password hash
-                let updateParams = {
-                    id: req.session.user_id,
-                    user: {
-                        password_hash: hash
-                    }
-                };
-
-                delete req.session.needsNewpassword;
-
-                 globals.logger.debug( `${routeHeader} :: before user update`, updateParams);
-
-                Users.update(updateParams, (err, dbres) => {
-                    if(err){
-                        res.status(500);
-                        return next(err);
-                    }
-
-                    if( dbres[0].changedRows > 0 ){
-                        let user = dbres[1];
-
-                        globals.logger.debug( `${routeHeader} :: user ::`, user);
-
-                        //save the session to redis store
-                        req.session.regenerate( (err) => {
-                            req.session.isLoggedIn = true;
-                            req.session.user = user;
-
-                            return res.json({ success: true });
-                            // return res.redirect('/');
-                        });
-                    } else {
-                        globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
-
-                        //invalid request
-                        res.status(400);
-                        return res.json({ success: false })
-                    }
-                });
-            } //endif validNewpassword
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-     // user/confirm/:id/:token
-    .get('/confirm/:id/:token', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "GET /user/confirm/:id/:token";
-
-        globals.logger.debug( `${routeHeader} :: BEGIN`);
-
-        try {
-
-            globals.logger.debug( `${routeHeader} :: id:: ${req.params.id} :: token :: ${req.params.token}`);
-
-            let tokenParams = {
-                id: parseInt(req.params.id),
-                token: req.params.token
-            };
-
-            Users.confirmRegistration(tokenParams, (err, dbres) => {
-                globals.logger.debug( `${routeHeader} :: Back from db`);
-
-                if(err){
-                    res.status(500);
-                    return next(err);
-                }
-
-                if(dbres[0].changedRows > 0){
-                    globals.logger.debug( `${routeHeader} :: SUCCESS :: id:: ${req.params.id} :: token :: ${req.params.token}`);
-
-                    let user = dbres[1];
-
-                    globals.logger.debug( `${routeHeader} :: user :: ${user}`);
-
-                    delete user.password_hash;
-                    delete user.forgot_password_token;
-                    delete user.invite_token;
-
-                    req.session.user = user;
-                    req.session.needsNewpassword = true;
-                    req.session.isLoggedIn = false;
-
-                    globals.logger.debug( `${routeHeader} :: SESSION SET :: ${req.session}`);
-
-                    //success
-                    return res.redirect('/user/newpassword');
-                } else {
-                    globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id} :: token :: ${req.params.token}`);
-
-                    //invalid request
-                    res.status(400);
-                    return next(err);
-                }
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-    // user/:id operations
-    .get('/:id', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "GET /user/:id";
-
-        try {
-            globals.logger.debug( `${routeHeader} :: BEGIN` );
-
-            globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
-
-            globals.logger.debug( `${routeHeader} :: parseInt(req.params.id): ${parseInt(req.params.id)}` );
-
-            if( req.params.id === undefined || isNaN( parseInt(req.params.id) ) ){
-                res.status(404)
-                return next()
-            }
-
-            //get user
-            Users.findOne({ id: parseInt(req.params.id) }, (err, user) => {
-                if(err){
-                    res.status(500);
-                    return next(err);
-                }
-
-                globals.logger.debug(`GET /user/:id :: user.id: ${req.params.id}`, user);
-
-                globals.logger.debug( `${routeHeader} :: END` );
-
-                return res.json(user);
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-    .put('/:id', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "PUT /user/:id ";
-
-        try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
-
-            globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
-
-            let user = req.body;
-            delete user._csrf;
-            let updateParams = { id: parseInt(req.params.id), user: req.body };
-
-            globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
-
-            Users.update(updateParams, (err, dbres) => {
-                if(err){
-                    res.status(500);
-                    return next(err);
-                }
-
-                let user = dbres[1];
-                globals.logger.debug( `${routeHeader} :: user ::`, user);
-
-                globals.logger.info( routeHeader  + " :: END" );
-                return res.json({ success: true, user: user });
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-    .get('/forgotpassword/:id/:token', (req,res,next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "GET /forgotpassword/:id/:token";
-
-        globals.logger.debug(`${routeHeader} :: req.params: `, req.params);
-
-        //check id && token, and set to needs pw change for
-            //this session until the pw change has taken place
-        if( req.params.id !== '' && req.params.token !== '' ){
-            let opts = {
-                id: parseInt( req.params.id ),
-                token: req.params.token
-            }
-            Users.findForgotPW(opts, (err, dbRes) => {
-                if(err){
-                    globals.logger.debug( `${routeHeader} :: DB user.login() error: `, err);
-                    return res.status(500).json({reason: "server_error"});
-                }
-
-                globals.logger.debug(`${routeHeader} :: dbRes`, dbRes);
-
-                if( dbRes === undefined || dbRes.id <= 0 ) {
-                    globals.logger.debug(`${routeHeader} :: ForgotPW dbRes is undefined.. redirecting..`);
-                    return res.redirect('/')
-                }
-
-                globals.logger.debug(`${routeHeader} :: req.session: `, req.session);
-
-                //set some parameters to remember this user while resetting their password
-                req.session.isLoggedIn = false;
-                req.session.user_id = dbRes.id
-                req.session.needsNewpassword = true;
-
-                globals.logger.debug(`${routeHeader} :: req.session: `, req.session);
-
-                return res.redirect('/user/newpassword')
-            })
-        }
-    })
-    // user/forgotpassword
-    .post('/forgotpassword', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let userNotification = new UserNotificationsModel( globals );
-        let routeHeader = "POST /user/forgotpassword";
-
-        try {
-
-            globals.logger.debug( `${routeHeader} :: req.body `, req.body);
-
-            let email_address = req.body.email_address || ""
-
-            if( email_address !== "" ){
-                //try to find it and generate a forgot pw token
-                let opts = {
-                    email_address: email_address.toLowerCase()
-                }
-                Users.forgotPW( opts, (err, dbRes) => {
-                    if(err){
-                        globals.logger.debug( `${routeHeader} :: DB user.login() error: `, err);
-                        return res.status(500).json({reason: "server_error"});
-                    }
-
-                    globals.logger.debug(`${routeHeader} :: user.forgotPW() :: dbRes`, dbRes);
-
-                    if( dbRes.user_id !== undefined
-                        && dbRes !== ''
-                        && dbRes.forgot_password_token !== undefined
-                        && dbRes.forgot_password_token !== '')
-                    {
-                        let opts = {
-                            id: dbRes.user_id,
-                            token: dbRes.forgot_password_token
-                        }
-                        let forgotPWEmail = globals.forgotpw_email(opts)
-
-                        notification = {
-                            user_id: dbRes.user_id,
-                            notification_type_id: globals.NOTIFICATION_TYPES.forgot_password,
-                            notification_method_id: globals.NOTIFICATION_METHODS.email,
-                            status: globals.NOTIFICATION_STATUS.PENDING,
-                            status_detail: "",
-                            to_email: dbRes.email_address,
-                            from_email: `${process.env.APP_NAME} Admin <${process.env.ADMIN_EMAIL_FROM}>`,
-                            subject: `[${process.env.APP_NAME}] Reset Password`,
-                            body_html: forgotPWEmail.html,
-                            body_text: forgotPWEmail.text,
-                            update_user_id: dbRes.user_id,
-                            create_user_id: dbRes.user_id
-                        }
-
-                        globals.logger.debug(`${routeHeader} :: Forgot PW email :: email: `, notification);
-
-                        // create a record in the user_notifications table
-                        userNotification.create(notification, (err, _userNotifications) => {
-                            if(err && err.error_type == "user") {
-                                globals.logger.error(`${routeHeader} :: user db error: `, err );
-                                return res.json({ success: false })
-                            } else if(err) {
-                                globals.logger.error(`${routeHeader} :: system db error: `, err );
-                                return res.json({ success: false })
-                            } else {
-                                return res.json({ success: true })
-                            }
-                        });
-                    } else {
-                        return res.json({ success: false })
-                    }
-                })
-            } else {
-                globals.logger.debug( `${routeHeader} :: failed..`, );
-                return res.json({ success: false })
-            }
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-    .delete('/:id', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "DELETE /user/:id ";
-
-        try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
-
-            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
-
-            Users.delete( parseInt(req.params.id), (err, deleteRes) => {
-                if(err){
-                    res.status(500);
-                    return next(err);
-                }
-                globals.logger.info( routeHeader  + " :: res", deleteRes );
-
-                globals.logger.info( routeHeader  + " :: END" );
-                return res.json({ success: true });
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    });
 };
