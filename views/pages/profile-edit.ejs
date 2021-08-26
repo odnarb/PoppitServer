@@ -19,7 +19,7 @@
                                     </div>
                                 </div>
  -->
-                                <form action="/user/edit/<%- vuser.id %>" method="POST" enctype="multipart/form-data" class="kt-form kt-form--label-right user-add-edit-form" _lpchecked="1">
+                                <form action="/profile/edit/<%- vuser.id %>" method="POST" enctype="multipart/form-data" class="kt-form kt-form--label-right user-add-edit-form" _lpchecked="1">
                                     <div class="kt-portlet__body">
 
                                         <div class="form-group row">
@@ -117,6 +117,9 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <input type="hidden" name="_csrf" value="<%- _csrf %>" />
+
                                 </form>
 
                             </div>
