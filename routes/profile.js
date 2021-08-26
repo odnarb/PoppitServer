@@ -158,11 +158,15 @@ module.exports = (globals) => {
 
                 let userUpdateObj = JSON.parse(JSON.stringify(req.body))
 
+                userUpdateObj.gender = 'M'
+
                 //don't let this data get modified regardless of admin/support status
                 delete userUpdateObj.password_hash
                 delete userUpdateObj.forgot_password_token
                 delete userUpdateObj.invite_token
                 delete userUpdateObj.email_address
+                delete userUpdateObj.profile_picture_edit
+                delete userUpdateObj._csrf
 
                 //remove sensitive info if not admin
                 if(!req.session.user.is_admin && !req.session.user.is_support ){
@@ -188,7 +192,7 @@ module.exports = (globals) => {
 
                     if( dbres[0].changedRows > 0 ){
                         globals.logger.debug( `${routeHeader} :: user updated!`)
-                        return res.redirect('/user/view/' + vuser.id)
+                        return res.redirect('/profile/view/' + vuser.id)
                     } else {
                         globals.logger.debug( `${routeHeader} :: ERROR :: id:: ${req.params.id}`);
 
