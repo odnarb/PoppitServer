@@ -19,7 +19,7 @@ let initChangeUserContext = function(){
         if(validUser){
             $.ajax({
                 method: "GET",
-                url: `/admin/user/setcontext/${user_id}` // ?_csrf=${window._csrf}`,
+                url: `/admin/user/setcontext/${user_id}`, // ?_csrf=${window._csrf}`,
                 success: function(res) {
                     console.log("User context res: ", res)
 
