@@ -31,23 +31,8 @@ module.exports = (globals) => {
                 //remove timestamp param for datatables
                 if( params._ !== undefined ) delete params._;
 
-                //get user
+                //get users
                 Users.find(req.query, (err, dbresult) => {
-
-                    let user = dbresult[0];
-                    for(let i=0; i < user.length;i++) {
-                        let user = user[i];
-                        let res = "none";
-                        if (user.company_role === 1) {
-                            res = "admin"
-                        } else if (user.company_role === 2) {
-                            res = "technical";
-                        } else if (user.company_role === 3) {
-                            res = "marketing";
-                        }
-                        user.company_role = res;
-                        user[i] = user;
-                    }
 
                     globals.logger.debug( `${routeHeader} :: DB CB: `, err);
 
@@ -62,7 +47,7 @@ module.exports = (globals) => {
                     }
                     globals.logger.debug( `${routeHeader} :: DONE`);
                     return res.json({
-                        aaData: user,
+                        aaData: dbresult[0],
                         iTotalRecords: dbresult[1].totalCount,
                         iTotalDisplayRecords: dbresult[2].totalCountWithFilter
                     });

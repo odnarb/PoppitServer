@@ -478,8 +478,8 @@ class Users {
 
     //logical delete only
     delete(id, cb){
-        // let sqlStr = `DELETE FROM ${TABLE_NAME} WHERE id=${this.dbescape(id)}`;
-        let sqlStr = `UPDATE ${TABLE_NAME} SET active=0 WHERE id=${this.dbescape(id)}`;
+        let sqlStr = `DELETE FROM ${TABLE_NAME} WHERE id=${this.dbescape(id)}`;
+        // let sqlStr = `UPDATE ${TABLE_NAME} SET active=0 WHERE id=${this.dbescape(id)}`;
 
         this.globals.logger.debug(`${MODEL_NAME}.delete() sqlStr: ${sqlStr}`);
 
