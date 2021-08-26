@@ -9,6 +9,7 @@
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
+
                                     <div class="modal-body">
                                         <form class="kt-form kt-form--label-right company-add-edit-form" _lpchecked="1">
                                             <div class="kt-portlet__body">
@@ -27,9 +28,16 @@
                                                 </div>
 
                                                 <div class="form-group row">
-                                                    <label for="address" class="col-2 col-form-label">Address*:</label>
+                                                    <label for="address" class="col-2 col-form-label">Address Line 1*:</label>
                                                     <div class="col-10">
-                                                        <input name="address" class="form-control" type="text" value="" maxlength="255" autocomplete="off">
+                                                        <input name="address1" class="form-control" type="text" value="" maxlength="255" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="address" class="col-2 col-form-label">Address Line 2:</label>
+                                                    <div class="col-10">
+                                                        <input name="address2" class="form-control" type="text" value="" maxlength="255" autocomplete="off">
                                                     </div>
                                                 </div>
 
@@ -41,45 +49,37 @@
                                                 </div>
 
                                                 <div class="form-group row">
-                                                    <label for="state" class="col-2 col-form-label">State*:</label>
+                                                    <label for="state" class="col-2 col-form-label">State/Province*:</label>
                                                     <div class="col-10">
-                                                        <input name="state" class="form-control" type="text" value="" maxlength="2" autocomplete="off">
+                                                        <input name="state_province" class="form-control" type="text" value="" maxlength="2" autocomplete="off">
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group row">
-                                                    <label for="zip" class="col-2 col-form-label">Zip*:</label>
+                                                    <label for="zip" class="col-2 col-form-label">Zip/Postal Code*:</label>
                                                     <div class="col-10">
-                                                        <input name="zip" class="form-control" type="text" value="" maxlength="5" autocomplete="off">
+                                                        <input name="postal_code" class="form-control" type="text" value="" maxlength="5" autocomplete="off">
                                                     </div>
                                                 </div>
 
+                                                <!--
                                                 <div class="form-group row">
-                                                    <label for="country_code" class="col-2 col-form-label">Country*:</label>
+                                                    <label for="country" class="col-2 col-form-label">Country*:</label>
                                                     <div class="col-10">
-                                                        <input name="country_code" class="form-control" type="text" value="" maxlength="2" autocomplete="off">
+                                                        <select name="country" class="form-control">
+                                                            <option value="United States">United States</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                -->
+
+                                                 <div class="form-group row">
+                                                    <label for="zip" class="col-2 col-form-label">Website:</label>
+                                                    <div class="col-10">
+                                                        <input name="website" class="form-control" type="text" value="" autocomplete="off">
                                                     </div>
                                                 </div>
 
-                                                <div class="form-group row">
-                                                    <label for="active" class="col-2 col-form-label">Active</label>
-                                                    <span class="kt-switch">
-                                                        <label>
-                                                            <input name="active" type="checkbox" checked="checked" />
-                                                            <span></span>
-                                                        </label>
-                                                    </span>
-                                                </div>
-
-                                                <div class="form-group row">
-                                                    <label for="demo_acct" class="col-2 col-form-label">Demo Account?</label>
-                                                    <span class="kt-switch">
-                                                        <label>
-                                                            <input name="demo_acct" type="checkbox" checked="checked" />
-                                                            <span></span>
-                                                        </label>
-                                                    </span>
-                                                </div>
                                             </div>
                                             <div class="kt-portlet__foot">
                                                 <div class="kt-form__actions">

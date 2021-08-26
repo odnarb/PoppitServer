@@ -211,6 +211,9 @@ app.use('/profile', profile);
 let user = require('./routes/user.js')(globals);
 app.use('/user', user);
 
+let companies = require('./routes/companies.js')(globals);
+app.use('/companies', companies);
+
 let campaigns = require('./routes/campaigns.js')(globals);
 app.use('/campaigns', campaigns);
 
