@@ -112,7 +112,7 @@ app.set('layout', './layout.ejs');
     //I've tested this and if an asset exists, the file is served directly
     // without any policies being applied, but if it does not, the asset request
     // flows next through the policy chain and routes
-app.use(express.static('public'));
+app.use(express.static( path.join(__dirname, "public" )));
 
 //set the favicon
 app.use(favicon(path.join(__dirname, 'public', process.env.APP_FAVICON )))
@@ -190,11 +190,6 @@ app.use( (req,res,next) => {
     if( req.session.isLoggedIn ){
         res.locals.user = req.session.user;
     }
-    if( req.session.company_context && req.session.company_context.id > 0 ){
-        res.locals.company_context = req.session.company_context;
-    } else {
-        res.locals.company_context = undefined;
-    }
     if( req.session.user_context && req.session.user_context.id > 0 ){
         res.locals.user_context = req.session.user_context;
     } else {
@@ -210,29 +205,31 @@ app.use( (req,res,next) => {
 let main = require('./routes/main.js')(globals);
 app.use('/', main);
 
+let profile = require('./routes/profile.js')(globals);
+app.use('/profile', profile);
+
 let user = require('./routes/user.js')(globals);
 app.use('/user', user);
-
-let appuser = require('./routes/appuser.js')(globals);
-app.use('/appuser', appuser);
 
 let campaigns = require('./routes/campaigns.js')(globals);
 app.use('/campaigns', campaigns);
 
-let locations = require('./routes/locations.js')(globals);
-app.use('/locations', locations);
+// let appuser = require('./routes/appuser.js')(globals);
+// app.use('/appuser', appuser);
+
+// let locations = require('./routes/locations.js')(globals);
+// app.use('/locations', locations);
 
 //handle 404's
 app.use( (req, res, next) => {
     globals.logger.info("ERROR 404 :: requested url: " + req.url );
 
-
     if( req.xhr ) {
         return res.json({ status_code: res.status, status: "error", err_msg: "Not found" });
+    } else if ( globals.isStaticRequest( req.url ) ) {
+        return res.send("Not Found")
     } else {
-        let error_layout = (req.session.user && req.session.id > 0)? 'layout' : 'login_layout'
-
-globals.logger.debug(`BC ERROR HANDLER :: error_layout: `, error_layout);
+        let error_layout = (req.session.user && req.session.user.id > 0)? 'layout' : 'login_layout'
 
         //for the error handler, we need to set the variable in res.locals
         return res.render('errors/404.ejs', {

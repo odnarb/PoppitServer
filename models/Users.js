@@ -250,6 +250,7 @@ class Users {
             let user_id = parseInt(opts.id) || 0;
 
             let getUserSQL = `CALL getUser(${user_id},"${email_address_str}");`
+
             this.globals.logger.debug(`${MODEL_NAME}.getUser() getUserSQL: ${getUserSQL}`);
 
             this.execSQL(this.db, getUserSQL, (error, results) => {
@@ -257,17 +258,6 @@ class Users {
                     this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else {
-                    /*
-                       results array and their order that will come back in the DBAL
-                      0 - the user
-                      1 - groups a member of
-                      2 - access_level results
-                      3 - group_owners results
-                      4 - reports for the user
-                      5 - user acct
-                      6 - user payment history (last 6 rows)
-                      7 - classes the user teaches
-                    */
 
                     let user = {}, tmp
                     if( results[0].length > 0 ){
@@ -284,98 +274,6 @@ class Users {
                     } else {
                         this.globals.logger.error(`${MODEL_NAME}.getUser() :: No user found: `, opts);
                         return cb(null, false)
-                    }
-
-                    //groups a member of
-                    user.groups = []
-                    if( results[1].length > 0 ){
-                        try {
-                            tmp = JSON.parse( JSON.stringify( results[1] ) )
-                            user.groups = tmp
-
-                            user.groups.forEach((r, i) => {
-                                user.groups[i].data = JSON.parse( r.data )
-                            })
-                        } catch(e){
-                            this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR parsing results[1]: `, e);
-                        }
-                    }
-
-                    //user's access level
-                    user.access_level = 0
-                    if( results[2].length > 0 ){
-                        try {
-                            tmp = JSON.parse( JSON.stringify( results[2][0] ) )
-                            user.access_level = parseInt(tmp.access_level) || 0
-                        } catch(e) {
-                            this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR parsing results[2][0]: `, e);
-                        }
-                    }
-
-                    //groups owned
-                    user.groups_owned = []
-                    if( results[3].length > 0 ){
-                        try {
-                            tmp = JSON.parse( JSON.stringify( results[3] ) )
-                            user.groups_owned = tmp
-                        } catch(e) {
-                            this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR parsing results[3]: `, e);
-                        }
-                    }
-
-                    //user's reports
-                    user.reports = []
-                    if( results[4].length > 0 ){
-                        try {
-                            tmp = JSON.parse( JSON.stringify( results[4] ) )
-                            user.reports = tmp
-
-                            user.reports.forEach((r, i) => {
-                                user.reports[i].data = JSON.parse( r.data )
-                            })
-                        } catch(e) {
-                            this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR parsing results[4]: `, e);
-                        }
-                    }
-
-                    //user's account
-                    user.account = {}
-                    if( results[5].length > 0 ){
-                        try {
-                            tmp = JSON.parse( JSON.stringify( results[5][0] ) )
-                            user.account = tmp
-                        } catch(e) {
-                            this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR parsing results[5]: `, e);
-                        }
-                    }
-
-                    //user's payment history
-                    user.payment_history = []
-                    if( results[6].length > 0 ){
-                        try {
-                            tmp = JSON.parse( JSON.stringify( results[6] ) )
-
-                            //get payment history if it's there
-                            if(tmp.length > 0) {
-                                user.payment_history = tmp
-                            }
-                        } catch(e) {
-                            this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR parsing results[6]: `, e);
-                        }
-                    }
-
-                    user.teaching = []
-                    if( results[7].length > 0 ){
-                        console.log(`${MODEL_NAME}.getUser() :: user teaching?: `, results[7])
-                        try {
-                            tmp = JSON.parse( JSON.stringify( results[7] ) )
-
-                            if(tmp.length > 0) {
-                                user.teaching = tmp
-                            }
-                        } catch(e) {
-                            this.globals.logger.error(`${MODEL_NAME}.getUser() :: ERROR parsing results[7]: `, e);
-                        }
                     }
 
                     this.globals.logger.debug(`${MODEL_NAME}.getUser() result?: `, user);
