@@ -85,182 +85,6 @@ module.exports = (globals) => {
             }
         }
     })
-    .delete('/:id', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "DELETE /user/:id ";
-
-        try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
-
-            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
-
-            Users.delete( parseInt(req.params.id), (err, deleteRes) => {
-                if(err){
-                    res.status(500);
-                    return next(err);
-                }
-                globals.logger.info( routeHeader  + " :: res", deleteRes );
-
-                globals.logger.info( routeHeader  + " :: END" );
-                return res.json({ success: true });
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-    // create user
-    .post('/', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "POST /user";
-
-        try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
-
-            let createParams = req.body;
-
-            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
-
-            //auto-generate a password for the user when created via the panel
-            const salt = bcrypt.genSaltSync(globals.salt_rounds);
-            const hash = bcrypt.hashSync(uuid.v4(), salt);
-
-            //save the password hash
-            createParams.password_hash = hash;
-
-            //create a token for first login
-            createParams.invite_token = uuid.v4()
-
-            delete createParams._csrf;
-
-            Users.create(createParams, (err, new_user_id) => {
-                if(err && err.error_type == "user") {
-                    res.status(400);
-                    return next(err);
-                } else if(err) {
-                    res.status(500);
-                    return next(err);
-                }
-
-                globals.logger.info( `${routeHeader} :: Users created: ${new_user_id}` );
-
-                /*
-                //now send some emails
-                globals.logger.info( `${routeHeader} :: Send registration email...` );
-
-                let regEmail = globals.is_admin_registration_email({ user: createParams })
-
-                //send regristration email
-                let email = {
-                    to: createParams.email_address,
-                    from: `${process.env.is_admin_EMAIL}`,
-                    subject: `[${process.env.APP_NAME}] New User Registered`,
-                    html: regEmail.html,
-                    text: regEmail.text
-                }
-
-                globals.sendEmail(email, (err,emailRes) => {
-                    if(err){
-                        next(err);
-                    } else {
-                        globals.logger.info( `${routeHeader} :: Email sent to new user: ${createParams.email_address}` );
-                    }
-                });
-
-                let regUserEmail = globals.user_registration_email({ user: createParams });
-
-                email = {
-                    to: createParams.email_address,
-                    from: `${process.env.is_admin_EMAIL}`,
-                    subject: `[${process.env.APP_NAME}] Registration Confirm`,
-                    html: regUserEmail.html,
-                    text: regUserEmail.text
-                }
-
-                globals.sendEmail(email, (err,emailRes) => {
-                    if(err){
-                        next(err);
-                    } else {
-                        globals.logger.info( `${routeHeader} :: Admin email sent for new registration:` );
-                    }
-                });
-                */
-
-                globals.logger.info( `${routeHeader} :: END` );
-                return res.json({ success: true, user_id: new_user_id });
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-    // user/:id operations
-    .get('/:id', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "GET /user/:id";
-
-        try {
-            globals.logger.debug( `${routeHeader} :: BEGIN` );
-
-            globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
-
-            globals.logger.debug( `${routeHeader} :: parseInt(req.params.id): ${parseInt(req.params.id)}` );
-
-            if( req.params.id === undefined || isNaN( parseInt(req.params.id) ) ){
-                res.status(404)
-                return next()
-            }
-
-            //get user
-            Users.findOne({ id: parseInt(req.params.id) }, (err, user) => {
-                if(err){
-                    res.status(500);
-                    return next(err);
-                }
-
-                globals.logger.debug(`GET /user/:id :: user.id: ${req.params.id}`, user);
-
-                globals.logger.debug( `${routeHeader} :: END` );
-
-                return res.json(user);
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
-    .put('/:id', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "PUT /user/:id ";
-
-        try {
-            globals.logger.info( `${routeHeader} :: BEGIN` );
-
-            globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
-
-            let user = req.body;
-            delete user._csrf;
-            let updateParams = { id: parseInt(req.params.id), user: req.body };
-
-            globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
-
-            Users.update(updateParams, (err, dbres) => {
-                if(err){
-                    res.status(500);
-                    return next(err);
-                }
-
-                let user = dbres[1];
-                globals.logger.debug( `${routeHeader} :: user ::`, user);
-
-                globals.logger.info( routeHeader  + " :: END" );
-                return res.json({ success: true, user: user });
-            });
-        } catch( err ) {
-            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-            return next(err);
-        }
-    })
     // user/confirm/:id/:token
     .get('/confirm/:id/:token', (req, res, next) => {
         let Users = new UsersModel( globals );
@@ -842,6 +666,182 @@ module.exports = (globals) => {
 
                 globals.logger.info( `${routeHeader} :: END` );
                 return res.json({ success: true, user_id: new_user.id });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .delete('/:id', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "DELETE /user/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            Users.delete( parseInt(req.params.id), (err, deleteRes) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+                globals.logger.info( routeHeader  + " :: res", deleteRes );
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // create user
+    .post('/', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "POST /user";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            let createParams = req.body;
+
+            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
+
+            //auto-generate a password for the user when created via the panel
+            const salt = bcrypt.genSaltSync(globals.salt_rounds);
+            const hash = bcrypt.hashSync(uuid.v4(), salt);
+
+            //save the password hash
+            createParams.password_hash = hash;
+
+            //create a token for first login
+            createParams.invite_token = uuid.v4()
+
+            delete createParams._csrf;
+
+            Users.create(createParams, (err, new_user_id) => {
+                if(err && err.error_type == "user") {
+                    res.status(400);
+                    return next(err);
+                } else if(err) {
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.info( `${routeHeader} :: Users created: ${new_user_id}` );
+
+                /*
+                //now send some emails
+                globals.logger.info( `${routeHeader} :: Send registration email...` );
+
+                let regEmail = globals.is_admin_registration_email({ user: createParams })
+
+                //send regristration email
+                let email = {
+                    to: createParams.email_address,
+                    from: `${process.env.is_admin_EMAIL}`,
+                    subject: `[${process.env.APP_NAME}] New User Registered`,
+                    html: regEmail.html,
+                    text: regEmail.text
+                }
+
+                globals.sendEmail(email, (err,emailRes) => {
+                    if(err){
+                        next(err);
+                    } else {
+                        globals.logger.info( `${routeHeader} :: Email sent to new user: ${createParams.email_address}` );
+                    }
+                });
+
+                let regUserEmail = globals.user_registration_email({ user: createParams });
+
+                email = {
+                    to: createParams.email_address,
+                    from: `${process.env.is_admin_EMAIL}`,
+                    subject: `[${process.env.APP_NAME}] Registration Confirm`,
+                    html: regUserEmail.html,
+                    text: regUserEmail.text
+                }
+
+                globals.sendEmail(email, (err,emailRes) => {
+                    if(err){
+                        next(err);
+                    } else {
+                        globals.logger.info( `${routeHeader} :: Admin email sent for new registration:` );
+                    }
+                });
+                */
+
+                globals.logger.info( `${routeHeader} :: END` );
+                return res.json({ success: true, user_id: new_user_id });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // user/:id operations
+    .get('/:id', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "GET /user/:id";
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN` );
+
+            globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            globals.logger.debug( `${routeHeader} :: parseInt(req.params.id): ${parseInt(req.params.id)}` );
+
+            if( req.params.id === undefined || isNaN( parseInt(req.params.id) ) ){
+                res.status(404)
+                return next()
+            }
+
+            //get user
+            Users.findOne({ id: parseInt(req.params.id) }, (err, user) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.debug(`GET /user/:id :: user.id: ${req.params.id}`, user);
+
+                globals.logger.debug( `${routeHeader} :: END` );
+
+                return res.json(user);
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .put('/:id', (req, res, next) => {
+        let Users = new UsersModel( globals );
+        let routeHeader = "PUT /user/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
+
+            let user = req.body;
+            delete user._csrf;
+            let updateParams = { id: parseInt(req.params.id), user: req.body };
+
+            globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
+
+            Users.update(updateParams, (err, dbres) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                let user = dbres[1];
+                globals.logger.debug( `${routeHeader} :: user ::`, user);
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true, user: user });
             });
         } catch( err ) {
             globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
