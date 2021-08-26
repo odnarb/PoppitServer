@@ -1,71 +1,56 @@
                         <div class="kt-portlet kt-portlet--mobile">
                             <div class="kt-portlet__head kt-portlet__head--lg">
                                 <div class="kt-portlet__head-label">
-                                    <img src="<%- vuser.profile_picture %>" width=150px title="<%- vuser.first_name %> <%- vuser.last_name %>" />
                                     <h3 class="kt-portlet__head-title">
                                         <%- vuser.first_name %> <%- vuser.last_name %>
+                                        <% if ( user !== undefined && user.is_admin === 1 ) { %>(id: <%- vuser.id %> )<% } %>
                                     </h3>
                                 </div>
                             </div>
                             <div class="kt-portlet__body">
 
-<!--                                 <div class="form-group row">
-                                    <label for="company_id" class="col-2 col-form-label">Profile Picture:</label>
-                                    <div class="col-10">
-                                        <form action="/user/edit/profile-picture/<%- vuser.id %>" method="POST" enctype="multipart/form-data">
-                                            <input type="file" name="profile_picture_edit"><br>
-                                            <input type="submit" name="upload_btn" value="upload">
-                                        </form>
-                                    </div>
-                                </div>
- -->
                                 <form action="/profile/edit/<%- vuser.id %>" method="POST" class="kt-form kt-form--label-right user-add-edit-form" _lpchecked="1">
                                     <div class="kt-portlet__body">
 
+                                        <% if ( user !== undefined && user.is_admin === 1 ) { %>
                                         <div class="form-group row">
-                                            <label for="profile_picture" class="col-2 col-form-label">Profile Picture:</label>
+                                            <label for="first_name" class="col-2 col-form-label">User Type:</label>
                                             <div class="col-10">
-                                                <input type="file" name="profile_picture_edit"><br>
+                                                <select name="user_type_id" class="custom-select form-control" placeholder="Select a user type...">
+                                                    <option value="1"<% if( vuser.user_type_id === 1 ) { %> selected<% } %>>Admin</option>
+                                                    <option value="2"<% if( vuser.user_type_id === 2 ) { %> selected<% } %>>Support</option>
+                                                    <option value="3"<% if( vuser.user_type_id === 3 ) { %> selected<% } %>>Advertiser</option>
+                                                    <option value="4"<% if( vuser.user_type_id === 4 ) { %> selected<% } %>>User</option>
+                                                </select>
                                             </div>
                                         </div>
+                                        <% } %>
 
                                         <div class="form-group row">
                                             <label for="first_name" class="col-2 col-form-label">First Name*:</label>
                                             <div class="col-10">
-                                                <input name="first_name" class="form-control" type="text" maxlength="80" value="<%- vuser.first_name %>" autocomplete="off">
+                                                <input name="first_name" class="form-control" type="text" maxlength="80" value="<%- vuser.first_name %>" autocomplete="off" required>
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
                                             <label for="last_name" class="col-2 col-form-label">Last Name*:</label>
                                             <div class="col-10">
-                                                <input name="last_name" class="form-control" type="text" maxlength="80" value="<%- vuser.last_name %>" autocomplete="off">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group row">
-                                            <label for="gender" class="col-2 col-form-label">Gender*:</label>
-                                            <div class="col-10">
-                                                <select name="gender" class="custom-select form-control">
-                                                    <option>Select a gender...</option>
-                                                    <option value="M">Male</option>
-                                                    <option value="F">Female</option>
-                                                    <option value="O">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group row">
-                                            <label for="email_address" class="col-2 col-form-label">Email Address*:</label>
-                                            <div class="col-10">
-                                                <input name="email_address" class="form-control" type="text" value="<%- vuser.email_address %>" maxlength="255" autocomplete="off" disabled="disabled">
+                                                <input name="last_name" class="form-control" type="text" maxlength="80" value="<%- vuser.last_name %>" autocomplete="off" required>
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
                                             <label for="phone" class="col-2 col-form-label">Phone Number*:</label>
                                             <div class="col-10">
-                                                <input name="phone" class="form-control" type="text" value="<%- vuser.phone %>" autocomplete="off">
+                                                <input name="phone" class="form-control" type="text" value="<%- vuser.phone %>" autocomplete="off" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group row">
+                                            <label for="email_address" class="col-2 col-form-label">Email Address:</label>
+                                            <div class="col-10">
+                                                <input name="email_address" class="form-control" type="text" value="<%- vuser.email_address %>" maxlength="255" autocomplete="off" disabled="disabled">
                                             </div>
                                         </div>
 
@@ -84,21 +69,21 @@
                                         </div>
 
                                         <div class="form-group row">
-                                            <label for="city" class="col-2 col-form-label">City*:</label>
+                                            <label for="city" class="col-2 col-form-label">City:</label>
                                             <div class="col-10">
                                                 <input name="city" class="form-control" type="text" value="<%- vuser.city %>" maxlength="255" autocomplete="off">
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
-                                            <label for="state_province" class="col-2 col-form-label">State*:</label>
+                                            <label for="state_province" class="col-2 col-form-label">State:</label>
                                             <div class="col-10">
                                                 <input name="state_province" class="form-control" type="text" value="<%- vuser.state_province %>" maxlength="255" autocomplete="off">
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
-                                            <label for="postal_code" class="col-2 col-form-label">Postal Code*:</label>
+                                            <label for="postal_code" class="col-2 col-form-label">Postal Code:</label>
                                             <div class="col-10">
                                                 <input name="postal_code" class="form-control" type="text" value="<%- vuser.postal_code %>" maxlength="255" autocomplete="off">
                                             </div>

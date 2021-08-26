@@ -158,8 +158,6 @@ module.exports = (globals) => {
 
                 let userUpdateObj = JSON.parse(JSON.stringify(req.body))
 
-                userUpdateObj.gender = 'M'
-
                 //don't let this data get modified regardless of admin/support status
                 delete userUpdateObj.password_hash
                 delete userUpdateObj.forgot_password_token
