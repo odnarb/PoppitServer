@@ -359,7 +359,7 @@ class Users {
                     this.globals.logger.error(`${MODEL_NAME}.create() :: ERROR : `, error);
                     cb({ error_type: "system", error: "A system error has occurred, please contact support" });
                 } else if( result.insertId > 0 ){
-                    let getUserSQL = `CALL getUser(${result.insertId});`
+                    let getUserSQL = `CALL getUser(${result.insertId}, '');`
                     this.globals.logger.debug(`${MODEL_NAME}.create() getUserSQL: ${getUserSQL}`);
 
                     this.execSQL(this.db, getUserSQL, (error, result) => {

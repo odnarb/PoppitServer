@@ -98,11 +98,11 @@ let KTDatatablesExtensionsKeytable = function() {
                                 required: true,
                                 email: true,
                                 maxlength: 255
-                            },
-                            phone: {
-                                required: true,
-                                phoneUS: true
                             }
+                            // phone: {
+                            //     required: true,
+                            //     phoneUS: true
+                            // }
                         }
                     });
 
@@ -194,11 +194,11 @@ let KTDatatablesExtensionsKeytable = function() {
                                 required: true,
                                 email: true,
                                 maxlength: 255
-                            },
-                            phone: {
-                                required: true,
-                                phoneUS: true
                             }
+                            // phone: {
+                            //     required: true,
+                            //     phoneUS: true
+                            // }
                         }
                     });
 
