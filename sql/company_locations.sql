@@ -1,7 +1,6 @@
--- user_locations
-CREATE TABLE `user_locations` (
+CREATE TABLE `company_locations` (
     `id` INT AUTO_INCREMENT,
-    `user_id` INT NOT NULL,
+    `company_id` INT NOT NULL,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
     `description` VARCHAR(1000) NOT NULL DEFAULT '',
     `address` VARCHAR(255) NOT NULL DEFAULT '',
@@ -21,6 +20,6 @@ CREATE TABLE `user_locations` (
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
     PRIMARY KEY (`id`),
-    KEY `user_id` (`user_id`),
-    CONSTRAINT `user_locations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+    KEY `company_id` (`company_id`),
+    CONSTRAINT `user_locations_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `user_companies` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
