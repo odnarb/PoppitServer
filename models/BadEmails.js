@@ -7,19 +7,17 @@ const MODEL_NAME = "BadEmails";
 const OBJECT_NAME = "bad_emails";
 
 const VALID_COLS = [
+    "id",
     "email_address",
     "reason",
     "reason_detail",
     "data",
+    "active",
+    "updated_at",
     "update_user_id",
+    "created_at",
     "create_user_id"
 ];
-
-const VALID_FILTER_COLS = [];
-
-const IDENTITY_COL = "id";
-const CREATED_AT_COL = "created_at";
-const UPDATED_AT_COL = "updated_at";
 
 class BadEmails {
     constructor(globals) {

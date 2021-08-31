@@ -5,11 +5,12 @@ CREATE TABLE `user_analytics` (
     `path` VARCHAR(1000) NOT NULL DEFAULT '',
     -- tap, swipe, click, etc
     `action` VARCHAR(1000) NOT NULL DEFAULT '',
-    `data` json DEFAULT NULL,
-    `update_user_id` int NOT NULL DEFAULT 0,
-    `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `create_user_id` int NOT NULL DEFAULT 0,
-    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `data` JSON NULL,
+    `active` INT NOT NULL DEFAULT 1,
+    `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `update_user_id` INT NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    `create_user_id` INT NOT NULL,
     PRIMARY KEY (`id`),
     KEY `user_id` (`user_id`),
     CONSTRAINT `user_analytics_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)

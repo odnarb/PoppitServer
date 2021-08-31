@@ -1,19 +1,34 @@
 /*
-    DBAL for UserLocations
+    DBAL for CompanyLocations
 */
 
-const TABLE_NAME = "user_locations";
-const MODEL_NAME = "UserLocations";
-const OBJECT_NAME = "user_locations";
+const TABLE_NAME = "company_locations";
+const MODEL_NAME = "CompanyLocations";
+const OBJECT_NAME = "company_locations";
 
-const VALID_COLS = ["company_id","name","description","address","city","state","zip","country_code","latitude","longitude","altitude","polygon","active"];
-const VALID_FILTER_COLS = ["company_id","name","address","city","state","zip","country_code","active"];
+const VALID_COLS = [
+    "id",
+    "company_id",
+    "name",
+    "description",
+    "address",
+    "city",
+    "state",
+    "zip",
+    "country_code",
+    "latitude",
+    "longitude",
+    "altitude",
+    "polygon",
+    "active",
+    "data",
+    "update_user_id",
+    "updated_at",
+    "create_user_id",
+    "created_at"
+];
 
-const IDENTITY_COL = "id";
-const CREATED_AT_COL = "created_at";
-const UPDATED_AT_COL = "updated_at";
-
-class UserLocations {
+class CompanyLocations {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -28,7 +43,7 @@ class UserLocations {
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
                 order: {
-                    by: CREATED_AT_COL,
+                    by: "created_at",
                     direction: "DESC"
                 },
                 limit: 10,
@@ -92,7 +107,7 @@ class UserLocations {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
             let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
@@ -129,7 +144,7 @@ class UserLocations {
             cb({ error_type: "user", error: "id must be passed in" });
         } else {
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
 
             this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );
@@ -332,4 +347,4 @@ class UserLocations {
     }
 }
 
-module.exports = UserLocations;
+module.exports = CompanyLocations;

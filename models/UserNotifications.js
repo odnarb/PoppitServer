@@ -7,6 +7,7 @@ const MODEL_NAME = "UserNotifications";
 const OBJECT_NAME = "user_notification";
 
 const VALID_COLS = [
+    "id",
     "user_id",
     "notification_type_id",
     "notification_method_id",
@@ -17,29 +18,13 @@ const VALID_COLS = [
     "body_text",
     "status",
     "status_detail",
+    "active",
     "data",
     "update_user_id",
-    "create_user_id"
+    "updated_at",
+    "create_user_id",
+    "created_at"
 ];
-const VALID_FILTER_COLS = [
-    "user_id",
-    "notification_type_id",
-    "notification_method_id",
-    "to_email",
-    "from_email",
-    "subject",
-    "body_html",
-    "body_text",
-    "status",
-    "status_detail",
-    "data",
-    "update_user_id",
-    "create_user_id"
-];
-
-const IDENTITY_COL = "id";
-const CREATED_AT_COL = "created_at";
-const UPDATED_AT_COL = "updated_at";
 
 class UserNotifications {
     constructor(globals) {
@@ -55,7 +40,7 @@ class UserNotifications {
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
                 order: {
-                    by: CREATED_AT_COL,
+                    by: "created_at",
                     direction: "DESC"
                 },
                 limit: 10,
@@ -99,7 +84,7 @@ class UserNotifications {
         let colErrors = [];
         if( Object.keys(opts.where).length > 0 ) {
             Object.keys(opts.where).filter(el => {
-                if( VALID_FILTER_COLS.indexOf(el) < 0 ){
+                if( VALID_COLS.indexOf(el) < 0 ){
                     colErrors.push({ "invalid_col": el });
                 }
             });
@@ -119,7 +104,7 @@ class UserNotifications {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
             let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
@@ -156,7 +141,7 @@ class UserNotifications {
             cb({ error_type: "user", error: "id must be passed in" });
         } else {
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
 
             this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );

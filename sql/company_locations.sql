@@ -12,13 +12,14 @@ CREATE TABLE `company_locations` (
     `longitude` VARCHAR(30) NOT NULL DEFAULT '',
     `altitude` VARCHAR(30) NOT NULL DEFAULT '',
     `polygon` JSON NULL,
-
-    `data` JSON NULL,
     `date_start` DATETIME NOT NULL DEFAULT NOW(),
     `date_end` DATETIME NOT NULL DEFAULT NOW(),
-    `active` INT NOT NULL DEFAULT 0,
+    `data` JSON NULL,
+    `active` INT NOT NULL DEFAULT 1,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),
+    `update_user_id` INT NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT NOW(),
+    `create_user_id` INT NOT NULL,
     PRIMARY KEY (`id`),
     KEY `company_id` (`company_id`),
     CONSTRAINT `user_locations_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `user_companies` (`id`)

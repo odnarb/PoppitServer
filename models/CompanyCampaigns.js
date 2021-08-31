@@ -23,7 +23,7 @@ const VALID_COLS = [
     "created_at"
 ];
 
-class Campaign {
+class CompanyCampaigns {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -280,4 +280,4 @@ class Campaign {
     }
 }
 
-module.exports = Campaign;
+module.exports = CompanyCampaigns;

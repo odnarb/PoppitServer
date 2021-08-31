@@ -3,18 +3,17 @@
 let express = require('express');
 let router = express.Router();
 
-let UserLocationsModal = require('../models/UserLocations');
+let CompanyLocationsModel = require('../models/CompanyLocations');
 
 module.exports = (globals) => {
     return router
     // /location (get all locations)
     .get('/', (req, res, next) => {
-        let UserLocations = new UserLocationsModal( globals );
+        let CompanyLocations = new CompanyLocationsModel( globals );
         let routeHeader = "GET /location (HTTP)";
 
         if( req.xhr == true ){
             routeHeader = "GET /location (XHR)";
-
 
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN :: filtered location list` );
@@ -29,7 +28,7 @@ module.exports = (globals) => {
                 if( params._ !== undefined ) delete params._;
 
                 //get locations
-                Location.find(req.query, (err, locations) => {
+                CompanyLocations.find(req.query, (err, locations) => {
                     globals.logger.debug( `${routeHeader} :: DB CB: `, err);
 
                     if(err && err.error_type === "system"){
@@ -68,7 +67,7 @@ module.exports = (globals) => {
     })
     //create location
     .post('/', (req, res, next) => {
-        let UserLocations = new UserLocationsModal( globals );
+        let CompanyLocations = new CompanyLocationsModel( globals );
         let routeHeader = "POST /location";
 
         try {
@@ -80,13 +79,13 @@ module.exports = (globals) => {
 
             globals.logger.info(`${routeHeader} :: createParams: `, createParams );
 
-            Location.create(createParams, (err, new_location_id) => {
+            CompanyLocations.create(createParams, (err, new_location_id) => {
                 if(err){
                     res.status(500);
                     return next(err);
                 }
 
-                globals.logger.info( `${routeHeader} :: UserLocations created: ${new_location_id}` );
+                globals.logger.info( `${routeHeader} :: CompanyLocations created: ${new_location_id}` );
 
                 globals.logger.info( `${routeHeader} :: END` );
                 return res.json({ success: true, location_id: new_location_id });
@@ -98,7 +97,7 @@ module.exports = (globals) => {
     })
     // location/:id operations
     .get('/:id', (req, res, next) => {
-        let UserLocations = new UserLocationsModal( globals );
+        let CompanyLocations = new CompanyLocationsModel( globals );
         let routeHeader = "GET /location/:id";
 
         try {
@@ -107,13 +106,13 @@ module.exports = (globals) => {
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
 
             //get location
-            Location.findOne({ id: parseInt(req.params.id) }, (err, location) => {
+            CompanyLocations.findOne({ id: parseInt(req.params.id) }, (err, location) => {
                 if(err){
                     res.status(500);
                     return next(err);
                 }
 
-                globals.logger.info(`GET /location/:id :: Location.id: ${req.params.id}`, location);
+                globals.logger.info(`GET /location/:id :: location.id: ${req.params.id}`, location);
 
                 globals.logger.info( `${routeHeader} :: END` );
 
@@ -125,7 +124,7 @@ module.exports = (globals) => {
         }
     })
     .put('/:id', (req, res, next) => {
-        let UserLocations = new UserLocationsModal( globals );
+        let CompanyLocations = new CompanyLocationsModel( globals );
         let routeHeader = "PUT /location/:id ";
 
         try {
@@ -141,7 +140,7 @@ module.exports = (globals) => {
 
             globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
 
-            Location.update(updateParams, (err, location) => {
+            CompanyLocations.update(updateParams, (err, location) => {
                 if(err){
                     res.status(500);
                     return next(err);
@@ -156,7 +155,7 @@ module.exports = (globals) => {
         }
     })
     .delete('/:id', (req, res, next) => {
-        let UserLocations = new UserLocationsModal( globals );
+        let CompanyLocations = new CompanyLocationsModel( globals );
         let routeHeader = "DELETE /location/:id ";
 
         try {
@@ -164,7 +163,7 @@ module.exports = (globals) => {
 
             globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
 
-            Location.delete( parseInt(req.params.id), (err, deleteRes) => {
+            CompanyLocations.delete( parseInt(req.params.id), (err, deleteRes) => {
                 if(err){
                     res.status(500);
                     return next(err);

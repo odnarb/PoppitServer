@@ -3,7 +3,7 @@
 let express = require('express');
 let router = express.Router();
 
-let CampaignModel = require('../models/Campaigns');
+let CampaignModel = require('../models/CompanyCampaigns');
 
 module.exports = (globals) => {
     return router
