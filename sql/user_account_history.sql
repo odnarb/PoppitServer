@@ -1,5 +1,3 @@
--- user_account_history
--- payment history for users
 CREATE TABLE `user_account_history` (
     `id` INT AUTO_INCREMENT,
     `user_id` INT NOT NULL DEFAULT 0,

@@ -1,4 +1,3 @@
--- user_rewards
 CREATE TABLE `user_rewards` (
     `id` INT AUTO_INCREMENT,
     `campaign_id` INT NOT NULL,

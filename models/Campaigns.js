@@ -1,17 +1,27 @@
 /*
-    DBAL for Campaigns
+    DBAL for CompanyCampaigns
 */
 
 const TABLE_NAME = "company_campaigns";
-const MODEL_NAME = "Campaign";
-const OBJECT_NAME = "campaign";
+const MODEL_NAME = "CompanyCampaigns";
+const OBJECT_NAME = "company_campaigns";
 
-const VALID_COLS = ["company_id","name","category","description","game_id","data","date_start","date_end","active"];
-const VALID_FILTER_COLS = ["company_id","name","category","game_id","date_start","date_end","active"];
-
-const IDENTITY_COL = "id";
-const CREATED_AT_COL = "created_at";
-const UPDATED_AT_COL = "updated_at";
+const VALID_COLS = [
+    "id",
+    "company_id",
+    "name",
+    "category",
+    "description",
+    "date_start",
+    "date_end",
+    "game_id",
+    "active",
+    "data",
+    "update_user_id",
+    "updated_at",
+    "create_user_id",
+    "created_at"
+];
 
 class Campaign {
     constructor(globals) {
@@ -28,7 +38,7 @@ class Campaign {
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
                 order: {
-                    by: CREATED_AT_COL,
+                    by: "created_at",
                     direction: "DESC"
                 },
                 limit: 10,
@@ -72,7 +82,7 @@ class Campaign {
         let colErrors = [];
         if( Object.keys(opts.where).length > 0 ) {
             Object.keys(opts.where).filter(el => {
-                if( VALID_FILTER_COLS.indexOf(el) < 0 ){
+                if( VALID_COLS.indexOf(el) < 0 ){
                     colErrors.push({ "invalid_col": el });
                 }
             });
@@ -92,7 +102,7 @@ class Campaign {
                 whereStr += `LOWER(${col}) LIKE CONCAT( LOWER(${this.dbescape( opts.where[col] )}), '%')`;
             });
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME}`;
 
             let totalCount = `SELECT count(*) as totalCount FROM ${TABLE_NAME};`;
@@ -129,7 +139,7 @@ class Campaign {
             cb({ error_type: "user", error: "id must be passed in" });
         } else {
 
-            let cols = `${IDENTITY_COL},${VALID_COLS.join(',')},${CREATED_AT_COL},${UPDATED_AT_COL}`;
+            let cols = VALID_COLS.join(',');
             let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(opts.id)};`;
 
             this.globals.logger.debug( `${MODEL_NAME}.findOne() sqlStr: ${sqlStr}` );

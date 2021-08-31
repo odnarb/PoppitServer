@@ -1,5 +1,3 @@
--- user_analytics
--- this may be redundant, or not needed if we use some third party for analytics
 CREATE TABLE `user_analytics` (
     `id` INT AUTO_INCREMENT,
     `user_id` INT NOT NULL DEFAULT 0,

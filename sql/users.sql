@@ -1,4 +1,3 @@
--- users
 CREATE TABLE `users` (
     `id` INT AUTO_INCREMENT,
     `user_type_id` int NOT NULL,

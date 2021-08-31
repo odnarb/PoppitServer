@@ -1,4 +1,3 @@
--- games
 CREATE TABLE `games` (
     `id` INT AUTO_INCREMENT,
     `name` VARCHAR(80) NOT NULL DEFAULT '',
