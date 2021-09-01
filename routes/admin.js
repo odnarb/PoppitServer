@@ -65,8 +65,8 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/campaign',{
-                    pageTitle: "Search Campaigns"
+                return res.render('pages/admin-campaigns',{
+                    pageTitle: "Campaigns"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -253,8 +253,8 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/user_companies',{
-                    pageTitle: "Search Companies"
+                return res.render('pages/admin-companies',{
+                    pageTitle: "Companies"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -320,8 +320,8 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/user_companies',{
-                    pageTitle: "Search Companies"
+                return res.render('pages/admin-companies',{
+                    pageTitle: "Companies"
                 });
             } catch( err ) {
                 globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
@@ -516,7 +516,7 @@ module.exports = (globals) => {
                 globals.logger.debug( `${routeHeader} :: BEGIN`);
 
                 globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/users',{
+                return res.render('pages/admin-users',{
                     pageTitle: "Users"
                 });
             } catch( err ) {
