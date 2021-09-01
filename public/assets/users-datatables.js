@@ -123,7 +123,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the user
                     $.ajax({
                         method: "PUT",
-                        url: `/user/${user_id}`,
+                        url: `/admin/users/${user_id}`,
                         data: obj,
                         success: function(res) {
                             btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
@@ -221,7 +221,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the user
                     $.ajax({
                         method: "POST",
-                        url: `/user`,
+                        url: `/admin/users`,
                         data: obj,
                         success: function(res) {
                             btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
@@ -260,7 +260,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the user
                 $.ajax({
                     method: "DELETE",
-                    url: `/user/${user_id}?_csrf=${window._csrf}`,
+                    url: `/admin/users/${user_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("user deleted!: ", res);
 
@@ -285,7 +285,7 @@ let KTDatatablesExtensionsKeytable = function() {
             order: [[ 7, "desc" ]],
 
             //request uri
-            ajax: "/user",
+            ajax: "/admin/users",
 
             dataSrc: '',
 

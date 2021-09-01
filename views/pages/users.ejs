@@ -2,7 +2,7 @@
                             <div class="kt-portlet__head kt-portlet__head--lg">
                                 <div class="kt-portlet__head-label">
                                     <span class="kt-portlet__head-icon">
-                                        <i class="kt-font-brand flaticon-squares"></i>
+                                        <i class="fa fa-users"></i>
                                     </span>
                                     <h3 class="kt-portlet__head-title">
                                         Users
@@ -72,7 +72,7 @@ let checkJQ = () =>{
                 async: true
             });
         }
-        if (typeof someObject == 'undefined') $.loadScript('assets/users-datatables.js');
+        if (typeof someObject == 'undefined') $.loadScript('/assets/users-datatables.js');
 
     } else {
       window.setTimeout("checkJQ();",100);

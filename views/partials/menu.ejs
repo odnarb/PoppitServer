@@ -17,12 +17,28 @@
                                     <i class="kt-menu__section-icon flaticon-more-v2"></i>
                                 </li>
 
-                                <li class="kt-menu__item<% if(url === "/user") { %> kt-menu__item--active<%}%>" aria-haspopup="true">
-                                    <a href="/user" class="kt-menu__link ">
+                                <li class="kt-menu__item<% if(url === "/admin/users") { %> kt-menu__item--active<%}%>" aria-haspopup="true">
+                                    <a href="/admin/users" class="kt-menu__link ">
                                         <span class="kt-menu__link-icon">
                                             <i class="fa fa-users"></i>
                                         </span>
                                         <span class="kt-menu__link-text">Users</span>
+                                    </a>
+                                </li>
+                                <li class="kt-menu__item<% if(url === "/admin/companies") { %> kt-menu__item--active<%}%>" aria-haspopup="true" data-ktmenu-submenu-toggle="hover">
+                                    <a href="/admin/companies" class="kt-menu__link kt-menu__toggle">
+                                        <span class="kt-menu__link-icon">
+                                            <i class="fa fa-building"></i>
+                                        </span>
+                                        <span class="kt-menu__link-text">Companies</span>
+                                    </a>
+                                </li>
+                                <li class="kt-menu__item<% if(url === "/admin/campaigns") { %> kt-menu__item--active<%}%>" aria-haspopup="true" data-ktmenu-submenu-toggle="hover">
+                                    <a href="/admin/campaigns" class="kt-menu__link kt-menu__toggle">
+                                        <span class="kt-menu__link-icon">
+                                            <i class="fa fa-chart-bar"></i>
+                                        </span>
+                                        <span class="kt-menu__link-text">Campaigns</span>
                                     </a>
                                 </li>
 

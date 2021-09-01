@@ -121,7 +121,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the company
                     $.ajax({
                         method: "PUT",
-                        url: `/companies/${company_id}`,
+                        url: `/admin/companies/${company_id}`,
                         data: obj,
                         success: function(res) {
                             btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
@@ -219,7 +219,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the company
                     $.ajax({
                         method: "POST",
-                        url: `/companies`,
+                        url: `/admin/companies`,
                         data: obj,
                         success: function(res) {
                             btn.removeClass('kt-spinner kt-spinner--right kt-spinner--sm kt-spinner--light').attr('disabled', false);
@@ -262,7 +262,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the company
                 $.ajax({
                     method: "DELETE",
-                    url: `/companies/${company_id}?_csrf=${window._csrf}`,
+                    url: `/admin/companies/${company_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("company deleted!: ", res);
 
@@ -287,7 +287,7 @@ let KTDatatablesExtensionsKeytable = function() {
             order: [[ 7, "desc" ]],
 
             //request uri
-            ajax: "/companies",
+            ajax: "/admin/companies",
 
             //tell datatables that our structure is in obj.companies
             dataSrc: '',

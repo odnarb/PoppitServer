@@ -11,65 +11,6 @@ let UserNotificationsModel = require('../models/UserNotifications');
 
 module.exports = (globals) => {
     return router
-    // user/ (get all users)
-    .get('/', (req, res, next) => {
-        let Users = new UsersModel( globals );
-        let routeHeader = "GET /user (HTTP)";
-
-        if( req.xhr == true ){
-            routeHeader = "GET /user (XHR)";
-
-            try {
-                globals.logger.debug( `${routeHeader} :: BEGIN :: filtered user list` );
-
-                globals.logger.debug( `${routeHeader} :: req.params: `, req.params );
-                globals.logger.debug( `${routeHeader} :: req.query: `, req.query );
-                globals.logger.debug( `${routeHeader} :: req.body: `, req.body );
-
-                let params = req.query;
-
-                //remove timestamp param for datatables
-                if( params._ !== undefined ) delete params._;
-
-                //get users
-                Users.find(req.query, (err, dbresult) => {
-
-                    globals.logger.debug( `${routeHeader} :: DB CB: `, err);
-
-                    if(err && err.error_type === "system"){
-                        globals.logger.debug( `${routeHeader} :: DB ERROR: `, err);
-                        res.status(500);
-                        return next(err);
-                    } else if( err && err.error_type === "user"){
-                        globals.logger.debug( `${routeHeader} :: Users DB ERROR: `, err);
-                        res.status(400);
-                        return next(err);
-                    }
-                    globals.logger.debug( `${routeHeader} :: DONE`);
-                    return res.json({
-                        aaData: dbresult[0],
-                        iTotalRecords: dbresult[1].totalCount,
-                        iTotalDisplayRecords: dbresult[2].totalCountWithFilter
-                    });
-                });
-            } catch( err ) {
-                globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-                return next(err);
-            }
-        } else {
-            try {
-                globals.logger.debug( `${routeHeader} :: BEGIN`);
-
-                globals.logger.debug( `${routeHeader} :: DONE`);
-                return res.render('pages/users',{
-                    pageTitle: "Users"
-                });
-            } catch( err ) {
-                globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
-                return next(err);
-            }
-        }
-    })
     // user/confirm/:id/:token
     .get('/confirm/:id/:token', (req, res, next) => {
         let Users = new UsersModel( globals );

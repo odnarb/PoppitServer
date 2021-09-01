@@ -205,6 +205,9 @@ app.use( (req,res,next) => {
 let main = require('./routes/main.js')(globals);
 app.use('/', main);
 
+let admin = require('./routes/admin.js')(globals);
+app.use('/admin', admin);
+
 let profile = require('./routes/profile.js')(globals);
 app.use('/profile', profile);
 
@@ -260,7 +263,7 @@ eventEmitter.on('mysqlReady', () => {
     // Now start Waterline passing adapters in
 
     // Start Server
-    let port = args.port || 7777;
+    let port = args.port || 3000;
     app.listen(port);
     globals.logger.info(`${process.env.APP_NAME} Server is LIVE on port ${port}`);
 });
