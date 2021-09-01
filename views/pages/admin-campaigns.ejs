@@ -107,8 +107,6 @@
                         <%- include('../partials/view_campaign_modal') %>
                         <%- include('../partials/add_edit_campaign_modal') %>
 
-<link href="assets/vendors/custom/datatables/datatables.bundle.min.css" rel="stylesheet" type="text/css" />
-
 <script>
 let checkJQ = () =>{
     if ( window.jQuery ){
@@ -121,7 +119,7 @@ let checkJQ = () =>{
                 async: true
             });
         }
-        if (typeof someObject == 'undefined') $.loadScript('assets/admin-campaigns.js');
+        if (typeof someObject == 'undefined') $.loadScript('/assets/admin-campaigns.js');
 
     } else {
       window.setTimeout("checkJQ();",100);
