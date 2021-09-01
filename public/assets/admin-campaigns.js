@@ -131,7 +131,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the campaign
                     $.ajax({
                         method: "PUT",
-                        url: `/campaign/${campaign_id}`,
+                        url: `/admin/campaigns/${campaign_id}`,
                         data: obj,
                         success: function(res) {
                             //reset form
@@ -234,7 +234,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the campaign
                     $.ajax({
                         method: "POST",
-                        url: `/campaign`,
+                        url: `/admin/campaigns`,
                         data: obj,
                         success: function(res) {
                             //reset form
@@ -273,7 +273,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the campaign
                 $.ajax({
                     method: "DELETE",
-                    url: `/campaign/${campaign_id}?_csrf=${window._csrf}`,
+                    url: `/admin/campaigns/${campaign_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("campaign deleted!: ", res);
 
@@ -297,19 +297,8 @@ let KTDatatablesExtensionsKeytable = function() {
             pagingType: 'full_numbers',
             order: [[ 7, "desc" ]],
 
-            buttons: [
-                'print',
-                'copyHtml5',
-                'excelHtml5',
-                'csvHtml5',
-                {
-                    extend: 'pdfHtml5',
-                    orientation: 'landscape'
-                }
-            ],
-
             //request uri
-            ajax: "/campaign",
+            ajax: "/admin/campaigns",
 
             //tell datatables that our structure is in obj.campaigns
             dataSrc: '',
