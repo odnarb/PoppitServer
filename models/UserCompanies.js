@@ -83,6 +83,9 @@ class UserCompanies {
             opts.offset = parseInt(opts.offset);
         }
 
+        //lastly, make sure it's active
+        opts.where.active = 1
+
         this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts validation: `, opts);
 
         //need more resilience: send back which columns are invalid?
