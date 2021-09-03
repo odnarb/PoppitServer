@@ -1,7 +1,6 @@
 "use strict";
 let KTDatatablesExtensionsKeytable = function() {
 
-    // $('#kt_view_modal').modal('show');
     let modal = $('#kt_view_modal');
 
     let checkToggle = function(val){
@@ -289,7 +288,7 @@ let KTDatatablesExtensionsKeytable = function() {
             });
         }; //end initTableHandlers()
 
-        let table = $('#kt_table_1').DataTable({
+        let table = $('#campaigns').DataTable({
             processing: true,
             responsive: true,
             select: true,
@@ -375,31 +374,6 @@ let KTDatatablesExtensionsKeytable = function() {
             ]
         });
 
-        $('#export_print').on('click', function(e) {
-            e.preventDefault();
-            table.button(0).trigger();
-        });
-
-        $('#export_copy').on('click', function(e) {
-            e.preventDefault();
-            table.button(1).trigger();
-        });
-
-        $('#export_excel').on('click', function(e) {
-            e.preventDefault();
-            table.button(2).trigger();
-        });
-
-        $('#export_csv').on('click', function(e) {
-            e.preventDefault();
-            table.button(3).trigger();
-        });
-
-        $('#export_pdf').on('click', function(e) {
-            e.preventDefault();
-            table.button(4).trigger();
-        });
-
         let formatDate = function(dateStamp){
             let date = dateStamp.split('T')[0];
             let time = dateStamp.split('T')[1].substr(0,8);
@@ -440,6 +414,115 @@ let KTDatatablesExtensionsKeytable = function() {
             initTableHandlers();
         });
     };
+
+    $("#company_id").select2({
+        placeholder: "Select a company",
+        allowClear: true,
+        ajax: {
+            url: "/admin/companies",
+            dataType: 'json',
+            delay: 350,
+            data: function(params) {
+                return {
+                    q: params.term, // search term
+                    page: params.page
+                }
+            },
+            processResults: function(data, params) {
+                console.log("processResults() :: data: ", data)
+
+                // parse the results into the format expected by Select2
+                // since we are using custom formatting functions we do not need to
+                // alter the remote JSON data, except to indicate that infinite
+                // scrolling can be used
+                params.page = params.page || 1;
+
+                return {
+                    results: data.aaData,
+                    pagination: {
+                        more: (params.page * 30) < data.aaData.length
+                    }
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1,
+
+        escapeMarkup: function(markup) {
+            return markup;
+        }, // let our custom formatter work
+        templateResult: function (obj) {
+            if (obj.loading) return obj.name;
+            var markup = "<div>" +
+                "<div>" +
+                "<div>" + obj.name + "</div>"
+            if (obj.description) {
+                markup += "<div>" + obj.description + "</div>"
+            }
+            markup += "</div></div>"
+            return markup;
+        },
+        templateSelection: function (obj) {
+            if ( parseInt(obj.id) > 0 ) {
+                return obj.name
+            }
+            return obj.text
+        } // omitted for brevity, see the source of this page
+    })
+    $("#game_id").select2({
+        placeholder: "Select a company",
+        allowClear: true,
+        ajax: {
+            url: "/admin/games",
+            dataType: 'json',
+            delay: 350,
+            data: function(params) {
+                return {
+                    q: params.term, // search term
+                    page: params.page
+                }
+            },
+            processResults: function(data, params) {
+                console.log("processResults() :: data: ", data.aaData)
+
+                // parse the results into the format expected by Select2
+                // since we are using custom formatting functions we do not need to
+                // alter the remote JSON data, except to indicate that infinite
+                // scrolling can be used
+                params.page = params.page || 1;
+
+                return {
+                    results: data.aaData,
+                    pagination: {
+                        more: (params.page * 30) < data.aaData.length
+                    }
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1,
+
+        escapeMarkup: function(markup) {
+            return markup;
+        }, // let our custom formatter work
+        templateResult: function (obj) {
+            if (obj.loading) return obj.name;
+            var markup = "<div>" +
+                "<div>" +
+                "<div>" + obj.name + "</div>"
+            if (obj.description) {
+                markup += "<div>" + obj.description + "</div>"
+            }
+            markup += "</div></div>"
+            return markup;
+        },
+        templateSelection: function (obj) {
+            if ( parseInt(obj.id) > 0 ) {
+                return obj.name
+            }
+            return obj.text
+        } // omitted for brevity, see the source of this page
+    })
 
     return {
         //main function to initiate the module

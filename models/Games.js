@@ -1,20 +1,18 @@
 /*
-    DBAL for CompanyCampaigns
+    DBAL for Games
 */
 
-const TABLE_NAME = "company_campaigns";
-const MODEL_NAME = "CompanyCampaigns";
-const OBJECT_NAME = "campaign";
+const TABLE_NAME = "games";
+const MODEL_NAME = "Games";
+const OBJECT_NAME = "games";
 
 const VALID_COLS = [
     "id",
-    "company_id",
     "name",
-    "category",
     "description",
-    "date_start",
-    "date_end",
-    "game_id",
+    "images",
+    "url",
+    "is_live",
     "active",
     "data",
     "update_user_id",
@@ -23,7 +21,7 @@ const VALID_COLS = [
     "created_at"
 ];
 
-class CompanyCampaigns {
+class Games {
     constructor(globals) {
         this.globals = globals;
         this.execSQL = globals.execSQL;
@@ -36,15 +34,22 @@ class CompanyCampaigns {
         this.globals.logger.debug(`${MODEL_NAME}.find() :: BEFORE opts initialized: `, opts);
 
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
-            opts = {
-                order: {
-                    by: "created_at",
-                    direction: "DESC"
-                },
-                limit: 10,
-                offset: 0,
-                where: {}
-            };
+            opts = {}
+        }
+        if( opts.order === undefined ) {
+            opts.order = {
+                by: "created_at",
+                direction: "DESC"
+            }
+        }
+        if( opts.limit === undefined ) {
+            opts.limit = 10
+        }
+        if( opts.offset === undefined ) {
+            opts.offset = 0
+        }
+        if( opts.where === undefined ) {
+            opts.where = {}
         }
 
         this.globals.logger.debug(`${MODEL_NAME}.find() :: AFTER opts initialized: `, opts);
@@ -280,4 +285,4 @@ class CompanyCampaigns {
     }
 }
 
-module.exports = CompanyCampaigns;
+module.exports = Games;

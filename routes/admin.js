@@ -9,6 +9,8 @@ const bcrypt = require('bcrypt');
 let CompanyCampaignModel = require('../models/CompanyCampaigns');
 let UserCompaniesModel   = require('../models/UserCompanies');
 let UsersModel           = require('../models/Users');
+let GamesModel           = require('../models/Games');
+
 
 module.exports = (globals) => {
     return router
@@ -446,9 +448,193 @@ module.exports = (globals) => {
     })
     //end company operations
 
+    //start games operations
+    .get('/games', (req, res, next) => {
+        let Games = new GamesModel( globals );
+        let routeHeader = "GET /games (HTTP)";
+
+        if( req.xhr == true ){
+            routeHeader = "GET /games (XHR)";
+
+            try {
+                globals.logger.debug( `${routeHeader} :: BEGIN :: filtered games list` );
+
+                globals.logger.debug( `${routeHeader} :: req.params: `, req.params );
+                globals.logger.debug( `${routeHeader} :: req.query: `, req.query );
+                globals.logger.debug( `${routeHeader} :: req.body: `, req.body );
+
+                let params = req.query;
+
+                //remove timestamp param for datatables
+                if( params._ !== undefined ) delete params._;
+
+                //get games
+                Games.find(req.query, (err, dbresult) => {
+
+                    globals.logger.debug( `${routeHeader} :: DB CB: `, err);
+
+                    if(err && err.error_type === "system"){
+                        globals.logger.debug( `${routeHeader} :: DB ERROR: `, err);
+                        res.status(500);
+                        return next(err);
+                    } else if( err && err.error_type === "user"){
+                        globals.logger.debug( `${routeHeader} :: Games DB ERROR: `, err);
+                        res.status(400);
+                        return next(err);
+                    }
+                    globals.logger.debug( `${routeHeader} :: DONE`);
+                    return res.json({
+                        aaData: dbresult[0],
+                        iTotalRecords: dbresult[1].totalCount,
+                        iTotalDisplayRecords: dbresult[2].totalCountWithFilter
+                    });
+                });
+            } catch( err ) {
+                globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+                return next(err);
+            }
+        } else {
+            try {
+                globals.logger.debug( `${routeHeader} :: BEGIN`);
+
+                globals.logger.debug( `${routeHeader} :: DONE`);
+                return res.render('pages/admin-games',{
+                    pageTitle: "Games"
+                });
+            } catch( err ) {
+                globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+                return next(err);
+            }
+        }
+    })
+    .delete('/games/:id', (req, res, next) => {
+        let Games = new GamesModel( globals );
+        let routeHeader = "DELETE /games/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            Games.delete( parseInt(req.params.id), (err, deleteRes) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+                globals.logger.info( routeHeader  + " :: res", deleteRes );
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    // create game
+    .post('/games/', (req, res, next) => {
+        let Games = new GamesModel( globals );
+        let routeHeader = "POST /games";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            let createParams = req.body;
+
+            globals.logger.info(`${routeHeader} :: createParams: `, createParams );
+
+            delete createParams._csrf;
+
+            Games.create(createParams, (err, new_game_id) => {
+                if(err && err.error_type == "user") {
+                    res.status(400);
+                    return next(err);
+                } else if(err) {
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.info( `${routeHeader} :: Game created: ${new_game_id}` );
+
+                globals.logger.info( `${routeHeader} :: END` );
+                return res.json({ success: true, game_id: new_game_id });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .get('/games/:id', (req, res, next) => {
+        let Games = new GamesModel( globals );
+        let routeHeader = "GET /games/:id";
+
+        try {
+            globals.logger.debug( `${routeHeader} :: BEGIN` );
+
+            globals.logger.debug( `${routeHeader} :: id: ${req.params.id} :: ` );
+
+            globals.logger.debug( `${routeHeader} :: parseInt(req.params.id): ${parseInt(req.params.id)}` );
+
+            if( req.params.id === undefined || isNaN( parseInt(req.params.id) ) ){
+                res.status(404)
+                return next()
+            }
+
+            //get game
+            Games.findOne({ id: parseInt(req.params.id) }, (err, game) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                globals.logger.debug(`GET /games/:id :: game.id: ${req.params.id}`, game);
+
+                globals.logger.debug( `${routeHeader} :: END` );
+
+                return res.json(game);
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    .put('/games/:id', (req, res, next) => {
+        let Games = new GamesModel( globals );
+        let routeHeader = "PUT /games/:id ";
+
+        try {
+            globals.logger.info( `${routeHeader} :: BEGIN` );
+
+            globals.logger.info( `${routeHeader} :: id: ${req.params.id}` );
+
+            let game = req.body;
+            delete game._csrf;
+            let updateParams = { id: parseInt(req.params.id), game: req.body };
+
+            globals.logger.info(routeHeader + ` :: id & updateParams: ${req.params.id} :: `, updateParams );
+
+            Games.update(updateParams, (err, dbres) => {
+                if(err){
+                    res.status(500);
+                    return next(err);
+                }
+
+                let game = dbres[1];
+                globals.logger.debug( `${routeHeader} :: game ::`, game);
+
+                globals.logger.info( routeHeader  + " :: END" );
+                return res.json({ success: true, game: game });
+            });
+        } catch( err ) {
+            globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);
+            return next(err);
+        }
+    })
+    //end games operations
+
     //start reports pages
     .get('/reports', (req, res, next) => {
-        let routeHeader = "GET /user/login";
+        let routeHeader = "GET /admin/reports";
 
         globals.logger.debug( `${routeHeader} :: BEGIN`);
 
@@ -469,10 +655,10 @@ module.exports = (globals) => {
     //start user operations
     .get('/users', (req, res, next) => {
         let Users = new UsersModel( globals );
-        let routeHeader = "GET /user (HTTP)";
+        let routeHeader = "GET /users (HTTP)";
 
         if( req.xhr == true ){
-            routeHeader = "GET /user (XHR)";
+            routeHeader = "GET /users (XHR)";
 
             try {
                 globals.logger.debug( `${routeHeader} :: BEGIN :: filtered user list` );

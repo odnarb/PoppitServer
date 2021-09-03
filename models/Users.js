@@ -40,10 +40,6 @@ const VALID_COLS = [
     "created_at"
 ];
 
-const IDENTITY_COL = "id";
-const CREATED_AT_COL = "created_at";
-const UPDATED_AT_COL = "updated_at";
-
 class Users {
     constructor(globals) {
         this.globals = globals;
@@ -59,7 +55,7 @@ class Users {
         if (opts == undefined || !opts || Object.keys(opts).length === 0 ) {
             opts = {
                 order: {
-                    by: CREATED_AT_COL,
+                    by: "created_at",
                     direction: "DESC"
                 },
                 limit: 10,
@@ -381,7 +377,7 @@ class Users {
     confirmRegistration(obj, cb){
 
         let updateStr = `UPDATE ${TABLE_NAME} SET invite_token='', verified = 1 `;
-        updateStr += `WHERE ${IDENTITY_COL} = ${this.dbescape(obj.id)} AND invite_token = ${this.dbescape(obj.token)} AND active = 1;`;
+        updateStr += `WHERE id = ${this.dbescape(obj.id)} AND invite_token = ${this.dbescape(obj.token)} AND active = 1;`;
 
         let cols = VALID_COLS.join(',');
         let sqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(obj.id)} LIMIT 1;`;
@@ -445,7 +441,7 @@ class Users {
             updateStr = updateStr.slice(0,-1);
 
             let sqlStr = `UPDATE ${TABLE_NAME} SET ${updateStr} `;
-            sqlStr += `where ${IDENTITY_COL} = ${this.dbescape(vals.id)};`;
+            sqlStr += `where id = ${this.dbescape(vals.id)};`;
 
             let cols = VALID_COLS.join(',');
             let userSqlStr = `SELECT ${cols} FROM ${TABLE_NAME} where id=${this.dbescape(vals.id)} LIMIT 1;`;
