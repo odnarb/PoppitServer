@@ -416,7 +416,7 @@ let KTDatatablesExtensionsKeytable = function() {
     };
 
     $("#company_id").select2({
-        placeholder: "Select a company",
+        placeholder: "Select a company...",
         allowClear: true,
         ajax: {
             url: "/admin/companies",
@@ -470,7 +470,7 @@ let KTDatatablesExtensionsKeytable = function() {
         } // omitted for brevity, see the source of this page
     })
     $("#game_id").select2({
-        placeholder: "Select a company",
+        placeholder: "Select a game...",
         allowClear: true,
         ajax: {
             url: "/admin/games",
