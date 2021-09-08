@@ -315,6 +315,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 { "data": "category" },
                 { "data": "description" },
                 { "data": "game_id" },
+                { "data": "data" },
                 { "data": "date_start" },
                 { "data": "date_end" },
                 { "data": "active" },
@@ -325,27 +326,32 @@ let KTDatatablesExtensionsKeytable = function() {
 
             columnDefs: [
                 {
-                    targets: -6,
+                    "targets": [ 6 ],
+                    "visible": false,
+                    "searchable": false
+                },
+                {
+                    targets: 7,
                     render: function(data, type, campaign, meta) {
                         return `${formatDate(campaign.date_start)}`;
                     }
                 },
                 {
-                    targets: -5,
+                    targets: 8,
                     render: function(data, type, campaign, meta) {
                         return `${formatDate(campaign.date_end)}`;
                     }
                 },
                 //render time stamp
                 {
-                    targets: -3,
+                    targets: 10,
                     render: function(data, type, campaign, meta) {
                         return `${formatDate(campaign.created_at)}`;
                     }
                 },
                 //render time stamp
                 {
-                    targets: -2,
+                    targets: 11,
                     render: function(data, type, campaign, meta) {
                         return `${formatDate(campaign.updated_at)}`;
                     }
@@ -419,7 +425,7 @@ let KTDatatablesExtensionsKeytable = function() {
         placeholder: "Select a company...",
         allowClear: true,
         ajax: {
-            url: "/admin/companies",
+            url: "/admin/campaign",
             dataType: 'json',
             delay: 350,
             data: function(params) {
