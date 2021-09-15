@@ -386,7 +386,11 @@ module.exports = (globals) => {
 
                 globals.logger.info( `${routeHeader} :: END` );
 
-                return res.json(company);
+                if( company === undefined ) {
+                    return res.json({})
+                } else {
+                    return res.json(company);
+                }
             });
         } catch( err ) {
             globals.logger.error(`${routeHeader} :: CAUGHT ERROR`);

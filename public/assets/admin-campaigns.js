@@ -54,10 +54,34 @@ let KTDatatablesExtensionsKeytable = function() {
 
                 //fill form with content from campaign row
                 $('#kt_object_add-edit_modal form input[name=company_id]').val(campaign.company_id);
+
+                if(campaign.company_id && campaign.company_id > 0){
+                    $.ajax({
+                        method: "GET",
+                        url: `/admin/companies/${campaign.company_id}`
+                    }).then( function(data){
+                        if( data.id !== undefined ) {
+                            $(".view_selected_company").html(`${data.name} (id: ${data.id})`)
+                        }
+                    });
+                }
+
                 $('#kt_object_add-edit_modal form input[name=name]').val(campaign.name);
                 $('#kt_object_add-edit_modal form input[name=category]').val(campaign.category);
                 $('#kt_object_add-edit_modal form input[name=description]').val(campaign.description);
                 $('#kt_object_add-edit_modal form input[name=game_id]').val(campaign.game_id);
+
+                if(campaign.game_id && campaign.game_id > 0){
+                    $.ajax({
+                        method: "GET",
+                        url: `/admin/games/${campaign.game_id}`
+                    }).then( function(data){
+                        if( data.id !== undefined ) {
+                            $(".view_selected_game").html(`${data.name} (id: ${data.id})`)
+                        }
+                    });
+                }
+
                 $('#kt_object_add-edit_modal form input[name=data]').val(campaign.data);
                 $('#kt_object_add-edit_modal form input[name=date_start]').val( formatDate(campaign.date_start) );
                 $('#kt_object_add-edit_modal form input[name=date_end]').val( formatDate(campaign.date_end) );
@@ -82,8 +106,16 @@ let KTDatatablesExtensionsKeytable = function() {
                     form.validate({
                         rules: {
                             company_id: {
-                                required: true,
+                                required: () => {
+                                    return ($(".view_selected_company").html() === "")
+                                },
                                 maxlength: 32,
+                                digits: true
+                            },
+                            game_id: {
+                                required: () => {
+                                    return ($(".view_selected_game").html() === "")
+                                },
                                 digits: true
                             },
                             name: {
@@ -97,10 +129,6 @@ let KTDatatablesExtensionsKeytable = function() {
                             description: {
                                 required: false,
                                 maxlength: 1000
-                            },
-                            game_id: {
-                                required: true,
-                                digits: true
                             },
                             date_start: {
                                 required: true,
@@ -119,13 +147,18 @@ let KTDatatablesExtensionsKeytable = function() {
 
                     let obj = getFormData();
 
+                    if( obj.company_id === "" ) {
+                        delete obj.company_id
+                    }
+                    if( obj.game_id === "" ) {
+                        delete obj.game_id
+                    }
+
                     if( checkToggle(obj.active) ){
                         obj.active = 1;
                     } else {
                         obj.active = 0;
                     }
-
-                    console.log("campaign obj: ", obj);
 
                     //add the campaign
                     $.ajax({
@@ -174,6 +207,9 @@ let KTDatatablesExtensionsKeytable = function() {
                 //unbind any handlers
                 $('.submit-edit-add-form').off();
                 $('.cancel-edit-add-form').off();
+
+                $(".view_selected_company").html("N/A")
+                $(".view_selected_game").html("N/A")
 
                 //bind the submit/cancel buttons
                 $('.submit-edit-add-form').on('click', function(e) {
@@ -266,8 +302,6 @@ let KTDatatablesExtensionsKeytable = function() {
 
                 let campaign_id = $(e.currentTarget).data('campaign-id');
                 let row_id = `campaign-${campaign_id}`;
-
-                console.log( `remove campaign id?: ${campaign_id}` );
 
                 //delete the campaign
                 $.ajax({
@@ -425,7 +459,7 @@ let KTDatatablesExtensionsKeytable = function() {
         placeholder: "Select a company...",
         allowClear: true,
         ajax: {
-            url: "/admin/campaign",
+            url: "/admin/companies",
             dataType: 'json',
             delay: 350,
             data: function(params) {
