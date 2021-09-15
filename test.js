@@ -1,8 +1,12 @@
-let Users = require('./models/Users'),
-	Companies = require('./models/Companies'),
-	Campaigns = require('./models/Companies');
+let BaseModel = require('./test-models.js');
+let CompanyModel = require('./test-company.js');
 
+global['Company'] = new BaseModel({opt1: "test"});
 
-console.log( Users );
-console.log( Companies );
-console.log( Campaigns );
+Company.prototype = "Company";
+
+console.log( Company );
+
+Company.find({ id: 123, name: "Brandon" }, () => {
+    console.log("Done")
+});
