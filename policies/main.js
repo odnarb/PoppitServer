@@ -1,27 +1,59 @@
 module.exports = (globals) => {
     return (req, res, next) => {
-        // const allowedMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'OPTIONS'];
+        //quick health check
+        if( req.url == "/ping?health-check=1" ){
+            return res.json({ success: true })
+        }
 
-        // // globals.logger.info("main policy :: METHOD: ", req.method);
+        const routeHeader = "main() policy"
 
-        // if (!allowedMethods.includes(req.method)) {
-        //     return res.sendStatus(404);
-        // }
+        globals.logger.debug(`${routeHeader} :: --------------------- BEGIN`)
 
-        // if ( !req.session ) {
-        //     req.session = {};
-        // }
+        //init session vars and info
+        if( req.session.isLoggedIn === undefined ) {
+            req.session.isLoggedIn = false;
+        }
 
-        // // check session... show login or show dashboard
-        // if( req.url == '/' && !req.session.isLoggedIn ) {
-        //     globals.logger.debug( "User NOT logged in..routing to login page" );
-        //     return res.redirect('/user/login');
-        // }
+        globals.logger.debug(`${routeHeader} :: ${req.method}, ${req.url}`);
 
-        // if( req.url == '/user/login' && req.session.isLoggedIn ) {
-        //     globals.logger.debug( "User logged in..routing to dashboard" );
-        //     return res.redirect('/');
-        // }
-        next();
+        if ( globals.allowedMethods.includes(req.method) === false ) {
+            return res.sendStatus(404);
+        }
+
+        if( globals.allowPassThruRequest(req.url) === true) {
+            globals.logger.debug(`${routeHeader} :: allowPassThruRequest TRUE`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
+            next();
+        } else if( globals.loginPageRequest(req.url) === true ) {
+            globals.logger.debug(`${routeHeader} :: loginPageRequest TRUE`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
+            next();
+        } else if( req.session.needsNewpassword === true ){
+            globals.logger.debug(`${routeHeader} :: needsNewpassword TRUE`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
+            //grab the query params and pass to the redirect
+            let queryStr = Object.keys(req.query).map(key => `${key}=${req.query[key]}`).join('&');
+            if( queryStr !== '' ){
+                queryStr = "?" + queryStr
+            }
+            res.redirect('/user/newpassword' + queryStr)
+        } else if( globals.loginPageRequest(req.url) === false && req.session.isLoggedIn === false ) {
+            //grab the query params and pass to the redirect
+            let queryStr = Object.keys(req.query).map(key => `${key}=${req.query[key]}`).join('&');
+            if( queryStr !== '' ){
+                queryStr = "?" + queryStr
+            }
+            globals.logger.debug(`${routeHeader} ::  REDIRECTING TO LOGIN PAGE (with queryStr?): `, queryStr)
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
+            res.redirect('/user/login' + queryStr)
+        } else if( globals.loginPageRequest(req.url) === false && req.session.isLoggedIn === true ){
+            globals.logger.debug("main policy :: ALLOW APP PAGES");
+
+            next();
+        } else {
+            globals.logger.debug(`${routeHeader} :: USER IS LOGGING IN`);
+            globals.logger.debug(`${routeHeader} :: --------------------- END`)
+            next();
+        }
     };
 };

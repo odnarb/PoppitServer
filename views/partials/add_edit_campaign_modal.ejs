@@ -1,0 +1,121 @@
+                        <div id="kt_object_add-edit_modal" class="modal fade" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+                                <div class="modal-content" style="min-height: 590px;">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            <span class="view-object-header"></span>
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="kt-form kt-form--label-right campaign-add-edit-form" _lpchecked="1">
+                                            <div class="kt-portlet__body">
+
+                                                <div class="form-group row">
+                                                    <label for="name" class="col-2 col-form-label">Name*:</label>
+                                                    <div class="col-10">
+                                                        <input name="name" class="form-control" type="text" value="" placeholder="Enter a name..." autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="description" class="col-2 col-form-label">Description:</label>
+                                                    <div class="col-10">
+                                                        <input name="description" class="form-control" type="text" value="" placeholder="Enter a description..." autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="company_id" class="col-2 col-form-label">Company*: (Current: <span class="view_selected_company"></span>)</label>
+                                                    <div class="col-10">
+                                                        <select id="company_id" class="form-control m-select2" name="company_id" style="width: 100%;">
+                                                            <option></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="game_id" class="col-2 col-form-label">Game*: (Current: <span class="view_selected_game"></span>)</label>
+                                                    <div class="col-10">
+                                                        <select id="game_id" class="form-control m-select2" name="game_id" style="width: 100%;">
+                                                            <option></option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="category" class="col-2 col-form-label">Category*:</label>
+                                                    <div class="col-10">
+                                                        <input name="category" class="form-control" type="text" placeholder="Type a category..." value="" maxlength="80">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="data" class="col-2 col-form-label">Data:</label>
+                                                    <div class="col-10">
+                                                        <input name="data" class="form-control" type="text" value="" disabled>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label class="col-form-label col-lg-3 col-sm-12">Date Start*:</label>
+                                                    <div class="col-8">
+                                                        <div class='input-group date'>
+                                                            <input type='text' class="form-control" name="date_start" placeholder="Select starting date & time" id="date_start_picker" />
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text"><i class="la la-calendar-check-o glyphicon-th"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <span class="form-text text-muted">Select starting date & time</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label class="col-form-label col-lg-3 col-sm-12">Date End*:</label>
+                                                    <div class="col-8">
+                                                        <div class='input-group date'>
+                                                            <input type='text' class="form-control" name="date_end" placeholder="Select ending date & time" id="date_end_picker" />
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text"><i class="la la-calendar-check-o glyphicon-th"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <span class="form-text text-muted">Select ending date & time</span>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="form-group row">
+                                                    <label for="active" class="col-2 col-form-label">Active:</label>
+                                                    <span class="kt-switch">
+                                                        <label>
+                                                            <input name="active" type="checkbox" checked="checked" />
+                                                            <span></span>
+                                                        </label>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="kt-portlet__foot">
+                                                <div class="kt-form__actions">
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                        </div>
+                                                        <div class="col-10">
+                                                            <button class="btn btn-success submit-edit-add-form">Submit</button>
+                                                            <button class="btn btn-secondary cancel-edit-add-form">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="_csrf" value="<%- _csrf %>" />
+                                        </form>
+                                    </div>
+                                    <!-- <div class="modal-body modal-body-fit"></div> -->
+                                    <!-- <div class="modal-footer kt-hidden">
+                                        <button type="button" class="btn btn-clean btn-bold btn-upper btn-font-md" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-default btn-bold btn-upper btn-font-md">Submit</button>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>

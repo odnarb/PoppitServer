@@ -2676,3 +2676,24 @@
                             <!--End::Section-->
 
                             <!--End::Dashboard 1-->
+
+<script>
+    let checkJQ = () =>{
+        if ( window.jQuery ){
+
+            jQuery.loadScript = function (url) {
+                jQuery.ajax({
+                    url: url,
+                    dataType: 'script',
+                    // success: callback,
+                    async: true
+                });
+            }
+            if (typeof someObject == 'undefined') $.loadScript('assets/dashboard.js');
+
+        } else {
+          window.setTimeout("checkJQ();",100);
+        }
+    }
+    checkJQ();
+</script>

@@ -1,0 +1,128 @@
+                        <div id="kt_object_add-edit_modal" class="modal fade" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-l modal-dialog-centered" role="document">
+                                <div class="modal-content" style="min-height: 590px;">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">
+                                            <span class="view-object-header"></span>
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="kt-form kt-form--label-right location-add-edit-form" _lpchecked="1">
+                                            <div class="kt-portlet__body">
+
+                                                <div class="form-group row">
+                                                    <label for="company_id" class="col-2 col-form-label">Company ID*:</label>
+                                                    <div class="col-10">
+                                                        <input name="company_id" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="name" class="col-2 col-form-label">Name*:</label>
+                                                    <div class="col-10">
+                                                        <input name="name" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="description" class="col-2 col-form-label">Description:</label>
+                                                    <div class="col-10">
+                                                        <input name="description" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="address" class="col-2 col-form-label">Address*:</label>
+                                                    <div class="col-10">
+                                                        <input name="address" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="city" class="col-2 col-form-label">City*:</label>
+                                                    <div class="col-10">
+                                                        <input name="city" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="state" class="col-2 col-form-label">State*:</label>
+                                                    <div class="col-10">
+                                                        <input name="state" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="zip" class="col-2 col-form-label">Zip*:</label>
+                                                    <div class="col-10">
+                                                        <input name="zip" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="country_code" class="col-2 col-form-label">Country Code*:</label>
+                                                    <div class="col-10">
+                                                        <input name="country_code" class="form-control" type="text" value="" autocomplete="off">
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="latitude" class="col-2 col-form-label">Coords:</label>
+                                                    <div class="col-10">
+                                                        <button class="btn btn-primary" id="geocode-address">
+                                                            <i class="fa fa-search"></i>Geocode Address
+                                                        </button>
+
+                                                        <span class="latlong-coords-group">
+                                                            <span class="latlong-coords-error has-error" style="display:none;">Please specify an address, city and state</span>
+
+                                                            <span class="latlong-coords" style="display: none;">
+                                                                (<span class="latitude-value">0</span>,<span class="longitude-value">0</span>)
+                                                            </span>
+                                                            <input name="latitude" type="hidden" value="">
+                                                            <input name="longitude" type="hidden" value="">
+                                                            <input name="polygon" type="hidden" value="">
+                                                            <input name="altitude" type="hidden" value="1">
+                                                        </span>
+                                                        <div id="location-geocode-map" style="display: none; height: 300px; position: relative; overflow: hidden;"></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="active" class="col-2 col-form-label">Active</label>
+                                                    <span class="kt-switch">
+                                                        <label>
+                                                            <input name="active" type="checkbox" checked="checked" />
+                                                            <span></span>
+                                                        </label>
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                            <div class="kt-portlet__foot">
+                                                <div class="kt-form__actions">
+                                                    <div class="row">
+                                                        <div class="col-2">
+                                                        </div>
+                                                        <div class="col-10">
+                                                            <button class="btn btn-success submit-edit-add-form">Submit</button>
+                                                            <button class="btn btn-secondary cancel-edit-add-form">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" name="_csrf" value="<%- _csrf %>" />
+                                        </form>
+                                    </div>
+                                    <!-- <div class="modal-body modal-body-fit"></div> -->
+                                    <!-- <div class="modal-footer kt-hidden">
+                                        <button type="button" class="btn btn-clean btn-bold btn-upper btn-font-md" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-default btn-bold btn-upper btn-font-md">Submit</button>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>

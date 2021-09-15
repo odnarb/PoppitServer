@@ -13,44 +13,67 @@
                                         <form class="kt-form kt-form--label-right user-add-edit-form" _lpchecked="1">
                                             <div class="kt-portlet__body">
                                                 <div class="form-group row">
-                                                    <label for="company_id" class="col-2 col-form-label">Company ID</label>
+                                                    <label for="company_id" class="col-2 col-form-label">Company ID*:</label>
                                                     <div class="col-10">
                                                         <input name="company_id" class="form-control" type="text" value="">
                                                     </div>
                                                 </div>
                                                 <div class="form-group row">
-                                                    <label for="first_name" class="col-2 col-form-label">First Name</label>
+                                                    <label for="first_name" class="col-2 col-form-label">First Name*:</label>
                                                     <div class="col-10">
-                                                        <input name="first_name" class="form-control" type="text" value="">
+                                                        <input name="first_name" class="form-control" type="text" value="" maxlength="80" autocomplete="off">
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group row">
-                                                    <label for="last_name" class="col-2 col-form-label">Last Name</label>
+                                                    <label for="last_name" class="col-2 col-form-label">Last Name*:</label>
                                                     <div class="col-10">
-                                                        <input name="last_name" class="form-control" type="text" value="">
+                                                        <input name="last_name" class="form-control" type="text" value="" maxlength="80" autocomplete="off">
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group row">
-                                                    <label for="email_address" class="col-2 col-form-label">Email Address</label>
+                                                    <label for="email_address" class="col-2 col-form-label">Email Address*:</label>
                                                     <div class="col-10">
-                                                        <input name="email_address" class="form-control" type="text" value="">
+                                                        <input name="email_address" class="form-control" type="text" value="" maxlength="255" autocomplete="off">
                                                     </div>
                                                 </div>
 
                                                 <div class="form-group row">
-                                                    <label for="company_permissions" class="col-2 col-form-label">Company Permissions</label>
+                                                    <label for="phone_number" class="col-2 col-form-label">Phone Number*:</label>
                                                     <div class="col-10">
-                                                        <input name="company_permissions" disabled class="form-control" type="text" value="">
+                                                        <input name="phone_number" class="form-control" type="text" value="" autocomplete="off">
                                                     </div>
+                                                </div>
+
+                                                <div class="form-group row">
+                                                    <label for="company_role" class="col-2 col-form-label">Company Role*:</label>
+                                                    <div class="col-10">
+                                                        <select name="company_role" class="custom-select form-control">
+                                                            <option>Select a contact type...</option>
+                                                            <option value="none">None</option>
+                                                            <option value="admin">Admin</option>
+                                                            <option value="technical">Technical</option>
+                                                            <option value="marketing">Marketing</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label for="company_contact" class="col-2 col-form-label">Company Contact</label>
+                                                    <span class="kt-switch">
+                                                        <label>
+                                                            <input name="company_contact" type="checkbox" />
+                                                            <span></span>
+                                                        </label>
+                                                    </span>
                                                 </div>
 
                                                 <div class="form-group row">
                                                     <label for="active" class="col-2 col-form-label">Active</label>
                                                     <span class="kt-switch">
                                                         <label>
-                                                            <input name="active" type="checkbox" checked="checked" />
+                                                            <input name="active" type="checkbox" />
                                                             <span></span>
                                                         </label>
                                                     </span>
@@ -68,6 +91,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <input type="hidden" name="_csrf" value="<%- _csrf %>" />
                                         </form>
                                     </div>
                                     <!-- <div class="modal-body modal-body-fit"></div> -->

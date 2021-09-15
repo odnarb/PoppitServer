@@ -23013,7 +23013,8 @@ strong {
 .has-success .kt-option .kt-option__label .kt-option__head .kt-option__title {
   color: #0abb87; }
 
-.has-error .kt-option .kt-option__label .kt-option__head .kt-option__title {
+.has-error .kt-option .kt-option__label .kt-option__head .kt-option__title,
+span.has-error {
   color: #ffb822; }
 
 .kt-avatar {

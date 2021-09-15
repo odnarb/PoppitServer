@@ -1,5 +1,5 @@
 {
-  "name": "Poppitserver",
+  "name": "PoppitAppServer",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -7,9 +7,11 @@
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "connect-redis": "^5.0.0",
-    "cookie-parser": "^1.4.4",
+    "cookie-parser": "^1.4.5",
+    "csurf": "^1.11.0",
     "dotenv": "^8.1.0",
     "ejs": "^2.7.1",
+    "email-validator": "^2.0.4",
     "express": "^4.17.1",
     "express-ejs-layouts": "^2.5.0",
     "express-session": "^1.17.1",
@@ -17,8 +19,10 @@
     "minimist": "^1.2.5",
     "moment": "^2.24.0",
     "mysql": "^2.17.1",
+    "nodemailer": "^6.4.14",
     "redis": "^3.0.2",
     "serve-favicon": "^2.5.0",
+    "uuid": "^8.3.1",
     "winston": "^3.3.3"
   },
   "devDependencies": {
@@ -28,5 +32,5 @@
     "lint": "jshint **.js models/*.js routes/*.js policies/*.js lib/*.js"
   },
   "author": "Brandon Chambers",
-  "license": "Copyright 2020 Brandon Chambers - All rights reserved."
+  "license": "Copyright 2021 Brandon Chambers - All rights reserved."
 }
