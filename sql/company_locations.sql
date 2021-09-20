@@ -12,8 +12,6 @@ CREATE TABLE `company_locations` (
     `longitude` VARCHAR(30) NOT NULL DEFAULT '',
     `altitude` VARCHAR(30) NOT NULL DEFAULT '',
     `polygon` JSON NULL,
-    `date_start` DATETIME NOT NULL DEFAULT NOW(),
-    `date_end` DATETIME NOT NULL DEFAULT NOW(),
     `data` JSON NULL,
     `active` INT NOT NULL DEFAULT 1,
     `updated_at` DATETIME NOT NULL DEFAULT NOW(),

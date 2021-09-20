@@ -332,7 +332,7 @@ let KTDatatablesExtensionsKeytable = function() {
             });
         }; //end initTableHandlers()
 
-        let table = $('#kt_table_1').DataTable({
+        let table = $('#locations-list').DataTable({
             processing: true,
             responsive: true,
             select: true,
@@ -340,19 +340,8 @@ let KTDatatablesExtensionsKeytable = function() {
             pagingType: 'full_numbers',
             order: [[ 7, "desc" ]],
 
-            buttons: [
-                'print',
-                'copyHtml5',
-                'excelHtml5',
-                'csvHtml5',
-                {
-                    extend: 'pdfHtml5',
-                    orientation: 'landscape'
-                }
-            ],
-
             //request uri
-            ajax: "/location",
+            ajax: "/admin/locations",
 
             //tell datatables that our structure is in obj
             dataSrc: '',
@@ -411,31 +400,6 @@ let KTDatatablesExtensionsKeytable = function() {
                     }
                 }
             ]
-        });
-
-        $('#export_print').on('click', function(e) {
-            e.preventDefault();
-            table.button(0).trigger();
-        });
-
-        $('#export_copy').on('click', function(e) {
-            e.preventDefault();
-            table.button(1).trigger();
-        });
-
-        $('#export_excel').on('click', function(e) {
-            e.preventDefault();
-            table.button(2).trigger();
-        });
-
-        $('#export_csv').on('click', function(e) {
-            e.preventDefault();
-            table.button(3).trigger();
-        });
-
-        $('#export_pdf').on('click', function(e) {
-            e.preventDefault();
-            table.button(4).trigger();
         });
 
         let formatDate = function(dateStamp){
