@@ -270,8 +270,8 @@ module.exports = (globals) => {
             globals.logger.info(`${routeHeader} :: createParams: `, createParams );
 
             //format dates properly
-            createParams.date_start = new Date(createParams.date_start);
-            createParams.date_end = new Date(createParams.date_end);
+            createParams.update_user_id = req.session.user.id
+            createParams.create_user_id = req.session.user.id
 
             delete createParams._csrf;
 

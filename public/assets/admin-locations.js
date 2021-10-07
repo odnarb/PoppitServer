@@ -92,6 +92,16 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.latlong-coords .latitude-value').html(obj.latitude);
                 $('.latlong-coords .longitude-value').html(obj.longitude);
 
+                if(obj.company_id && obj.company_id > 0){
+                    $.ajax({
+                        method: "GET",
+                        url: `/admin/companies/${obj.company_id}`
+                    }).then( function(data){
+                        if( data.id !== undefined ) {
+                            $(".view_selected_company").html(`${data.name} (id: ${data.id})`)
+                        }
+                    });
+                }
 
                 //unbind any handlers
                 $('.submit-edit-add-form').off();
@@ -104,10 +114,13 @@ let KTDatatablesExtensionsKeytable = function() {
                     var btn = $(this);
                     var form = $(this).closest('form');
 
+
                     form.validate({
                         rules: {
                             company_id: {
-                                required: true,
+                                required: () => {
+                                    return ($(".view_selected_company").html() === "")
+                                },
                                 maxlength: 32,
                                 digits: true
                             },
@@ -128,9 +141,7 @@ let KTDatatablesExtensionsKeytable = function() {
                                 maxlength: 80
                             },
                             state: {
-                                required: true,
-                                maxlength: 2,
-                                minlength: 2
+                                required: true
                             },
                             zip: {
                                 required: true,
@@ -163,7 +174,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the location
                     $.ajax({
                         method: "PUT",
-                        url: `/location/${row_id}`,
+                        url: `/admin/locations/${row_id}`,
                         data: obj,
                         success: function(res) {
                             //reset form
@@ -211,6 +222,8 @@ let KTDatatablesExtensionsKeytable = function() {
                 $('.submit-edit-add-form').off();
                 $('.cancel-edit-add-form').off();
 
+                $(".view_selected_company").html("N/A")
+
                 //bind the submit/cancel buttons
                 $('.submit-edit-add-form').on('click', function(e) {
                     e.preventDefault();
@@ -242,9 +255,7 @@ let KTDatatablesExtensionsKeytable = function() {
                                 maxlength: 80
                             },
                             state: {
-                                required: true,
-                                maxlength: 2,
-                                minlength: 2
+                                required: true
                             },
                             zip: {
                                 required: true,
@@ -277,7 +288,7 @@ let KTDatatablesExtensionsKeytable = function() {
                     //add the location
                     $.ajax({
                         method: "POST",
-                        url: `/location`,
+                        url: `/admin/locations`,
                         data: obj,
                         success: function(res) {
                             //reset form
@@ -316,7 +327,7 @@ let KTDatatablesExtensionsKeytable = function() {
                 //delete the location
                 $.ajax({
                     method: "DELETE",
-                    url: `/location/${location_id}?_csrf=${window._csrf}`,
+                    url: `/admin/locations/${location_id}?_csrf=${window._csrf}`,
                     success: function(res) {
                         console.log("location deleted!: ", res);
 
@@ -458,6 +469,60 @@ let KTDatatablesExtensionsKeytable = function() {
         });
     };
 
+    $("#company_id").select2({
+        placeholder: "Select a company...",
+        allowClear: true,
+        ajax: {
+            url: "/admin/companies",
+            dataType: 'json',
+            delay: 350,
+            data: function(params) {
+                return {
+                    q: params.term, // search term
+                    page: params.page
+                }
+            },
+            processResults: function(data, params) {
+                console.log("processResults() :: data: ", data)
+
+                // parse the results into the format expected by Select2
+                // since we are using custom formatting functions we do not need to
+                // alter the remote JSON data, except to indicate that infinite
+                // scrolling can be used
+                params.page = params.page || 1;
+
+                return {
+                    results: data.aaData,
+                    pagination: {
+                        more: (params.page * 30) < data.aaData.length
+                    }
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1,
+
+        escapeMarkup: function(markup) {
+            return markup;
+        }, // let our custom formatter work
+        templateResult: function (obj) {
+            if (obj.loading) return obj.name;
+            var markup = "<div>" +
+                "<div>" +
+                "<div>" + obj.name + "</div>"
+            if (obj.description) {
+                markup += "<div>" + obj.description + "</div>"
+            }
+            markup += "</div></div>"
+            return markup;
+        },
+        templateSelection: function (obj) {
+            if ( parseInt(obj.id) > 0 ) {
+                return obj.name
+            }
+            return obj.text
+        } // omitted for brevity, see the source of this page
+    })
     return {
         //main function to initiate the module
         init: function() {
