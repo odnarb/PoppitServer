@@ -17,7 +17,7 @@
     "express-session": "^1.17.1",
     "lodash": "^4.17.19",
     "minimist": "^1.2.5",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mysql": "^2.17.1",
     "nodemailer": "^6.4.14",
     "redis": "^3.0.2",
